@@ -12,6 +12,7 @@ plugins {
     java
     kotlin("jvm") version "1.3.10"
     id("com.github.johnrengelman.shadow") version "4.0.3"
+    id("org.jmailen.kotlinter") version "1.20.1"
 }
 
 group = "com.md"

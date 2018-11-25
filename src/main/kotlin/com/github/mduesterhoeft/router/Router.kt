@@ -1,4 +1,4 @@
-package com.md.api
+package com.github.mduesterhoeft.router
 
 class Router {
 
@@ -27,4 +27,3 @@ data class RouterFunction(
     val requestPredicate: RequestPredicate,
     val handler: HandlerFunction
 )
-

@@ -1,6 +1,7 @@
+package com.github.mduesterhoeft.router
+
 import assertk.assert
 import assertk.assertions.isEqualTo
-import com.md.api.*
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 
@@ -90,11 +91,21 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(404)
     }
 
-    class TestRequestHandler: RequestHandler {
+    class TestRequestHandler : RequestHandler {
 
-        override val router= Router.router {
-            GET("/some") { ApiJsonResponse(statusCode = 200, body = """{"hello": "world", "request":"${it.body}"}""") }
-            POST("/some") { ApiJsonResponse(statusCode = 200, body = """{"hello": "world", "request":"${it.body}"}""") }
+        override val router = Router.router {
+            GET("/some") {
+                ApiJsonResponse(
+                    statusCode = 200,
+                    body = """{"hello": "world", "request":"${it.body}"}"""
+                )
+            }
+            POST("/some") {
+                ApiJsonResponse(
+                    statusCode = 200,
+                    body = """{"hello": "world", "request":"${it.body}"}"""
+                )
+            }
         }
     }
 }

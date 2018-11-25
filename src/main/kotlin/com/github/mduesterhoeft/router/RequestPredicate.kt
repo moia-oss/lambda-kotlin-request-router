@@ -1,7 +1,6 @@
-package com.md.api
+package com.github.mduesterhoeft.router
 
 import com.google.common.net.MediaType
-
 
 data class RequestPredicate(
     val method: String,
@@ -21,8 +20,14 @@ data class RequestPredicate(
         MatchResult(
             matchPath = pathMatches(request),
             matchMethod = methodMatches(request),
-            matchAcceptType = contentTypeMatches(request.headers?.entries?.firstOrNull { it.key.toLowerCase() == "accept" }?.value, produces),
-            matchContentType = contentTypeMatches(request.headers?.entries?.firstOrNull { it.key.toLowerCase() == "content-type" }?.value, consumes)
+            matchAcceptType = contentTypeMatches(
+                request.headers?.entries?.firstOrNull { it.key.toLowerCase() == "accept" }?.value,
+                produces
+            ),
+            matchContentType = contentTypeMatches(
+                request.headers?.entries?.firstOrNull { it.key.toLowerCase() == "content-type" }?.value,
+                consumes
+            )
         )
 
     private fun pathMatches(request: ApiRequest) = request.path == pathPattern
@@ -32,9 +37,7 @@ data class RequestPredicate(
         else if (contentType == null) false
         else accepted.any { MediaType.parse(contentType).`is`(MediaType.parse(it)) }
 
-    companion object {
-
-    }
+    companion object
 }
 
 internal data class MatchResult(
