@@ -14,7 +14,7 @@ package com.github.mduesterhoeft.router
     data class ApiRequest(
         var path: String? = null,
         var source: String? = null,
-        var headers: MutableMap<String, String>? = null,
+        var headers: MutableMap<String, String> = mutableMapOf(),
         var pathParameters: MutableMap<String, String>? = null,
         var requestContext: RequestContext? = null,
         var resource: String? = null,
@@ -25,7 +25,12 @@ package com.github.mduesterhoeft.router
         var stageVariables: MutableMap<String, String>? = null
     ) {
 
+        val acceptHeader = getHeaderCaseInsensitive("Accept")
+        val contentType = getHeaderCaseInsensitive("Content-Type")
+
         private fun getHeaderCaseInsensitive(httpHeader: String): String? {
-            return headers?.get(httpHeader) ?: headers?.get(httpHeader.toLowerCase())
+            return headers.entries
+                .firstOrNull { it.key.toLowerCase() == httpHeader.toLowerCase() }
+                ?.value
         }
     }

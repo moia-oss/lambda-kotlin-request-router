@@ -21,11 +21,11 @@ data class RequestPredicate(
             matchPath = pathMatches(request),
             matchMethod = methodMatches(request),
             matchAcceptType = contentTypeMatches(
-                request.headers?.entries?.firstOrNull { it.key.toLowerCase() == "accept" }?.value,
+                request.headers.entries.firstOrNull { it.key.toLowerCase() == "accept" }?.value,
                 produces
             ),
             matchContentType = contentTypeMatches(
-                request.headers?.entries?.firstOrNull { it.key.toLowerCase() == "content-type" }?.value,
+                request.headers.entries.firstOrNull { it.key.toLowerCase() == "content-type" }?.value,
                 consumes
             )
         )

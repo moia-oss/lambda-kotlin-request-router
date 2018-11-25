@@ -1,13 +1,12 @@
 package com.github.mduesterhoeft.router.sample
 
-import com.github.mduesterhoeft.router.ApiJsonResponse
 import com.github.mduesterhoeft.router.ApiRequest
+import com.github.mduesterhoeft.router.ResponseEntity
 
 class SomeController {
 
     fun get(request: ApiRequest) =
-        ApiJsonResponse(
-            statusCode = 200,
-            body = """{"hello": "world", "request":"${request.body}"}"""
-        )
+        ResponseEntity.ok(MyResponse("hello", request.body))
+
+    data class MyResponse(val hello: String, val request: String?)
 }

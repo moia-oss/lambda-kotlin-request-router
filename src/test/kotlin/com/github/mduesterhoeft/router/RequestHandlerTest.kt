@@ -23,6 +23,7 @@ class RequestHandlerTest {
         )!!
 
         assert(response.statusCode).isEqualTo(200)
+        assert(response.body).isEqualTo("""{"greeting":"Hello"}""")
     }
 
     @Test
@@ -91,20 +92,15 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(404)
     }
 
-    class TestRequestHandler : RequestHandler {
+    class TestRequestHandler : RequestHandler() {
 
+        data class TestResponse(val greeting: String)
         override val router = Router.router {
             GET("/some") {
-                ApiJsonResponse(
-                    statusCode = 200,
-                    body = """{"hello": "world", "request":"${it.body}"}"""
-                )
+               ResponseEntity.ok(TestResponse("Hello"))
             }
             POST("/some") {
-                ApiJsonResponse(
-                    statusCode = 200,
-                    body = """{"hello": "world", "request":"${it.body}"}"""
-                )
+                ResponseEntity.ok(TestResponse("Hello post"))
             }
         }
     }

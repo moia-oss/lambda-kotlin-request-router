@@ -7,6 +7,7 @@ import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import com.github.mduesterhoeft.router.Router.Companion.router
 import org.junit.jupiter.api.Test
+import javax.xml.ws.Response
 
 class RouterTest {
 
@@ -14,10 +15,7 @@ class RouterTest {
     fun `should register get route with default accept header`() {
         val router = router {
             GET("/some") {
-                ApiJsonResponse(
-                    statusCode = 200,
-                    body = """{"hello": "world", "request":"${it.body}"}"""
-                )
+                ResponseEntity.ok("""{"hello": "world", "request":"${it.body}"}""")
             }
         }
 

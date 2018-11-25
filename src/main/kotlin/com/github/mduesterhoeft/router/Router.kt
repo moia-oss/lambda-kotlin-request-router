@@ -2,16 +2,16 @@ package com.github.mduesterhoeft.router
 
 class Router {
 
-    val routes = mutableListOf<RouterFunction>()
+    val routes = mutableListOf<RouterFunction<*>>()
 
-    fun GET(pattern: String, handlerFunction: HandlerFunction) =
+    fun <T> GET(pattern: String, handlerFunction: HandlerFunction<T>) =
         RequestPredicate(
             method = "GET",
             pathPattern = pattern,
             consumes = emptySet()
         ).also { routes += RouterFunction(it, handlerFunction) }
 
-    fun POST(pattern: String, handlerFunction: HandlerFunction) =
+    fun <T> POST(pattern: String, handlerFunction: HandlerFunction<T>) =
         RequestPredicate("POST", pattern).also {
             routes += RouterFunction(it, handlerFunction)
     }
@@ -21,9 +21,9 @@ class Router {
     }
 }
 
-typealias HandlerFunction = (request: ApiRequest) -> ApiResponse
+typealias HandlerFunction<T> = (request: ApiRequest) -> ResponseEntity<T>
 
-data class RouterFunction(
+data class RouterFunction<T>(
     val requestPredicate: RequestPredicate,
-    val handler: HandlerFunction
+    val handler: HandlerFunction<T>
 )
