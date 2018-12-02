@@ -14,3 +14,9 @@ class ApiJsonResponse(
     override val isBase64Encoded: Boolean = false
 ) : ApiResponse
 
+class ApiProtoResponse(override val statusCode: Int,
+                       override val headers: Map<String, String> = mapOf(),
+                       override val body: ByteArray,
+                       override val isBase64Encoded: Boolean = true) : ApiResponse
+
+

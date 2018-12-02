@@ -5,7 +5,10 @@ import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.mduesterhoeft.router.ProtoBufUtils.toJsonWithoutWrappers
 import com.github.mduesterhoeft.router.Router.Companion.router
+import com.google.common.net.MediaType
+import com.google.protobuf.GeneratedMessageV3
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -73,11 +76,32 @@ abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
             body = objectMapper.writeValueAsString(ex)
         )
 
-    open fun <T> createResponse(input: ApiRequest, response: ResponseEntity<T>) = ApiJsonResponse(
-        statusCode = 200,
-        headers = mapOf("Content-Type" to "application/json"),
-        body = response.body?.let { objectMapper.writeValueAsString(it) }
-    )
+    open fun <T> createResponse(input: ApiRequest, response: ResponseEntity<T>): ApiResponse {
+        val accept = MediaType.parse(input.acceptHeader)
+        return when  {
+            response.body is Unit -> ApiJsonResponse(statusCode = 204, body = null)
+            accept.`is`(MediaType.parse("application/x-protobuf")) -> ApiProtoResponse(
+                statusCode = 200,
+                headers = mapOf("Accept" to "application/x-protobuf"),
+                body = (response.body as GeneratedMessageV3).toByteArray()
+            )
+            accept.`is`(MediaType.parse("application/json")) ->
+                if (response.body is GeneratedMessageV3)
+                    ApiJsonResponse(
+                        statusCode = 200,
+                        headers = mapOf("Content-Type" to "application/json"),
+                        body = toJsonWithoutWrappers(response.body)
+                    )
+                else
+                    ApiJsonResponse(
+                        statusCode = 200,
+                        headers = mapOf("Content-Type" to "application/json"),
+                        body = response.body?.let { objectMapper.writeValueAsString(it) }
+                    )
+            else -> throw IllegalArgumentException("unsupported response $response")
+        }
+
+    }
 
     companion object {
         val log: Logger = LogManager.getLogger(RequestHandler::class.java)

@@ -2,6 +2,9 @@ package com.github.mduesterhoeft.router
 
 import assertk.assert
 import assertk.assertions.isEqualTo
+import com.github.mduesterhoeft.router.Router.Companion.router
+import com.github.mduesterhoeft.router.sample.proto.SampleOuterClass
+import com.github.mduesterhoeft.router.sample.proto.SampleOuterClass.*
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 
@@ -24,6 +27,40 @@ class RequestHandlerTest {
 
         assert(response.statusCode).isEqualTo(200)
         assert(response.body).isEqualTo("""{"greeting":"Hello"}""")
+    }
+
+    @Test
+    fun `should match request to proto handler and return json`() {
+
+        val response = testRequestHandler.handleRequest(
+            ApiRequest(
+                path = "/some-proto",
+                httpMethod = "GET",
+                headers = mutableMapOf(
+                    "Accept" to "application/json"
+                )
+            ), mockk()
+        )!!
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.body).isEqualTo("""{"hello":"Hello","request":""}""")
+    }
+
+    @Test
+    fun `should match request to proto handler and return proto`() {
+
+        val response = testRequestHandler.handleRequest(
+            ApiRequest(
+                path = "/some-proto",
+                httpMethod = "GET",
+                headers = mutableMapOf(
+                    "Accept" to "application/x-protobuf"
+                )
+            ), mockk()
+        )!!
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(Sample.parseFrom(response.body as ByteArray)).isEqualTo(Sample.newBuilder().setHello("Hello").setRequest("").build())
     }
 
     @Test
@@ -95,9 +132,12 @@ class RequestHandlerTest {
     class TestRequestHandler : RequestHandler() {
 
         data class TestResponse(val greeting: String)
-        override val router = Router.router {
+        override val router = router {
             GET("/some") {
                ResponseEntity.ok(TestResponse("Hello"))
+            }
+            GET("/some-proto") {
+                ResponseEntity.ok(Sample.newBuilder().setHello("Hello").setRequest(it.body?:"").build())
             }
             POST("/some") {
                 ResponseEntity.ok(TestResponse("Hello post"))

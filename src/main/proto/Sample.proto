@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package com.github.mduesterhoeft.router.sample.proto;
+
+message Sample {
+    string hello = 1;
+    string request = 2;
+}
