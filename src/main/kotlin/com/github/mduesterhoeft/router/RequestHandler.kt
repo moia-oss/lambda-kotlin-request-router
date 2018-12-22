@@ -4,13 +4,12 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.mduesterhoeft.router.ProtoBufUtils.toJsonWithoutWrappers
-import com.github.mduesterhoeft.router.Router.Companion.router
 import com.google.common.net.MediaType
 import com.google.protobuf.GeneratedMessageV3
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import kotlin.reflect.jvm.reflect
 
 abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
 
@@ -21,8 +20,14 @@ abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
         val matchResults: List<MatchResult> = router.routes.map {
             val matchResult = it.requestPredicate.match(input)
             log.info("match result for route '$it' is '$matchResult'")
-            if (matchResult.match)
-                return createResponse(input, it.handler(input))
+            if (matchResult.match) {
+                val requestType = it.handler.reflect()!!.parameters.drop(1).first()
+                val request: Any = when (requestType.type.javaClass) {
+                    Unit::javaClass -> Unit
+                    else -> objectMapper.readValue(input.body, requestType.type.javaClass)
+                }
+                return createResponse(input, it.handler(input, request))
+            }
 
             matchResult
         }
@@ -100,7 +105,6 @@ abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
                     )
             else -> throw IllegalArgumentException("unsupported response $response")
         }
-
     }
 
     companion object {

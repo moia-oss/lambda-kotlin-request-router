@@ -2,28 +2,38 @@ package com.github.mduesterhoeft.router
 
 class Router {
 
-    val routes = mutableListOf<RouterFunction<*>>()
+    val routes = mutableListOf<RouterFunction<*,*>>()
 
-    fun <T> GET(pattern: String, handlerFunction: HandlerFunction<T>) =
+    fun <I, T> GET(pattern: String, handlerFunction: HandlerFunction<I, T>) =
         RequestPredicate(
             method = "GET",
             pathPattern = pattern,
             consumes = emptySet()
         ).also { routes += RouterFunction(it, handlerFunction) }
 
-    fun <T> POST(pattern: String, handlerFunction: HandlerFunction<T>) =
+    fun <I, T> POST(pattern: String, handlerFunction: HandlerFunction<I, T>) =
         RequestPredicate("POST", pattern).also {
             routes += RouterFunction(it, handlerFunction)
-    }
+        }
+
+    fun <I, T> PUT(pattern: String, handlerFunction: HandlerFunction<I, T>) =
+        RequestPredicate("PUT", pattern).also {
+            routes += RouterFunction(it, handlerFunction)
+        }
+
+    fun <I, T> DELETE(pattern: String, handlerFunction: HandlerFunction<I, T>) =
+        RequestPredicate("DELETE", pattern).also {
+            routes += RouterFunction(it, handlerFunction)
+        }
 
     companion object {
         fun router(routes: Router.() -> Unit) = Router().apply(routes)
     }
 }
 
-typealias HandlerFunction<T> = (request: ApiRequest) -> ResponseEntity<T>
+typealias HandlerFunction<I, T> = (request: ApiRequest, body: I) -> ResponseEntity<T>
 
-data class RouterFunction<T>(
+data class RouterFunction<I, T>(
     val requestPredicate: RequestPredicate,
-    val handler: HandlerFunction<T>
+    val handler: HandlerFunction<I, T>
 )
