@@ -17,7 +17,7 @@ abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
     val objectMapper: ObjectMapper = jacksonObjectMapper()
 
     override fun handleRequest(input: ApiRequest, context: Context): ApiResponse? {
-        log.info("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader} Content-Type:${input.contentType}")
+        log.info("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader} Content-Type:${input.contentType} $input")
         val routes = router.routes as List<RouterFunction<Any, Any>>
         val matchResults: List<MatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->
             val matchResult = routerFunction.requestPredicate.match(input)
