@@ -25,8 +25,8 @@ package com.github.mduesterhoeft.router
         var stageVariables: MutableMap<String, String>? = null
     ) {
 
-        val acceptHeader = getHeaderCaseInsensitive("Accept")
-        val contentType = getHeaderCaseInsensitive("Content-Type")
+        val acceptHeader by lazy { getHeaderCaseInsensitive("Accept") }
+        val contentType by lazy { getHeaderCaseInsensitive("Content-Type") }
 
         private fun getHeaderCaseInsensitive(httpHeader: String): String? {
             return headers.entries
