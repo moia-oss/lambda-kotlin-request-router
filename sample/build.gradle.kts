@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 import java.net.URI
+import java.util.concurrent.TimeUnit.*
 
 buildscript {
     repositories {
@@ -66,4 +67,8 @@ tasks {
         dependsOn("test", "shadowJar")
         commandLine("serverless", "deploy")
     }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(0, SECONDS)
 }

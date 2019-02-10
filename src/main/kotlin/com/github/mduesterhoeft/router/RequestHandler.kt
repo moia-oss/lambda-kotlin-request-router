@@ -41,6 +41,7 @@ abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
         val requestType = handler.reflect()!!.parameters.first().type.arguments.first().type?.classifier as KClass<*>
         return when (requestType) {
             Unit::class -> Unit
+            String::class -> input.body!!
             else -> objectMapper.readValue(input.body, requestType.java)
         }
     }
