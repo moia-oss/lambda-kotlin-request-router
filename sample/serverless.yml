@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: kotlin-router-sample # NOTE: update this with your service name
+service: lambda-kotlin-request-router-sample # NOTE: update this with your service name
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -47,7 +47,7 @@ provider:
 
 # you can add packaging information here
 package:
-  artifact: build/libs/kotlin-router.jar
+  artifact: build/libs/lambda-kotlin-request-router-sample.jar
 
 functions:
   my-handler:

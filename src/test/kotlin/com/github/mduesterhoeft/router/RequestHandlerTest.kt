@@ -97,6 +97,25 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should handle request with body`() {
+
+        val response = testRequestHandler.handleRequest(
+            ApiRequest(
+                path = "/some",
+                httpMethod = "POST",
+                headers = mutableMapOf(
+                    "Accept" to "application/json",
+                    "Content-Type" to "application/json"
+                ),
+                body = """{ "greeting": "some" }"""
+            ), mockk()
+        )!!
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.body).isEqualTo("""{"greeting":"some"}""")
+    }
+
+    @Test
     fun `should return method not allowed`() {
 
         val response = testRequestHandler.handleRequest(
@@ -132,15 +151,16 @@ class RequestHandlerTest {
     class TestRequestHandler : RequestHandler() {
 
         data class TestResponse(val greeting: String)
+        data class TestRequest(val greeting: String)
         override val router = router {
-            GET("/some") {
+            GET("/some") { request: Request<Unit> ->
                ResponseEntity.ok(TestResponse("Hello"))
             }
-            GET("/some-proto") {
-                ResponseEntity.ok(Sample.newBuilder().setHello("Hello").setRequest(it.body?:"").build())
+            GET("/some-proto") { request: Request<Unit> ->
+                ResponseEntity.ok(Sample.newBuilder().setHello("Hello").build())
             }
-            POST("/some") {
-                ResponseEntity.ok(TestResponse("Hello post"))
+            POST("/some") { r: Request<TestRequest> ->
+                ResponseEntity.ok(TestResponse(r.body.greeting))
             }
         }
     }

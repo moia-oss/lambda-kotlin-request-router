@@ -9,6 +9,9 @@ import com.google.common.net.MediaType
 import com.google.protobuf.GeneratedMessageV3
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import kotlin.reflect.KClass
+import kotlin.reflect.KTypeParameter
+import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.reflect
 
 abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
@@ -17,21 +20,31 @@ abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
 
     override fun handleRequest(input: ApiRequest, context: Context): ApiResponse? {
         log.info("handling request with method '${input.httpMethod}' and path '${input.path}'")
-        val matchResults: List<MatchResult> = router.routes.map {
-            val matchResult = it.requestPredicate.match(input)
-            log.info("match result for route '$it' is '$matchResult'")
+        val routes = router.routes as List<RouterFunction<Any, Any>>
+        val matchResults: List<MatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->
+            val matchResult = routerFunction.requestPredicate.match(input)
+            log.info("match result for route '$routerFunction' is '$matchResult'")
             if (matchResult.match) {
-                val requestType = it.handler.reflect()!!.parameters.drop(1).first()
-                val request: Any = when (requestType.type.javaClass) {
-                    Unit::javaClass -> Unit
-                    else -> objectMapper.readValue(input.body, requestType.type.javaClass)
-                }
-                return createResponse(input, it.handler(input, request))
+                val handler: HandlerFunction<Any, Any> = routerFunction.handler
+                val request = deserializeRequest(handler, input)
+                val response = handler(Request(input, request))
+                return createResponse(input, response)
             }
 
             matchResult
         }
         return handleNonDirectMatch(matchResults, input)
+    }
+
+    private fun deserializeRequest(
+        handler: HandlerFunction<Any, Any>,
+        input: ApiRequest
+    ): Any {
+        val requestType = handler.reflect()!!.parameters.first().type.arguments.first().type?.classifier as KClass<*>
+        return when (requestType) {
+            Unit::class -> Unit
+            else -> objectMapper.readValue(input.body, requestType.java)
+        }
     }
 
     private fun handleNonDirectMatch(matchResults: List<MatchResult>, input: ApiRequest): ApiResponse {

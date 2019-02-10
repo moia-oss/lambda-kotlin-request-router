@@ -1,7 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
-import com.google.protobuf.gradle.*
 
 buildscript {
     repositories {
@@ -13,9 +12,10 @@ plugins {
     java
     kotlin("jvm") version "1.3.10"
     idea
+    id("com.github.johnrengelman.shadow") version "4.0.3"
     id("org.jmailen.kotlinter") version "1.20.1"
-    id("com.google.protobuf") version "0.8.7"
 }
+
 
 group = "com.github.mduesterhoeft"
 version = "1.0-SNAPSHOT"
@@ -40,14 +40,6 @@ dependencies {
     testImplementation("io.mockk:mockk:1.8.13.kotlin13")
 }
 
-tasks.withType<ShadowJar> {
-    baseName = project.name
-    classifier = ""
-    version = ""
-    transform(Log4j2PluginsCacheFileTransformer::class.java)
-    minimize()
-}
-
 tasks {
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
@@ -57,16 +49,17 @@ tasks {
         useJUnitPlatform()
     }
 
+    withType<ShadowJar> {
+        baseName = project.name
+        classifier = ""
+        version = ""
+        transform(Log4j2PluginsCacheFileTransformer::class.java)
+        minimize()
+    }
+
     val deploy by creating(Exec::class) {
 
         dependsOn("test", "shadowJar")
         commandLine("serverless", "deploy")
-    }
-}
-
-protobuf {
-    protoc {
-        // The artifact spec for the Protobuf Compiler
-        artifact = "com.google.protobuf:protoc:3.6.1"
     }
 }

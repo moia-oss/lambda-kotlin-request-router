@@ -14,8 +14,8 @@ class RouterTest {
     @Test
     fun `should register get route with default accept header`() {
         val router = router {
-            GET("/some") {
-                ResponseEntity.ok("""{"hello": "world", "request":"${it.body}"}""")
+            GET("/some") { r: Request<Unit> ->
+                ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
             }
         }
 

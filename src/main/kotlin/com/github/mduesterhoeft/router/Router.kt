@@ -31,9 +31,11 @@ class Router {
     }
 }
 
-typealias HandlerFunction<I, T> = (request: ApiRequest, body: I) -> ResponseEntity<T>
+typealias HandlerFunction<I, T> = (request: Request<I>) -> ResponseEntity<T>
 
 data class RouterFunction<I, T>(
     val requestPredicate: RequestPredicate,
     val handler: HandlerFunction<I, T>
 )
+
+data class Request<I>(val apiRequest: ApiRequest, val body: I)

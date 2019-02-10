@@ -1,12 +1,13 @@
 package com.github.mduesterhoeft.router.sample
 
 import com.github.mduesterhoeft.router.ApiRequest
+import com.github.mduesterhoeft.router.Request
 import com.github.mduesterhoeft.router.ResponseEntity
 
 class SomeController {
 
-    fun get(request: ApiRequest) =
-        ResponseEntity.ok(MyResponse("hello", request.body))
+    fun get(request: Request<Unit>) =
+        ResponseEntity.ok(MyResponse("hello"))
 
-    data class MyResponse(val hello: String, val request: String?)
+    data class MyResponse(val hello: String)
 }
