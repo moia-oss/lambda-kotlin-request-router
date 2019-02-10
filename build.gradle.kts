@@ -13,6 +13,8 @@ plugins {
     java
     kotlin("jvm") version "1.3.10"
     idea
+    maven
+    id("com.github.johnrengelman.shadow") version "4.0.3"
     id("org.jmailen.kotlinter") version "1.20.1"
     id("com.google.protobuf") version "0.8.7"
 }

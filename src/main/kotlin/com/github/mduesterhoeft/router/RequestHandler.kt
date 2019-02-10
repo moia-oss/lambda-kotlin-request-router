@@ -10,8 +10,6 @@ import com.google.protobuf.GeneratedMessageV3
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import kotlin.reflect.KClass
-import kotlin.reflect.KTypeParameter
-import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.reflect
 
 abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
@@ -96,7 +94,7 @@ abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
 
     open fun <T> createResponse(input: ApiRequest, response: ResponseEntity<T>): ApiResponse {
         val accept = MediaType.parse(input.acceptHeader)
-        return when  {
+        return when {
             response.body is Unit -> ApiJsonResponse(statusCode = 204, body = null)
             accept.`is`(MediaType.parse("application/x-protobuf")) -> ApiProtoResponse(
                 statusCode = 200,

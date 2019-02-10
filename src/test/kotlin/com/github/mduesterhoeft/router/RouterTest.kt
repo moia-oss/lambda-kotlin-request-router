@@ -7,7 +7,6 @@ import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import com.github.mduesterhoeft.router.Router.Companion.router
 import org.junit.jupiter.api.Test
-import javax.xml.ws.Response
 
 class RouterTest {
 

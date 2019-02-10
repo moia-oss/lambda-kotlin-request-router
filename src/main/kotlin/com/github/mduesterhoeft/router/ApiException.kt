@@ -7,7 +7,7 @@ class ApiException(
     message: String,
     val errorCode: Int,
     val details: Map<String, Any> = emptyMap()
-): RuntimeException(message) {
+) : RuntimeException(message) {
 
     override fun toString(): String {
         return "ApiException(statusCode=$statusCode, errorCode=$errorCode, details=$details)"

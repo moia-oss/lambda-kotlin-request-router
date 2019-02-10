@@ -2,7 +2,7 @@ package com.github.mduesterhoeft.router
 
 class Router {
 
-    val routes = mutableListOf<RouterFunction<*,*>>()
+    val routes = mutableListOf<RouterFunction<*, *>>()
 
     fun <I, T> GET(pattern: String, handlerFunction: HandlerFunction<I, T>) =
         RequestPredicate(

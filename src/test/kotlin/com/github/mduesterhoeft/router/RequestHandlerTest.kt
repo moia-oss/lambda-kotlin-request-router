@@ -3,8 +3,7 @@ package com.github.mduesterhoeft.router
 import assertk.assert
 import assertk.assertions.isEqualTo
 import com.github.mduesterhoeft.router.Router.Companion.router
-import com.github.mduesterhoeft.router.sample.proto.SampleOuterClass
-import com.github.mduesterhoeft.router.sample.proto.SampleOuterClass.*
+import com.github.mduesterhoeft.router.sample.proto.SampleOuterClass.Sample
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 
@@ -154,7 +153,7 @@ class RequestHandlerTest {
         data class TestRequest(val greeting: String)
         override val router = router {
             GET("/some") { request: Request<Unit> ->
-               ResponseEntity.ok(TestResponse("Hello"))
+                ResponseEntity.ok(TestResponse("Hello"))
             }
             GET("/some-proto") { request: Request<Unit> ->
                 ResponseEntity.ok(Sample.newBuilder().setHello("Hello").build())
