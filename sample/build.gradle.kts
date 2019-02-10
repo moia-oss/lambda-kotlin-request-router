@@ -59,7 +59,6 @@ tasks {
         classifier = ""
         version = ""
         transform(Log4j2PluginsCacheFileTransformer::class.java)
-        minimize()
     }
 
     val deploy by creating(Exec::class) {

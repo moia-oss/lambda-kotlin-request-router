@@ -51,7 +51,7 @@ package:
 
 functions:
   my-handler:
-    handler: com.md.api.sample.MyRequestHandler
+    handler: com.github.mduesterhoeft.router.sample.MyRequestHandler
     events:
       - http:
           path: some
