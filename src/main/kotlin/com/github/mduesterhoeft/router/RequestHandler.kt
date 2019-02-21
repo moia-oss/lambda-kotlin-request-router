@@ -14,7 +14,7 @@ import kotlin.reflect.jvm.reflect
 
 abstract class RequestHandler : RequestHandler<ApiRequest, ApiResponse> {
 
-    val objectMapper: ObjectMapper = jacksonObjectMapper()
+    open val objectMapper = jacksonObjectMapper()
 
     override fun handleRequest(input: ApiRequest, context: Context): ApiResponse? {
         log.info("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader} Content-Type:${input.contentType} $input")

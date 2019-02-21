@@ -33,4 +33,6 @@ package com.github.mduesterhoeft.router
                 .firstOrNull { it.key.toLowerCase() == httpHeader.toLowerCase() }
                 ?.value
         }
+
+        public fun getHeader(httpHeader: String) = getHeaderCaseInsensitive(httpHeader)
     }
