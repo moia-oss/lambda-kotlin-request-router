@@ -1,5 +1,7 @@
 package com.github.mduesterhoeft.router
 
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
+
 class Router {
 
     val routes = mutableListOf<RouterFunction<*, *>>()
@@ -38,4 +40,4 @@ data class RouterFunction<I, T>(
     val handler: HandlerFunction<I, T>
 )
 
-data class Request<I>(val apiRequest: ApiRequest, val body: I)
+data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I)

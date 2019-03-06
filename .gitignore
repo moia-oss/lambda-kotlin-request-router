@@ -10,11 +10,6 @@ bin/
 .idea/
 out/
 
-# Package Files
-*.jar
-*.war
-*.eargit
-
 # Serverless directories
 .serverless
 

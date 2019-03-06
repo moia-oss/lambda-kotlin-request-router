@@ -2,10 +2,12 @@ package com.github.mduesterhoeft.router
 
 import assertk.assert
 import assertk.assertions.isEqualTo
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.github.mduesterhoeft.router.Router.Companion.router
 import com.github.mduesterhoeft.router.sample.proto.SampleOuterClass.Sample
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
+import java.util.Base64
 
 class RequestHandlerTest {
 
@@ -15,13 +17,11 @@ class RequestHandlerTest {
     fun `should match request`() {
 
         val response = testRequestHandler.handleRequest(
-            ApiRequest(
-                path = "/some",
-                httpMethod = "GET",
-                headers = mutableMapOf(
-                    "Accept" to "application/json"
-                )
-            ), mockk()
+            APIGatewayProxyRequestEvent()
+                .withPath("/some")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json"))
+            , mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(200)
@@ -32,13 +32,11 @@ class RequestHandlerTest {
     fun `should match request to proto handler and return json`() {
 
         val response = testRequestHandler.handleRequest(
-            ApiRequest(
-                path = "/some-proto",
-                httpMethod = "GET",
-                headers = mutableMapOf(
-                    "Accept" to "application/json"
-                )
-            ), mockk()
+            APIGatewayProxyRequestEvent()
+                .withPath("/some-proto")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json"))
+            , mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(200)
@@ -49,30 +47,26 @@ class RequestHandlerTest {
     fun `should match request to proto handler and return proto`() {
 
         val response = testRequestHandler.handleRequest(
-            ApiRequest(
-                path = "/some-proto",
-                httpMethod = "GET",
-                headers = mutableMapOf(
-                    "Accept" to "application/x-protobuf"
-                )
-            ), mockk()
+            APIGatewayProxyRequestEvent()
+                .withPath("/some-proto")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/x-protobuf"))
+            , mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(200)
-        assert(Sample.parseFrom(response.body as ByteArray)).isEqualTo(Sample.newBuilder().setHello("Hello").setRequest("").build())
+        assert(Sample.parseFrom(response.bodyAsBytes())).isEqualTo(Sample.newBuilder().setHello("Hello").setRequest("").build())
     }
 
     @Test
     fun `should return not acceptable on unsupported accept header`() {
 
         val response = testRequestHandler.handleRequest(
-            ApiRequest(
-                path = "/some",
-                httpMethod = "GET",
-                headers = mutableMapOf(
-                    "Accept" to "image/jpg"
-                )
-            ), mockk()
+            APIGatewayProxyRequestEvent()
+                .withPath("/some")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "img/jpg"))
+            , mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(406)
@@ -82,14 +76,14 @@ class RequestHandlerTest {
     fun `should return unsupported media type`() {
 
         val response = testRequestHandler.handleRequest(
-            ApiRequest(
-                path = "/some",
-                httpMethod = "POST",
-                headers = mutableMapOf(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some")
+                .withHttpMethod("POST")
+                .withHeaders(mapOf(
                     "Accept" to "application/json",
                     "Content-Type" to "image/jpg"
-                )
-            ), mockk()
+                ))
+            , mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(415)
@@ -99,15 +93,15 @@ class RequestHandlerTest {
     fun `should handle request with body`() {
 
         val response = testRequestHandler.handleRequest(
-            ApiRequest(
-                path = "/some",
-                httpMethod = "POST",
-                headers = mutableMapOf(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some")
+                .withHttpMethod("POST")
+                .withHeaders(mapOf(
                     "Accept" to "application/json",
                     "Content-Type" to "application/json"
-                ),
-                body = """{ "greeting": "some" }"""
-            ), mockk()
+                ))
+                .withBody("""{ "greeting": "some" }""")
+            , mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(200)
@@ -118,14 +112,14 @@ class RequestHandlerTest {
     fun `should return method not allowed`() {
 
         val response = testRequestHandler.handleRequest(
-            ApiRequest(
-                path = "/some",
-                httpMethod = "PUT",
-                headers = mutableMapOf(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some")
+                .withHttpMethod("PUT")
+                .withHeaders(mapOf(
                     "Accept" to "application/json",
                     "Content-Type" to "image/jpg"
-                )
-            ), mockk()
+                ))
+            , mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(405)
@@ -135,13 +129,11 @@ class RequestHandlerTest {
     fun `should return not found`() {
 
         val response = testRequestHandler.handleRequest(
-            ApiRequest(
-                path = "/some-other",
-                httpMethod = "GET",
-                headers = mutableMapOf(
-                    "Accept" to "application/json"
-                )
-            ), mockk()
+            APIGatewayProxyRequestEvent()
+                .withPath("/some-other")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json"))
+            , mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(404)
@@ -151,6 +143,7 @@ class RequestHandlerTest {
 
         data class TestResponse(val greeting: String)
         data class TestRequest(val greeting: String)
+
         override val router = router {
             GET("/some") { request: Request<Unit> ->
                 ResponseEntity.ok(TestResponse("Hello"))
