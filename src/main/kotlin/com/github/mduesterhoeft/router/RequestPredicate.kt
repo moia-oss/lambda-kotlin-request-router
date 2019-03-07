@@ -6,8 +6,8 @@ import com.google.common.net.MediaType
 data class RequestPredicate(
     val method: String,
     val pathPattern: String,
-    var produces: Set<String> = setOf("application/json", "application/x-protobuf"),
-    var consumes: Set<String> = setOf("application/json", "application/x-protobuf")
+    var produces: Set<String>,
+    var consumes: Set<String>
 ) {
 
     fun consuming(vararg mediaTypes: String): RequestPredicate {

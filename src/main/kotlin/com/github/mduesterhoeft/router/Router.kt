@@ -6,27 +6,62 @@ class Router {
 
     val routes = mutableListOf<RouterFunction<*, *>>()
 
+    var defaultConsuming = setOf("application/json", "application/x-protobuf")
+    var defaultProducing = setOf("application/json", "application/x-protobuf")
+
     fun <I, T> GET(pattern: String, handlerFunction: HandlerFunction<I, T>) =
         RequestPredicate(
             method = "GET",
             pathPattern = pattern,
-            consumes = emptySet()
+            consumes = emptySet(),
+            produces = defaultProducing
         ).also { routes += RouterFunction(it, handlerFunction) }
 
     fun <I, T> POST(pattern: String, handlerFunction: HandlerFunction<I, T>) =
-        RequestPredicate("POST", pattern).also {
+        RequestPredicate(
+            method = "POST",
+            pathPattern = pattern,
+            consumes = defaultConsuming,
+            produces = defaultProducing
+        ).also {
             routes += RouterFunction(it, handlerFunction)
         }
 
     fun <I, T> PUT(pattern: String, handlerFunction: HandlerFunction<I, T>) =
-        RequestPredicate("PUT", pattern).also {
+        RequestPredicate(
+            method = "PUT",
+            pathPattern = pattern,
+            consumes = defaultConsuming,
+            produces = defaultProducing
+        ).also {
             routes += RouterFunction(it, handlerFunction)
         }
 
     fun <I, T> DELETE(pattern: String, handlerFunction: HandlerFunction<I, T>) =
-        RequestPredicate("DELETE", pattern).also {
+        RequestPredicate(
+            method = "DELETE",
+            pathPattern = pattern,
+            consumes = defaultConsuming,
+            produces = defaultProducing
+        ).also {
             routes += RouterFunction(it, handlerFunction)
         }
+
+    fun <I, T> PATCH(pattern: String, handlerFunction: HandlerFunction<I, T>) =
+        RequestPredicate(
+            method = "PATCH",
+            pathPattern = pattern,
+            consumes = defaultConsuming,
+            produces = defaultProducing
+        ).also {
+            routes += RouterFunction(it, handlerFunction)
+        }
+
+    // the default content types the HandlerFunctions of this router can produce
+    fun defaultProducing(contentTypes: Set<String>): Router = this.also { defaultProducing = contentTypes }
+
+    // the default content types the HandlerFunctions of this router can handle
+    fun defaultConsuming(contentTypes: Set<String>): Router = this.also { defaultConsuming = contentTypes }
 
     companion object {
         fun router(routes: Router.() -> Unit) = Router().apply(routes)

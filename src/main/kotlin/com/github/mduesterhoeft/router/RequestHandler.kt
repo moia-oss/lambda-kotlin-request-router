@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.mduesterhoeft.router.ProtoBufUtils.toJsonWithoutWrappers
 import com.google.common.net.MediaType
@@ -12,7 +11,6 @@ import com.google.protobuf.GeneratedMessageV3
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.Base64
-import java.util.logging.LogManager
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.reflect
 

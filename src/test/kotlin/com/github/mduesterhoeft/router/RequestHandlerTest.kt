@@ -7,7 +7,6 @@ import com.github.mduesterhoeft.router.Router.Companion.router
 import com.github.mduesterhoeft.router.sample.proto.SampleOuterClass.Sample
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
-import java.util.Base64
 
 class RequestHandlerTest {
 
@@ -20,8 +19,7 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json"))
-            , mockk()
+                .withHeaders(mapOf("Accept" to "application/json")), mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(200)
@@ -35,8 +33,7 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-proto")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json"))
-            , mockk()
+                .withHeaders(mapOf("Accept" to "application/json")), mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(200)
@@ -50,8 +47,7 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-proto")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/x-protobuf"))
-            , mockk()
+                .withHeaders(mapOf("Accept" to "application/x-protobuf")), mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(200)
@@ -65,8 +61,7 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "img/jpg"))
-            , mockk()
+                .withHeaders(mapOf("Accept" to "img/jpg")), mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(406)
@@ -82,8 +77,7 @@ class RequestHandlerTest {
                 .withHeaders(mapOf(
                     "Accept" to "application/json",
                     "Content-Type" to "image/jpg"
-                ))
-            , mockk()
+                )), mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(415)
@@ -100,8 +94,7 @@ class RequestHandlerTest {
                     "Accept" to "application/json",
                     "Content-Type" to "application/json"
                 ))
-                .withBody("""{ "greeting": "some" }""")
-            , mockk()
+                .withBody("""{ "greeting": "some" }"""), mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(200)
@@ -118,8 +111,7 @@ class RequestHandlerTest {
                 .withHeaders(mapOf(
                     "Accept" to "application/json",
                     "Content-Type" to "image/jpg"
-                ))
-            , mockk()
+                )), mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(405)
@@ -132,8 +124,7 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-other")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json"))
-            , mockk()
+                .withHeaders(mapOf("Accept" to "application/json")), mockk()
         )!!
 
         assert(response.statusCode).isEqualTo(404)
@@ -145,10 +136,10 @@ class RequestHandlerTest {
         data class TestRequest(val greeting: String)
 
         override val router = router {
-            GET("/some") { request: Request<Unit> ->
+            GET("/some") { _: Request<Unit> ->
                 ResponseEntity.ok(TestResponse("Hello"))
             }
-            GET("/some-proto") { request: Request<Unit> ->
+            GET("/some-proto") { _: Request<Unit> ->
                 ResponseEntity.ok(Sample.newBuilder().setHello("Hello").build())
             }
             POST("/some") { r: Request<TestRequest> ->
