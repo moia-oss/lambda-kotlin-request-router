@@ -10,11 +10,13 @@ data class RequestPredicate(
     var consumes: Set<String> = setOf("application/json", "application/x-protobuf")
 ) {
 
-    fun consuming(vararg mediaTypes: String) {
+    fun consuming(vararg mediaTypes: String): RequestPredicate {
         consumes = mediaTypes.toSet()
+        return this
     }
-    fun producing(vararg mediaTypes: String) {
+    fun producing(vararg mediaTypes: String): RequestPredicate {
         produces = mediaTypes.toSet()
+        return this
     }
 
     internal fun match(request: APIGatewayProxyRequestEvent) =
