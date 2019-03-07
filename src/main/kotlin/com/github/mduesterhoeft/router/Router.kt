@@ -9,6 +9,8 @@ class Router {
     var defaultConsuming = setOf("application/json", "application/x-protobuf")
     var defaultProducing = setOf("application/json", "application/x-protobuf")
 
+    var requestPreprocessor: (Request<*>) -> Unit = { _ -> Unit }
+
     fun <I, T> GET(pattern: String, handlerFunction: HandlerFunction<I, T>) =
         RequestPredicate(
             method = "GET",
@@ -62,6 +64,8 @@ class Router {
 
     // the default content types the HandlerFunctions of this router can handle
     fun defaultConsuming(contentTypes: Set<String>): Router = this.also { defaultConsuming = contentTypes }
+
+    fun withPreprocessor(preprocessorFunction: (Request<*>) -> Unit): Router = this.also { requestPreprocessor = preprocessorFunction }
 
     companion object {
         fun router(routes: Router.() -> Unit) = Router().apply(routes)
