@@ -58,7 +58,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 input, ApiException(
                     statusCode = 415,
                     message = "Unsupported Media Type",
-                    errorCode = 1
+                    code = "UNSUPPORTED_MEDIA_TYPE"
                 )
             )
         }
@@ -67,7 +67,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 input, ApiException(
                     statusCode = 406,
                     message = "Not Acceptable",
-                    errorCode = 2
+                    code = "NOT_ACCEPTABLE"
                 )
             )
         }
@@ -76,7 +76,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 input, ApiException(
                     statusCode = 405,
                     message = "Method Not Allowed",
-                    errorCode = 3
+                    code = "METHOD_NOT_ALLOWED"
                 )
             )
         }
@@ -84,7 +84,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             input, ApiException(
                 statusCode = 404,
                 message = "Not found",
-                errorCode = 4
+                code = "NOT_FOUND"
             )
         )
     }
@@ -95,7 +95,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         APIGatewayProxyResponseEvent()
             .withBody(objectMapper.writeValueAsString(mapOf(
                 "message" to ex.message,
-                "code" to ex.errorCode,
+                "code" to ex.code,
                 "details" to ex.details
             )))
             .withStatusCode(ex.statusCode)
