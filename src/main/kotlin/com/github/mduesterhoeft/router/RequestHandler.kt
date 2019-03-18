@@ -28,7 +28,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             if (matchResult.match) {
                 val handler: HandlerFunction<Any, Any> = routerFunction.handler
                 val requestBody = deserializeRequest(handler, input)
-                val request = Request(input, requestBody)
+                val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
                 val response = router.filter.then(handler as HandlerFunction<*, *>).invoke(request)
                 return createResponse(input, response)
             }

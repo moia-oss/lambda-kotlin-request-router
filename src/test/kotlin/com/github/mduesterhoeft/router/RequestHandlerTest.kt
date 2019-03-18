@@ -188,7 +188,7 @@ class RequestHandlerTest {
                 ResponseEntity.ok(TestResponse("Hello"))
             }
             GET("/some/{id}") { r: Request<Unit> ->
-                ResponseEntity.ok(TestResponse("Hello ${UriTemplate.from("/some/{id}").extract(r.apiRequest.path)["id"]}"))
+                ResponseEntity.ok(TestResponse("Hello ${r.getPathParameter("id")}"))
             }
             GET("/some-proto") { _: Request<Unit> ->
                 ResponseEntity.ok(Sample.newBuilder().setHello("Hello").build())
