@@ -22,15 +22,14 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent? {
         log.info("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input")
         val routes = router.routes as List<RouterFunction<Any, Any>>
-        val matchResults: List<MatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->
+        val matchResults: List<RequestMatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->
             val matchResult = routerFunction.requestPredicate.match(input)
             log.info("match result for route '$routerFunction' is '$matchResult'")
             if (matchResult.match) {
                 val handler: HandlerFunction<Any, Any> = routerFunction.handler
                 val requestBody = deserializeRequest(handler, input)
                 val request = Request(input, requestBody)
-                router.requestPreprocessor(request)
-                val response = handler(request)
+                val response = router.filter.then(handler as HandlerFunction<*, *>).invoke(request)
                 return createResponse(input, response)
             }
 
@@ -51,7 +50,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         }
     }
 
-    private fun handleNonDirectMatch(matchResults: List<MatchResult>, input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
+    private fun handleNonDirectMatch(matchResults: List<RequestMatchResult>, input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         // no direct match
         if (matchResults.any { it.matchPath && it.matchMethod && !it.matchContentType }) {
             return createErrorResponse(

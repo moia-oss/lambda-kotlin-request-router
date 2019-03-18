@@ -20,14 +20,14 @@ data class RequestPredicate(
     }
 
     internal fun match(request: APIGatewayProxyRequestEvent) =
-        MatchResult(
+        RequestMatchResult(
             matchPath = pathMatches(request),
             matchMethod = methodMatches(request),
             matchAcceptType = contentTypeMatches(request.acceptHeader(), produces),
             matchContentType = contentTypeMatches(request.contentType(), consumes)
         )
 
-    private fun pathMatches(request: APIGatewayProxyRequestEvent) = request.path == pathPattern
+    private fun pathMatches(request: APIGatewayProxyRequestEvent) = UriTemplate.from(pathPattern).matches(request.path)
     private fun methodMatches(request: APIGatewayProxyRequestEvent) = method.equals(request.httpMethod, true)
     private fun contentTypeMatches(contentType: String?, accepted: Set<String>) =
         if (accepted.isEmpty() && contentType == null) true
@@ -37,7 +37,7 @@ data class RequestPredicate(
     companion object
 }
 
-internal data class MatchResult(
+internal data class RequestMatchResult(
     val matchPath: Boolean = false,
     val matchMethod: Boolean = false,
     val matchAcceptType: Boolean = false,

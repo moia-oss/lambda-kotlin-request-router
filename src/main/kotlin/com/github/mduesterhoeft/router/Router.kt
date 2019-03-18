@@ -9,7 +9,7 @@ class Router {
     var defaultConsuming = setOf("application/json", "application/x-protobuf")
     var defaultProducing = setOf("application/json", "application/x-protobuf")
 
-    var requestPreprocessor: (Request<*>) -> Unit = { _ -> Unit }
+    var filter: Filter = Filter.NoOp
 
     fun <I, T> GET(pattern: String, handlerFunction: HandlerFunction<I, T>) =
         RequestPredicate(
@@ -59,18 +59,24 @@ class Router {
             routes += RouterFunction(it, handlerFunction)
         }
 
-    // the default content types the HandlerFunctions of this router can produce
-    fun defaultProducing(contentTypes: Set<String>): Router = this.also { defaultProducing = contentTypes }
-
-    // the default content types the HandlerFunctions of this router can handle
-    fun defaultConsuming(contentTypes: Set<String>): Router = this.also { defaultConsuming = contentTypes }
-
-    fun withPreprocessor(preprocessorFunction: (Request<*>) -> Unit): Router = this.also { requestPreprocessor = preprocessorFunction }
-
     companion object {
         fun router(routes: Router.() -> Unit) = Router().apply(routes)
     }
 }
+
+interface Filter : (HandlerFunction<*, *>) -> HandlerFunction<*,*> {
+    companion object {
+        operator fun invoke(fn: (HandlerFunction<*, *>) -> HandlerFunction<*, *>): Filter = object : Filter {
+            override operator fun invoke(next: HandlerFunction<*, *>): HandlerFunction<*, *> = fn(next)
+        }
+    }
+}
+
+val Filter.Companion.NoOp: Filter get() = Filter { next -> { next(it) } }
+
+fun Filter.then(next: Filter): Filter = Filter { this(next(it)) }
+
+fun Filter.then(next: HandlerFunction<*, *>): HandlerFunction<*, *> = { this(next)(it) }
 
 typealias HandlerFunction<I, T> = (request: Request<I>) -> ResponseEntity<T>
 

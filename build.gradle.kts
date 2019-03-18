@@ -1,7 +1,9 @@
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
-import com.google.protobuf.gradle.*
+import com.google.protobuf.gradle.protobuf
+import com.google.protobuf.gradle.protoc
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     repositories {
@@ -32,6 +34,7 @@ dependencies {
     compile("com.amazonaws:aws-lambda-java-core:1.2.0")
     compile("com.amazonaws:aws-lambda-java-events:2.2.5")
 
+
     compile("org.slf4j:slf4j-api:1.7.26")
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.8")
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
@@ -41,6 +44,7 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.4.0")
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.12")
+    testImplementation("org.assertj:assertj-core:3.11.1")
     testImplementation("io.mockk:mockk:1.8.13.kotlin13")
     testImplementation("org.slf4j:slf4j-simple:1.7.26")
 }

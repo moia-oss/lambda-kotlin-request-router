@@ -27,6 +27,20 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should match request with path parameter`() {
+
+        val response = testRequestHandler.handleRequest(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some/me")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+        )!!
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.body).isEqualTo("""{"greeting":"Hello me"}""")
+    }
+
+    @Test
     fun `should match request to proto handler and return json`() {
 
         val response = testRequestHandler.handleRequest(
@@ -130,6 +144,40 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(404)
     }
 
+    @Test
+    fun `should invoke filter chain`() {
+
+        val handler = TestRequestHandlerWithFilter()
+        val response = handler.handleRequest(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+        )!!
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(handler.filterInvocations).isEqualTo(2)
+    }
+
+    class TestRequestHandlerWithFilter : RequestHandler() {
+
+        var filterInvocations = 0
+
+        private val incrementingFilter = Filter {
+            next -> {
+                request ->
+                    filterInvocations += 1
+                    next(request)
+            }
+        }
+        override val router = router {
+            filter = incrementingFilter.then(incrementingFilter)
+
+            GET("/some") { _: Request<Unit> ->
+                ResponseEntity.ok("hello")
+            }
+        }
+    }
     class TestRequestHandler : RequestHandler() {
 
         data class TestResponse(val greeting: String)
@@ -138,6 +186,9 @@ class RequestHandlerTest {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
                 ResponseEntity.ok(TestResponse("Hello"))
+            }
+            GET("/some/{id}") { r: Request<Unit> ->
+                ResponseEntity.ok(TestResponse("Hello ${UriTemplate.from("/some/{id}").extract(r.apiRequest.path)["id"]}"))
             }
             GET("/some-proto") { _: Request<Unit> ->
                 ResponseEntity.ok(Sample.newBuilder().setHello("Hello").build())
