@@ -1,15 +1,14 @@
 package com.github.mduesterhoeft.router
 
-import java.lang.RuntimeException
-
-class ApiException(
-    val statusCode: Int = 400,
+open class ApiException(
     message: String,
     val code: String,
-    val details: Map<String, Any> = emptyMap()
-) : RuntimeException(message) {
+    val httpResponseStatus: Int,
+    val details: Map<String, Any> = emptyMap(),
+    cause: Throwable? = null
+) : RuntimeException("[$code] $message", cause) {
 
     override fun toString(): String {
-        return "ApiException(statusCode=$statusCode, code=$code, details=$details, message=$message)"
+        return "ApiException(message='$message', code='$code', httpResponseStatus=$httpResponseStatus, details=$details, cause=$cause)"
     }
 }

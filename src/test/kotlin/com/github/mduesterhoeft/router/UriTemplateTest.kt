@@ -34,5 +34,4 @@ class UriTemplateTest {
             .isEqualTo(mapOf("first" to "first-value", "second" to "second-value"))
         then(UriTemplate.from("/some").extract("/some")).isEmpty()
     }
-
 }

@@ -55,7 +55,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         if (matchResults.any { it.matchPath && it.matchMethod && !it.matchContentType }) {
             return createErrorResponse(
                 input, ApiException(
-                    statusCode = 415,
+                    httpResponseStatus = 415,
                     message = "Unsupported Media Type",
                     code = "UNSUPPORTED_MEDIA_TYPE"
                 )
@@ -64,7 +64,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         if (matchResults.any { it.matchPath && it.matchMethod && !it.matchAcceptType }) {
             return createErrorResponse(
                 input, ApiException(
-                    statusCode = 406,
+                    httpResponseStatus = 406,
                     message = "Not Acceptable",
                     code = "NOT_ACCEPTABLE"
                 )
@@ -73,7 +73,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         if (matchResults.any { it.matchPath && !it.matchMethod }) {
             return createErrorResponse(
                 input, ApiException(
-                    statusCode = 405,
+                    httpResponseStatus = 405,
                     message = "Method Not Allowed",
                     code = "METHOD_NOT_ALLOWED"
                 )
@@ -81,7 +81,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         }
         return createErrorResponse(
             input, ApiException(
-                statusCode = 404,
+                httpResponseStatus = 404,
                 message = "Not found",
                 code = "NOT_FOUND"
             )
@@ -97,7 +97,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 "code" to ex.code,
                 "details" to ex.details
             )))
-            .withStatusCode(ex.statusCode)
+            .withStatusCode(ex.httpResponseStatus)
             .withHeaders(mapOf("Content-Type" to "application/json"))
 
     open fun <T> createResponse(input: APIGatewayProxyRequestEvent, response: ResponseEntity<T>): APIGatewayProxyResponseEvent {

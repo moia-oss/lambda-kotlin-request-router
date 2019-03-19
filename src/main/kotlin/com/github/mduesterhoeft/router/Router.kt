@@ -64,7 +64,7 @@ class Router {
     }
 }
 
-interface Filter : (HandlerFunction<*, *>) -> HandlerFunction<*,*> {
+interface Filter : (HandlerFunction<*, *>) -> HandlerFunction<*, *> {
     companion object {
         operator fun invoke(fn: (HandlerFunction<*, *>) -> HandlerFunction<*, *>): Filter = object : Filter {
             override operator fun invoke(next: HandlerFunction<*, *>): HandlerFunction<*, *> = fn(next)
@@ -85,7 +85,7 @@ data class RouterFunction<I, T>(
     val handler: HandlerFunction<I, T>
 )
 
-data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, val pathPattern: String) {
+data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, val pathPattern: String = apiRequest.path) {
 
     val pathParameters by lazy { UriTemplate.from(pathPattern).extract(apiRequest.path) }
     fun getPathParameter(name: String) = pathParameters[name]
