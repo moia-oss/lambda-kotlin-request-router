@@ -16,6 +16,7 @@ plugins {
     kotlin("jvm") version "1.3.10"
     idea
     maven
+    `maven-publish`
     id("com.github.johnrengelman.shadow") version "4.0.3"
     id("org.jmailen.kotlinter") version "1.20.1"
     id("com.google.protobuf") version "0.8.7"
@@ -70,6 +71,14 @@ tasks {
 
         dependsOn("test", "shadowJar")
         commandLine("serverless", "deploy")
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
     }
 }
 
