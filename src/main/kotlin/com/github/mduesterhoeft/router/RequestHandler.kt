@@ -18,19 +18,30 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     open val objectMapper = jacksonObjectMapper()
 
+    abstract val router: Router
+
     @Suppress("UNCHECKED_CAST")
     override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent? {
-        log.info("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input")
+        log.debug("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input")
         val routes = router.routes as List<RouterFunction<Any, Any>>
         val matchResults: List<RequestMatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->
             val matchResult = routerFunction.requestPredicate.match(input)
-            log.info("match result for route '$routerFunction' is '$matchResult'")
+            log.debug("match result for route '$routerFunction' is '$matchResult'")
             if (matchResult.match) {
                 val handler: HandlerFunction<Any, Any> = routerFunction.handler
                 val requestBody = deserializeRequest(handler, input)
                 val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
-                val response = router.filter.then(handler as HandlerFunction<*, *>).invoke(request)
-                return createResponse(input, response)
+                return try {
+                    val response = router.filter.then(handler as HandlerFunction<*, *>).invoke(request)
+                    createResponse(input, response)
+                } catch (e: RuntimeException) {
+                    when (e) {
+                        is ApiException -> createErrorResponse(input, e)
+                            .also { log.info("Caught api error while handling ${input.httpMethod} ${input.path} - $e") }
+                        else -> createInternalServerErrorResponse(input, e)
+                            .also { log.error("Caught exception handling ${input.httpMethod} ${input.path} - $e", e) }
+                    }
+                }
             }
 
             matchResult
@@ -88,8 +99,6 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         )
     }
 
-    abstract val router: Router
-
     open fun createErrorResponse(input: APIGatewayProxyRequestEvent, ex: ApiException): APIGatewayProxyResponseEvent =
         APIGatewayProxyResponseEvent()
             .withBody(objectMapper.writeValueAsString(mapOf(
@@ -98,6 +107,15 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 "details" to ex.details
             )))
             .withStatusCode(ex.httpResponseStatus)
+            .withHeaders(mapOf("Content-Type" to "application/json"))
+
+    open fun createInternalServerErrorResponse(input: APIGatewayProxyRequestEvent, ex: java.lang.RuntimeException): APIGatewayProxyResponseEvent =
+        APIGatewayProxyResponseEvent()
+            .withBody(objectMapper.writeValueAsString(mapOf(
+                "message" to ex.message,
+                "code" to "INTERNAL_SERVER_ERROR"
+            )))
+            .withStatusCode(500)
             .withHeaders(mapOf("Content-Type" to "application/json"))
 
     open fun <T> createResponse(input: APIGatewayProxyRequestEvent, response: ResponseEntity<T>): APIGatewayProxyResponseEvent {

@@ -159,6 +159,32 @@ class RequestHandlerTest {
         assert(handler.filterInvocations).isEqualTo(2)
     }
 
+    @Test
+    fun `should handle api exception`() {
+
+        val response = testRequestHandler.handleRequest(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some-api-exception")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+        )!!
+
+        assert(response.statusCode).isEqualTo(400)
+    }
+
+    @Test
+    fun `should handle internal server error`() {
+
+        val response = testRequestHandler.handleRequest(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some-internal-server-error")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+        )!!
+
+        assert(response.statusCode).isEqualTo(500)
+    }
+
     class TestRequestHandlerWithFilter : RequestHandler() {
 
         var filterInvocations = 0
@@ -186,6 +212,12 @@ class RequestHandlerTest {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
                 ResponseEntity.ok(TestResponse("Hello"))
+            }
+            GET<Unit, Unit>("/some-api-exception") {
+                throw ApiException("boom", "BOOM", 400, mapOf("more" to "info"))
+            }
+            GET<Unit, Unit>("/some-internal-server-error") {
+                throw IllegalArgumentException("boom")
             }
             GET("/some/{id}") { r: Request<Unit> ->
                 ResponseEntity.ok(TestResponse("Hello ${r.getPathParameter("id")}"))
