@@ -7,10 +7,15 @@ import java.util.Base64
 fun APIGatewayProxyRequestEvent.acceptHeader() = getHeaderCaseInsensitive("accept")
 fun APIGatewayProxyRequestEvent.contentType() = getHeaderCaseInsensitive("content-type")
 
-fun APIGatewayProxyRequestEvent.getHeaderCaseInsensitive(httpHeader: String): String? {
-    return headers.entries
-        .firstOrNull { it.key.toLowerCase() == httpHeader.toLowerCase() }
+fun APIGatewayProxyRequestEvent.getHeaderCaseInsensitive(httpHeader: String): String? =
+    getCaseInsensitive(httpHeader, headers)
+
+fun APIGatewayProxyResponseEvent.getHeaderCaseInsensitive(httpHeader: String): String? =
+    getCaseInsensitive(httpHeader, headers)
+
+private fun getCaseInsensitive(key: String, map: Map<String, String>): String? =
+    map.entries
+        .firstOrNull { it.key.toLowerCase() == key.toLowerCase() }
         ?.value
-}
 
 fun APIGatewayProxyResponseEvent.bodyAsBytes() = Base64.getDecoder().decode(body)
