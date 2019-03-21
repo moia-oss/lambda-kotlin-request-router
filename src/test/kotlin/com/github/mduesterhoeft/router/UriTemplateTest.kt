@@ -2,7 +2,7 @@ package com.github.mduesterhoeft.router
 
 import org.assertj.core.api.BDDAssertions.then
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 class UriTemplateTest {
 
