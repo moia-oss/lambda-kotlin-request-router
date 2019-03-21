@@ -123,23 +123,24 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         return when {
             response.body is Unit -> APIGatewayProxyResponseEvent()
                 .withStatusCode(204)
+                .withHeaders(response.headers)
 
             accept.`is`(MediaType.parse("application/x-protobuf")) -> APIGatewayProxyResponseEvent()
-                .withStatusCode(200)
+                .withStatusCode(response.statusCode)
                 .withBody(Base64.getEncoder().encodeToString((response.body as GeneratedMessageV3).toByteArray()))
-                .withHeaders(mapOf("Content-Type" to "application/x-protobuf"))
+                .withHeaders(response.headers + ("Content-Type" to "application/x-protobuf"))
 
             accept.`is`(MediaType.parse("application/json")) ->
                 if (response.body is GeneratedMessageV3)
                     APIGatewayProxyResponseEvent()
-                        .withStatusCode(200)
+                        .withStatusCode(response.statusCode)
                         .withBody(toJsonWithoutWrappers(response.body))
-                        .withHeaders(mapOf("Content-Type" to "application/json"))
+                        .withHeaders(response.headers + ("Content-Type" to "application/json"))
                 else
                     APIGatewayProxyResponseEvent()
-                        .withStatusCode(200)
+                        .withStatusCode(response.statusCode)
                         .withBody(response.body?.let { objectMapper.writeValueAsString(it) })
-                        .withHeaders(mapOf("Content-Type" to "application/json"))
+                        .withHeaders(response.headers + ("Content-Type" to "application/json"))
             else -> throw IllegalArgumentException("unsupported response $response")
         }
     }
