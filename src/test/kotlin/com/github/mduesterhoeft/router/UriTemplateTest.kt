@@ -34,4 +34,16 @@ class UriTemplateTest {
             .isEqualTo(mapOf("first" to "first-value", "second" to "second-value"))
         then(UriTemplate.from("/some").extract("/some")).isEmpty()
     }
+
+    @Test
+    fun `should match with query parameter`() {
+        then(UriTemplate.from("/some?a=1").matches("/some")).isTrue()
+        then(UriTemplate.from("/some?a=1&b=2").matches("/some")).isTrue()
+    }
+
+    @Test
+    fun `should match with path parameter and query parameter`() {
+        then(UriTemplate.from("/some/{id}?a=1").matches("/some/${UUID.randomUUID()}")).isTrue()
+        then(UriTemplate.from("/some/{id}/other?a=1&b=2").matches("/some/${UUID.randomUUID()}/other")).isTrue()
+    }
 }
