@@ -101,9 +101,7 @@ class RequestHandlerTest {
     fun `should handle request with body`() {
 
         val response = testRequestHandler.handleRequest(
-            APIGatewayProxyRequestEvent()
-                .withPath("/some")
-                .withHttpMethod("POST")
+            POST("/some")
                 .withHeaders(mapOf(
                     "Accept" to "application/json",
                     "Content-Type" to "application/json"
@@ -157,6 +155,22 @@ class RequestHandlerTest {
 
         assert(response.statusCode).isEqualTo(200)
         assert(handler.filterInvocations).isEqualTo(2)
+    }
+
+    @Test
+    fun `should handle deserialization error`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("{}"), mockk()
+        )!!
+        assert(response.statusCode).isEqualTo(422)
     }
 
     @Test

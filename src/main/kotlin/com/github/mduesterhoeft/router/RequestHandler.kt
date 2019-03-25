@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.mduesterhoeft.router.ProtoBufUtils.toJsonWithoutWrappers
 import com.google.common.net.MediaType
@@ -29,16 +30,16 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             log.debug("match result for route '$routerFunction' is '$matchResult'")
             if (matchResult.match) {
                 val handler: HandlerFunction<Any, Any> = routerFunction.handler
-                val requestBody = deserializeRequest(handler, input)
-                val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
                 return try {
+                    val requestBody = deserializeRequest(handler, input)
+                    val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
                     val response = router.filter.then(handler as HandlerFunction<*, *>).invoke(request)
                     createResponse(input, response)
-                } catch (e: RuntimeException) {
+                } catch (e: Exception) {
                     when (e) {
-                        is ApiException -> createErrorResponse(input, e)
+                        is ApiException -> createApiExceptionErrorResponse(input, e)
                             .also { log.info("Caught api error while handling ${input.httpMethod} ${input.path} - $e") }
-                        else -> createInternalServerErrorResponse(input, e)
+                        else -> createUnexpectedErrorResponse(input, e)
                             .also { log.error("Caught exception handling ${input.httpMethod} ${input.path} - $e", e) }
                     }
                 }
@@ -64,7 +65,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     private fun handleNonDirectMatch(matchResults: List<RequestMatchResult>, input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         // no direct match
         if (matchResults.any { it.matchPath && it.matchMethod && !it.matchContentType }) {
-            return createErrorResponse(
+            return createApiExceptionErrorResponse(
                 input, ApiException(
                     httpResponseStatus = 415,
                     message = "Unsupported Media Type",
@@ -73,7 +74,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             )
         }
         if (matchResults.any { it.matchPath && it.matchMethod && !it.matchAcceptType }) {
-            return createErrorResponse(
+            return createApiExceptionErrorResponse(
                 input, ApiException(
                     httpResponseStatus = 406,
                     message = "Not Acceptable",
@@ -82,7 +83,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             )
         }
         if (matchResults.any { it.matchPath && !it.matchMethod }) {
-            return createErrorResponse(
+            return createApiExceptionErrorResponse(
                 input, ApiException(
                     httpResponseStatus = 405,
                     message = "Method Not Allowed",
@@ -90,7 +91,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 )
             )
         }
-        return createErrorResponse(
+        return createApiExceptionErrorResponse(
             input, ApiException(
                 httpResponseStatus = 404,
                 message = "Not found",
@@ -99,7 +100,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         )
     }
 
-    open fun createErrorResponse(input: APIGatewayProxyRequestEvent, ex: ApiException): APIGatewayProxyResponseEvent =
+    open fun createApiExceptionErrorResponse(input: APIGatewayProxyRequestEvent, ex: ApiException): APIGatewayProxyResponseEvent =
         APIGatewayProxyResponseEvent()
             .withBody(objectMapper.writeValueAsString(mapOf(
                 "message" to ex.message,
@@ -109,14 +110,28 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             .withStatusCode(ex.httpResponseStatus)
             .withHeaders(mapOf("Content-Type" to "application/json"))
 
-    open fun createInternalServerErrorResponse(input: APIGatewayProxyRequestEvent, ex: java.lang.RuntimeException): APIGatewayProxyResponseEvent =
-        APIGatewayProxyResponseEvent()
-            .withBody(objectMapper.writeValueAsString(mapOf(
-                "message" to ex.message,
-                "code" to "INTERNAL_SERVER_ERROR"
-            )))
-            .withStatusCode(500)
-            .withHeaders(mapOf("Content-Type" to "application/json"))
+    open fun createUnexpectedErrorResponse(input: APIGatewayProxyRequestEvent, ex: Exception): APIGatewayProxyResponseEvent =
+        when (ex) {
+            is MissingKotlinParameterException ->
+                APIGatewayProxyResponseEvent()
+                    .withBody(objectMapper.writeValueAsString(
+                        listOf(mapOf(
+                            "path" to ex.parameter.name.orEmpty(),
+                            "message" to "Missing required field",
+                            "code" to "MISSING_REQUIRED_FIELDS"
+                ))))
+                .withStatusCode(422)
+                .withHeaders(mapOf("Content-Type" to "application/json"))
+            else ->
+                APIGatewayProxyResponseEvent()
+                    .withBody(objectMapper.writeValueAsString(mapOf(
+                        "message" to ex.message,
+                        "code" to "INTERNAL_SERVER_ERROR"
+                    )))
+                    .withStatusCode(500)
+                    .withHeaders(mapOf("Content-Type" to "application/json"))
+        }
+
 
     open fun <T> createResponse(input: APIGatewayProxyRequestEvent, response: ResponseEntity<T>): APIGatewayProxyResponseEvent {
         val accept = MediaType.parse(input.acceptHeader())
