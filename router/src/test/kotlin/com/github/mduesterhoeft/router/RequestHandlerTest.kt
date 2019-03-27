@@ -4,7 +4,6 @@ import assertk.assert
 import assertk.assertions.isEqualTo
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.github.mduesterhoeft.router.Router.Companion.router
-import com.github.mduesterhoeft.router.sample.proto.SampleOuterClass.Sample
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 
@@ -38,34 +37,6 @@ class RequestHandlerTest {
 
         assert(response.statusCode).isEqualTo(200)
         assert(response.body).isEqualTo("""{"greeting":"Hello me"}""")
-    }
-
-    @Test
-    fun `should match request to proto handler and return json`() {
-
-        val response = testRequestHandler.handleRequest(
-            APIGatewayProxyRequestEvent()
-                .withPath("/some-proto")
-                .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json")), mockk()
-        )!!
-
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""{"hello":"Hello","request":""}""")
-    }
-
-    @Test
-    fun `should match request to proto handler and return proto`() {
-
-        val response = testRequestHandler.handleRequest(
-            APIGatewayProxyRequestEvent()
-                .withPath("/some-proto")
-                .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/x-protobuf")), mockk()
-        )!!
-
-        assert(response.statusCode).isEqualTo(200)
-        assert(Sample.parseFrom(response.bodyAsBytes())).isEqualTo(Sample.newBuilder().setHello("Hello").setRequest("").build())
     }
 
     @Test
@@ -251,9 +222,6 @@ class RequestHandlerTest {
             }
             GET("/some/{id}") { r: Request<Unit> ->
                 ResponseEntity.ok(TestResponse("Hello ${r.getPathParameter("id")}"))
-            }
-            GET("/some-proto") { _: Request<Unit> ->
-                ResponseEntity.ok(Sample.newBuilder().setHello("Hello").build())
             }
             POST("/some") { r: Request<TestRequest> ->
                 ResponseEntity.ok(TestResponse(r.body.greeting))

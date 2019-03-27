@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.github.mduesterhoeft.router.sample.proto;
+package com.github.mduesterhoeft.router.proto.sample;
 
 message Sample {
     string hello = 1;

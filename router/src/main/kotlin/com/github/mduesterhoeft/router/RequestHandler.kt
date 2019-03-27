@@ -4,17 +4,12 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
-import com.fasterxml.jackson.databind.type.TypeFactory
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.github.mduesterhoeft.router.ProtoBufUtils.toJsonWithoutWrappers
 import com.google.common.net.MediaType
-import com.google.protobuf.GeneratedMessageV3
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.Base64
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.reflect
 
 abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -22,6 +17,9 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     open val objectMapper = jacksonObjectMapper()
 
     abstract val router: Router
+
+    private val serializationHandlerChain by lazy { SerializationHandlerChain(serializationHandlers()) }
+    private val deserializationHandlerChain by lazy { DeserializationHandlerChain(deserializationHandlers()) }
 
     @Suppress("UNCHECKED_CAST")
     override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent? {
@@ -52,20 +50,17 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         return handleNonDirectMatch(matchResults, input)
     }
 
+    open fun serializationHandlers(): List<SerializationHandler> = listOf(JsonSerializationHandler(objectMapper))
+    open fun deserializationHandlers(): List<DeserializationHandler> = listOf(JsonDeserializationHandler(objectMapper))
+
     private fun deserializeRequest(
         handler: HandlerFunction<Any, Any>,
         input: APIGatewayProxyRequestEvent
-    ): Any {
-        val requestType = handler.reflect()!!.parameters.first().type.arguments.first().type?.classifier as KClass<*>
+    ): Any? {
+        val requestType = handler.reflect()!!.parameters.first().type.arguments.first().type
         return when {
-            requestType == Unit::class -> Unit
-            requestType == String::class -> input.body!!
-            requestType.isSubclassOf(Collection::class) -> {
-                val kClass = handler.reflect()!!.parameters.first().type.arguments.first().type!!.arguments.first().type!!.classifier as KClass<*>
-                val type = TypeFactory.defaultInstance().constructParametricType(requestType.javaObjectType, kClass.javaObjectType)
-                objectMapper.readValue(input.body, type)
-            }
-            else -> objectMapper.readValue(input.body, requestType.java)
+            requestType?.classifier as KClass<*> == Unit::class -> Unit
+            else -> deserializationHandlerChain.deserialize(input, requestType)
         }
     }
 
@@ -140,28 +135,17 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         }
 
     open fun <T> createResponse(input: APIGatewayProxyRequestEvent, response: ResponseEntity<T>): APIGatewayProxyResponseEvent {
+        // TODO add default accept type
         val accept = MediaType.parse(input.acceptHeader())
         return when {
             response.body is Unit -> APIGatewayProxyResponseEvent()
                 .withStatusCode(204)
                 .withHeaders(response.headers)
-
-            accept.`is`(MediaType.parse("application/x-protobuf")) -> APIGatewayProxyResponseEvent()
-                .withStatusCode(response.statusCode)
-                .withBody(Base64.getEncoder().encodeToString((response.body as GeneratedMessageV3).toByteArray()))
-                .withHeaders(response.headers + ("Content-Type" to "application/x-protobuf"))
-
-            accept.`is`(MediaType.parse("application/json")) ->
-                if (response.body is GeneratedMessageV3)
-                    APIGatewayProxyResponseEvent()
-                        .withStatusCode(response.statusCode)
-                        .withBody(toJsonWithoutWrappers(response.body))
-                        .withHeaders(response.headers + ("Content-Type" to "application/json"))
-                else
-                    APIGatewayProxyResponseEvent()
-                        .withStatusCode(response.statusCode)
-                        .withBody(response.body?.let { objectMapper.writeValueAsString(it) })
-                        .withHeaders(response.headers + ("Content-Type" to "application/json"))
+            serializationHandlerChain.supports(accept, response) ->
+                APIGatewayProxyResponseEvent()
+                    .withStatusCode(response.statusCode)
+                    .withBody(serializationHandlerChain.serialize(accept, response))
+                    .withHeaders(response.headers + ("Content-Type" to accept.toString()))
             else -> throw IllegalArgumentException("unsupported response $response")
         }
     }

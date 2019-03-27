@@ -1,1 +1,3 @@
 rootProject.name = 'lambda-kotlin-request-router'
+include 'router'
+include 'router-protobuf'

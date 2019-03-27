@@ -88,5 +88,5 @@ data class RouterFunction<I, T>(
 data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, val pathPattern: String = apiRequest.path) {
 
     val pathParameters by lazy { UriTemplate.from(pathPattern).extract(apiRequest.path) }
-    fun getPathParameter(name: String) = pathParameters[name]
+    fun getPathParameter(name: String): String? = pathParameters[name]
 }

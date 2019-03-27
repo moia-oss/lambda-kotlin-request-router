@@ -1,4 +1,4 @@
-package com.github.mduesterhoeft.router
+package com.github.mduesterhoeft.router.proto
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
@@ -14,17 +14,19 @@ object ProtoBufUtils {
         }
 
         fun removeWrapperObjects(json: String): String {
-            return removeWrapperObjects(jacksonObjectMapper().readTree(json)).toString()
+            return ProtoBufUtils.removeWrapperObjects(
+                jacksonObjectMapper().readTree(json)
+            ).toString()
         }
 
         fun removeWrapperObjects(json: JsonNode): JsonNode {
             if (json.isArray) {
-                return removeWrapperObjects(json as ArrayNode)
+                return ProtoBufUtils.removeWrapperObjects(json as ArrayNode)
             } else if (json.isObject) {
                 if (json.has("value") && json.size() == 1) {
                     return json.get("value")
                 }
-                return removeWrapperObjects(json as ObjectNode)
+                return ProtoBufUtils.removeWrapperObjects(json as ObjectNode)
             }
             return json
         }
@@ -34,7 +36,9 @@ object ProtoBufUtils {
             for (entry in json.fields()) {
                 if (entry.value.isContainerNode) {
                     if (entry.value.size() > 0) {
-                        result.set(entry.key, removeWrapperObjects(entry.value))
+                        result.set(entry.key,
+                            ProtoBufUtils.removeWrapperObjects(entry.value)
+                        )
                     } else {
                         result.set(entry.key, jacksonObjectMapper().nodeFactory.nullNode())
                     }
@@ -48,7 +52,7 @@ object ProtoBufUtils {
         private fun removeWrapperObjects(json: ArrayNode): ArrayNode {
             val result = jacksonObjectMapper().createArrayNode()
             for (entry in json) {
-                result.add(removeWrapperObjects(entry))
+                result.add(ProtoBufUtils.removeWrapperObjects(entry))
             }
             return result
         }
