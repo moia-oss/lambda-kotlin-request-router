@@ -1,0 +1,27 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Test
+paths:
+  /tests:
+    get:
+      summary: List all test records
+      operationId: get-tests
+      tags:
+        - tests
+      responses:
+        '200':
+          description: All tests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Test"
+components:
+  schemas:
+    Test:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: unique id of the service area

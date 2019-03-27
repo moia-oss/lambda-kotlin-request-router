@@ -1,3 +1,4 @@
 rootProject.name = 'lambda-kotlin-request-router'
 include 'router'
 include 'router-protobuf'
+include 'router-openapi-request-validator'
