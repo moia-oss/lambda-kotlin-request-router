@@ -32,8 +32,8 @@ fun DELETE(path: String) = DELETE().withPath(path)
  * The port is taken from the x-forwarded-port header. Standard ports are omitted.
  */
 fun APIGatewayProxyRequestEvent.location(path: String): URI {
-    val host = getHeaderCaseInsensitive("host")?:"localhost"
-    val proto = getHeaderCaseInsensitive("x-forwarded-proto")?:"http"
+    val host = getHeaderCaseInsensitive("host") ?: "localhost"
+    val proto = getHeaderCaseInsensitive("x-forwarded-proto") ?: "http"
     val portPart = getHeaderCaseInsensitive("x-forwarded-port")
         ?.let {
             when {
@@ -41,7 +41,7 @@ fun APIGatewayProxyRequestEvent.location(path: String): URI {
                 proto == "http" && it == "80" -> null
                 else -> ":$it"
             }
-        }?: ""
+        } ?: ""
     return URI("$proto://$host$portPart/${path.removePrefix("/")}")
 }
 

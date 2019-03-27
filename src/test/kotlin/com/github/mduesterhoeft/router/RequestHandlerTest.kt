@@ -114,6 +114,22 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should handle request with body as a List`() {
+
+        val response = testRequestHandler.handleRequest(
+                POST("/somes")
+                        .withHeaders(mapOf(
+                                "Accept" to "application/json",
+                                "Content-Type" to "application/json"
+                        ))
+                        .withBody("""[{ "greeting": "some" },{ "greeting": "some1" }]""".trimMargin()), mockk()
+        )!!
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.body).isEqualTo("""[{"greeting":"some"},{"greeting":"some1"}]""")
+    }
+
+    @Test
     fun `should return method not allowed`() {
 
         val response = testRequestHandler.handleRequest(
@@ -241,6 +257,8 @@ class RequestHandlerTest {
             }
             POST("/some") { r: Request<TestRequest> ->
                 ResponseEntity.ok(TestResponse(r.body.greeting))
+            }
+            POST("/somes") { r: Request<List<TestRequest>> -> ResponseEntity.ok(r.body.map { TestResponse(it.greeting) }.toList())
             }
         }
     }
