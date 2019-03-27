@@ -22,7 +22,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     private val deserializationHandlerChain by lazy { DeserializationHandlerChain(deserializationHandlers()) }
 
     @Suppress("UNCHECKED_CAST")
-    override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent? {
+    override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent {
         log.debug("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input")
         val routes = router.routes as List<RouterFunction<Any, Any>>
         val matchResults: List<RequestMatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->

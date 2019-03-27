@@ -19,7 +19,7 @@ class RequestHandlerTest {
                 .withPath("/some")
                 .withHttpMethod("GET")
                 .withHeaders(mapOf("Accept" to "application/json")), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(200)
         assert(response.body).isEqualTo("""{"greeting":"Hello"}""")
@@ -33,7 +33,7 @@ class RequestHandlerTest {
                 .withPath("/some/me")
                 .withHttpMethod("GET")
                 .withHeaders(mapOf("Accept" to "application/json")), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(200)
         assert(response.body).isEqualTo("""{"greeting":"Hello me"}""")
@@ -47,7 +47,7 @@ class RequestHandlerTest {
                 .withPath("/some")
                 .withHttpMethod("GET")
                 .withHeaders(mapOf("Accept" to "img/jpg")), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(406)
     }
@@ -63,7 +63,7 @@ class RequestHandlerTest {
                     "Accept" to "application/json",
                     "Content-Type" to "image/jpg"
                 )), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(415)
     }
@@ -78,7 +78,7 @@ class RequestHandlerTest {
                     "Content-Type" to "application/json"
                 ))
                 .withBody("""{ "greeting": "some" }"""), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(200)
         assert(response.body).isEqualTo("""{"greeting":"some"}""")
@@ -94,7 +94,7 @@ class RequestHandlerTest {
                                 "Content-Type" to "application/json"
                         ))
                         .withBody("""[{ "greeting": "some" },{ "greeting": "some1" }]""".trimMargin()), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(200)
         assert(response.body).isEqualTo("""[{"greeting":"some"},{"greeting":"some1"}]""")
@@ -111,7 +111,7 @@ class RequestHandlerTest {
                     "Accept" to "application/json",
                     "Content-Type" to "image/jpg"
                 )), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(405)
     }
@@ -124,7 +124,7 @@ class RequestHandlerTest {
                 .withPath("/some-other")
                 .withHttpMethod("GET")
                 .withHeaders(mapOf("Accept" to "application/json")), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(404)
     }
@@ -138,7 +138,7 @@ class RequestHandlerTest {
                 .withPath("/some")
                 .withHttpMethod("GET")
                 .withHeaders(mapOf("Accept" to "application/json")), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(200)
         assert(handler.filterInvocations).isEqualTo(2)
@@ -156,7 +156,7 @@ class RequestHandlerTest {
                     )
                 )
                 .withBody("{}"), mockk()
-        )!!
+        )
         assert(response.statusCode).isEqualTo(422)
     }
 
@@ -168,7 +168,7 @@ class RequestHandlerTest {
                 .withPath("/some-api-exception")
                 .withHttpMethod("GET")
                 .withHeaders(mapOf("Accept" to "application/json")), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(400)
     }
@@ -181,7 +181,7 @@ class RequestHandlerTest {
                 .withPath("/some-internal-server-error")
                 .withHttpMethod("GET")
                 .withHeaders(mapOf("Accept" to "application/json")), mockk()
-        )!!
+        )
 
         assert(response.statusCode).isEqualTo(500)
     }
