@@ -10,7 +10,6 @@ buildscript {
 plugins {
     java
     kotlin("jvm") version "1.3.21"
-    maven
     `maven-publish`
     id("org.jmailen.kotlinter") version "1.22.0"
 }
