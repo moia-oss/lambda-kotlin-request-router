@@ -22,7 +22,24 @@ class OpenApiValidator(val specUrlOrPayload: String) {
         return validate(request, response).let { if (it.hasErrors()) throw ApiInteractionInvalid(specUrlOrPayload, request, response, it) }
     }
 
-    class ApiInteractionInvalid(val spec: String, val request: APIGatewayProxyRequestEvent, val response: APIGatewayProxyResponseEvent, val validationReport: ValidationReport) :
+    fun assertValidRequest(request: APIGatewayProxyRequestEvent) =
+        validator.validateRequest(request.toRequest()).let { if (it.hasErrors()) throw ApiInteractionInvalid(
+            spec = specUrlOrPayload,
+            request = request,
+            validationReport = it) }
+
+    fun assertValidResponse(request: APIGatewayProxyRequestEvent, response: APIGatewayProxyResponseEvent) =
+        request.toRequest().let { r ->
+            validator.validateResponse(r.path, r.method, response.toResponse()).let {
+                if (it.hasErrors()) throw ApiInteractionInvalid(
+                    spec = specUrlOrPayload,
+                    request = request,
+                    validationReport = it
+                )
+            }
+        }
+
+    class ApiInteractionInvalid(val spec: String, val request: APIGatewayProxyRequestEvent, val response: APIGatewayProxyResponseEvent? = null, val validationReport: ValidationReport) :
         RuntimeException("Error validating request and response against $spec - $validationReport")
 
     private fun APIGatewayProxyRequestEvent.toRequest(): Request {

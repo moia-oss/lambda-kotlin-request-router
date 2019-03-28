@@ -22,6 +22,8 @@ class OpenApiValidatorTest {
 
         val response = testHandler.handleRequest(request, mockk())
 
+        validator.assertValidRequest(request)
+        validator.assertValidResponse(request, response)
         validator.assertValid(request, response)
     }
 
@@ -33,6 +35,7 @@ class OpenApiValidatorTest {
         val response = testHandler.handleRequest(request, mockk())
 
         thenThrownBy { validator.assertValid(request, response) }.isInstanceOf(OpenApiValidator.ApiInteractionInvalid::class.java)
+        thenThrownBy { validator.assertValidRequest(request) }.isInstanceOf(OpenApiValidator.ApiInteractionInvalid::class.java)
     }
 
     @Test
