@@ -14,7 +14,7 @@ plugins {
     id("org.jmailen.kotlinter") version "1.22.0"
 }
 
-group = "com.github.mduesterhoeft"
+group = "com.github.moia-dev"
 version = "1.0-SNAPSHOT"
 
 repositories {
