@@ -1,10 +1,10 @@
-package com.github.mduesterhoeft.router.sample
+package io.moia.router.sample
 
-import com.github.mduesterhoeft.router.Request
-import com.github.mduesterhoeft.router.RequestHandler
-import com.github.mduesterhoeft.router.ResponseEntity
-import com.github.mduesterhoeft.router.Router.Companion.router
-import com.github.mduesterhoeft.router.sample.proto.SampleOuterClass
+import io.moia.router.Request
+import io.moia.router.RequestHandler
+import io.moia.router.ResponseEntity
+import io.moia.router.Router.Companion.router
+import io.moia.router.proto.sample.SampleOuterClass
 
 class MyRequestHandler : RequestHandler() {
     private val controller = SomeController()
