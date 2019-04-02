@@ -11,6 +11,7 @@ plugins {
     java
     kotlin("jvm") version "1.3.21"
     `maven-publish`
+    jacoco
     id("org.jmailen.kotlinter") version "1.22.0"
 }
 
@@ -33,6 +34,7 @@ subprojects {
     
     apply(plugin = "java")
     apply(plugin = "kotlin")
+    apply(plugin = "jacoco")
     apply(plugin = "maven-publish")
     apply(plugin = "org.jmailen.kotlinter")
 
@@ -44,6 +46,7 @@ subprojects {
         withType<Test> {
             useJUnitPlatform()
         }
+
     }
     
     publishing {
@@ -52,5 +55,18 @@ subprojects {
                 from(components["java"])
             }
         }
+    }
+}
+
+val jacocoRootReport by tasks.creating(JacocoReport::class) {
+    description = "Generates an aggregate report from all subprojects"
+    group = "Coverage reports"
+    sourceSets(*subprojects.map { it.sourceSets["main"] }.toTypedArray())
+    executionData(fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec"))
+
+    reports {
+        html.isEnabled = true
+        xml.isEnabled = true
+        xml.setDestination(File(project.buildDir, "reports/jacoco/report.xml"))
     }
 }
