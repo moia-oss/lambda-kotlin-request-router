@@ -82,10 +82,14 @@ fun Filter.then(next: HandlerFunction<*, *>): HandlerFunction<*, *> = { this(nex
 
 typealias HandlerFunction<I, T> = (request: Request<I>) -> ResponseEntity<T>
 
-data class RouterFunction<I, T>(
+class RouterFunction<I, T>(
     val requestPredicate: RequestPredicate,
     val handler: HandlerFunction<I, T>
-)
+) {
+    override fun toString(): String {
+        return "RouterFunction(requestPredicate=$requestPredicate)"
+    }
+}
 
 data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, val pathPattern: String = apiRequest.path) {
 
