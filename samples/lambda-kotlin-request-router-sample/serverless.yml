@@ -1,0 +1,20 @@
+service: request-router-sample
+
+provider:
+  name: aws
+  runtime: java8
+  region: eu-west-1
+
+package:
+  artifact: build/libs/lambda-kotlin-request-router-sample.jar
+
+functions:
+  my-handler:
+    handler: io.moia.router.sample.MyRequestHandler
+    events:
+      - http:
+          path: some
+          method: get
+      - http:
+          path: some
+          method: post

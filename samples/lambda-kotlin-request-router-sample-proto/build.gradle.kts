@@ -1,10 +1,11 @@
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
-import java.net.URI
-import java.util.concurrent.TimeUnit.SECONDS
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URI
+import java.util.concurrent.TimeUnit.SECONDS
 
 
 buildscript {
@@ -59,9 +60,9 @@ tasks {
     }
 
     withType<ShadowJar> {
-        baseName = project.name
-        classifier = ""
-        version = ""
+        archiveBaseName.set(project.name)
+        archiveClassifier.set("")
+        archiveVersion.set("")
         transform(Log4j2PluginsCacheFileTransformer::class.java)
     }
 

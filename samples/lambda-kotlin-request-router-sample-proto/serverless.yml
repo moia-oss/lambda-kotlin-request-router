@@ -1,4 +1,4 @@
-service: lambda-kotlin-request-router-sample # NOTE: update this with your service name
+service: request-router-sample-proto # NOTE: update this with your service name
 
 provider:
   name: aws
@@ -6,7 +6,7 @@ provider:
   region: eu-west-1
 
 package:
-  artifact: build/libs/lambda-kotlin-request-router-sample.jar
+  artifact: build/libs/lambda-kotlin-request-router-sample-proto.jar
 
 functions:
   my-handler:
