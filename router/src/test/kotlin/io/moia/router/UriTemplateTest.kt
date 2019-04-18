@@ -1,62 +1,68 @@
 package io.moia.router
 
 import org.assertj.core.api.BDDAssertions.then
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.util.UUID
 
 class UriTemplateTest {
 
-    @Test
-    fun `should match without parameter`() {
-        then(UriTemplate.from("/some").matches("/some")).isTrue()
+    @ParameterizedTest
+    @MethodSource("matchTestParams")
+    fun `match template`(uriTemplate: String, matchTemplate: String, expectedResult: Boolean) {
+        then(UriTemplate.from(uriTemplate).matches(matchTemplate)).isEqualTo(expectedResult)
     }
 
-    @Test
-    fun `should not match simple`() {
-        then(UriTemplate.from("/some").matches("/some-other")).isFalse()
+    @ParameterizedTest
+    @MethodSource("extractTestParams")
+    fun `extract template`(uriTemplate: String, extractTemplate: String, expectedResult: Map<String, String>) {
+        then(UriTemplate.from(uriTemplate).extract(extractTemplate)).isEqualTo(expectedResult)
     }
 
-    @Test
-    fun `should match with parameter`() {
-        then(UriTemplate.from("/some/{id}").matches("/some/${UUID.randomUUID()}")).isTrue()
-        then(UriTemplate.from("/some/{id}/other").matches("/some/${UUID.randomUUID()}/other")).isTrue()
-    }
-
-    @Test
-    fun `should not match with parameter`() {
-        then(UriTemplate.from("/some/{id}").matches("/some-other/${UUID.randomUUID()}")).isFalse()
-        then(UriTemplate.from("/some/{id}/other").matches("/some/${UUID.randomUUID()}/other-test")).isFalse()
-    }
-
-    @Test
-    fun `should extract parameters`() {
-        then(UriTemplate.from("/some/{first}/other/{second}").extract("/some/first-value/other/second-value"))
-            .isEqualTo(mapOf("first" to "first-value", "second" to "second-value"))
-        then(UriTemplate.from("/some").extract("/some")).isEmpty()
-    }
-
-    @Test
-    fun `should match with query parameter`() {
-        then(UriTemplate.from("/some?a=1").matches("/some")).isTrue()
-        then(UriTemplate.from("/some?a=1&b=2").matches("/some")).isTrue()
-    }
-
-    @Test
-    fun `should match with path parameter and query parameter`() {
-        then(UriTemplate.from("/some/{id}?a=1").matches("/some/${UUID.randomUUID()}")).isTrue()
-        then(UriTemplate.from("/some/{id}/other?a=1&b=2").matches("/some/${UUID.randomUUID()}/other")).isTrue()
-    }
-
-    @Test
-    fun `should handle greedy path variables successfully`() {
-        then(UriTemplate.from("/some/{proxy+}").matches("/some/sub/sub/sub/path")).isTrue()
-    }
-
-    @Test
-    fun `should throw exception for greedy path variables at the wrong place`() {
+    @ParameterizedTest
+    @MethodSource("notAllowedGreedyPathTemplates")
+    fun `should throw exception for greedy path variables at the wrong place`(testedValue: String) {
         assertThrows<IllegalArgumentException>("Greedy path variables (e.g. '{proxy+}' are only allowed at the end of the template") {
-            UriTemplate.from("/some/{proxy+}/and/{variable}/error")
+            UriTemplate.from(testedValue)
         }
+    }
+
+    companion object {
+        @JvmStatic
+        @Suppress("unused")
+        fun matchTestParams() = listOf(
+            Arguments.of("/some",                       "/some",                                    true,   "should match without parameter"),
+            Arguments.of("/some",                       "/some-other",                              false,  "should not match simple"),
+            Arguments.of("/some/{id}",                  "/some/${UUID.randomUUID()}",               true,   "should match with parameter-1"),
+            Arguments.of("/some/{id}/other",            "/some/${UUID.randomUUID()}/other",         true,   "should match with parameter-2"),
+            Arguments.of("/some/{id}",                  "/some-other/${UUID.randomUUID()}",         false,  "should not match with parameter-1"),
+            Arguments.of("/some/{id}/other",            "/some/${UUID.randomUUID()}/other-test",    false,  "should not match with parameter-2"),
+            Arguments.of("/some?a=1",                   "/some",                                    true,   "should match with query parameter 1"),
+            Arguments.of("/some?a=1&b=2",               "/some",                                    true,   "should match with query parameter 2"),
+            Arguments.of("/some/{id}?a=1",              "/some/${UUID.randomUUID()}",               true,   "should match with path parameter and query parameter 1"),
+            Arguments.of("/some/{id}/other?a=1&b=2",    "/some/${UUID.randomUUID()}/other",         true,   "should match with path parameter and query parameter 2"),
+            Arguments.of("/some/{proxy+}",              "/some/sub/sub/sub/path",                   true,   "should handle greedy path variables successfully")
+        )
+
+        @JvmStatic
+        @Suppress("unused")
+        fun extractTestParams() = listOf(
+            Arguments.of("/some",                           "/some",                                    emptyMap<String,String>(),                                      "should extract parameters-1"),
+            Arguments.of("/some/{first}/other/{second}",    "/some/first-value/other/second-value",     mapOf("first" to "first-value", "second" to "second-value"),    "should extract parameters 2")
+            )
+
+        @JvmStatic
+        @Suppress("unused")
+        fun notAllowedGreedyPathTemplates() = listOf(
+            "/some/{proxy+}/and/{variable}/error",
+            "/{proxy+}/some/and/{variable}/error",
+            "/here/some/and/{proxy+}/{variable}",
+            "/here/some/and/{proxy+}/error", // FIXME: it should throw exception
+            "/here/some/and//good/good/{proxy+}/bad/bad/bad", // FIXME: it should throw exception
+            "/{proxy+}/{id}",
+            "/{proxy+}/whatever"
+        )
     }
 }
