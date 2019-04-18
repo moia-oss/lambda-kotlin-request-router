@@ -2,6 +2,7 @@ package io.moia.router
 
 import org.assertj.core.api.BDDAssertions.then
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 class UriTemplateTest {
@@ -45,5 +46,17 @@ class UriTemplateTest {
     fun `should match with path parameter and query parameter`() {
         then(UriTemplate.from("/some/{id}?a=1").matches("/some/${UUID.randomUUID()}")).isTrue()
         then(UriTemplate.from("/some/{id}/other?a=1&b=2").matches("/some/${UUID.randomUUID()}/other")).isTrue()
+    }
+
+    @Test
+    fun `should handle greedy path variables successfully`() {
+        then(UriTemplate.from("/some/{proxy+}").matches("/some/sub/sub/sub/path")).isTrue()
+    }
+
+    @Test
+    fun `should throw exception for greedy path variables at the wrong place`() {
+        assertThrows<IllegalArgumentException>("Greedy path variables (e.g. '{proxy+}' are only allowed at the end of the template") {
+            UriTemplate.from("/some/{proxy+}/and/{variable}/error")
+        }
     }
 }
