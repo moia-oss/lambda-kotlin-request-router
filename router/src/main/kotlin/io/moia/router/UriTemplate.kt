@@ -1,5 +1,6 @@
 package io.moia.router
 
+import java.lang.IllegalArgumentException
 import java.net.URLDecoder
 import java.util.regex.Pattern
 
@@ -9,16 +10,29 @@ class UriTemplate private constructor(private val template: String) {
     private val parameterNames: List<String>
 
     init {
-        matches = URI_TEMPLATE_FORMAT.findAll(template)
+        if (INVALID_GREEDY_PATH_VARIABLE_REGEX.matches(template)) {
+            throw IllegalArgumentException("Greedy path variables (e.g. '{proxy+}' are only allowed at the end of the template")
+        }
+        matches = PATH_VARIABLE_REGEX.findAll(template)
         parameterNames = matches.map { it.groupValues[1] }.toList()
         templateRegex = template.replace(
-            URI_TEMPLATE_FORMAT,
+            PATH_VARIABLE_REGEX,
             { notMatched -> Pattern.quote(notMatched) },
-            { matched -> if (matched.groupValues[2].isBlank()) "([^/]+)" else "(${matched.groupValues[2]})" }).toRegex()
+            { matched ->
+                // check for greedy path variables, e.g. '{proxy+}'
+                if (matched.groupValues[1].endsWith("+")) {
+                    return@replace "(.+)"
+                }
+                if (matched.groupValues[2].isBlank()) "([^/]+)" else "(${matched.groupValues[2]})"
+            }
+        ).toRegex()
     }
 
     companion object {
-        private val URI_TEMPLATE_FORMAT = "\\{([^}]+?)(?::([^}]+))?}".toRegex()
+        private val PATH_VARIABLE_REGEX = "\\{([^}]+?)(?::([^}]+))?}".toRegex()
+        private val INVALID_GREEDY_PATH_VARIABLE_REGEX = ".*\\{([^}]+?)(?::([^}]+))?\\+}.+".toRegex()
+
+        // Removes query params
         fun from(template: String) = UriTemplate(template.split('?')[0].trimSlashes())
 
         fun String.trimSlashes() = "^(/)?(.*?)(/)?$".toRegex().replace(this) { result -> result.groupValues[2] }

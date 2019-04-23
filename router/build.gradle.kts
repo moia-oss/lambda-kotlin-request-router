@@ -12,6 +12,7 @@ dependencies {
     compile("com.google.guava:guava:23.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.4.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.4.0")
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.12")
     testImplementation("org.assertj:assertj-core:3.11.1")
     testImplementation("io.mockk:mockk:1.8.13.kotlin13")
