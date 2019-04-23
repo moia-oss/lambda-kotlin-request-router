@@ -7,9 +7,9 @@ import io.moia.router.Request
 import io.moia.router.ResponseEntity
 import io.moia.router.Router.Companion.router
 import io.moia.router.bodyAsBytes
+import io.moia.router.proto.sample.SampleOuterClass.Sample
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
-import com.github.mduesterhoeft.router.proto.sample.SampleOuterClass.Sample
 import java.util.Base64
 
 class RequestHandlerTest {
@@ -67,9 +67,12 @@ class RequestHandlerTest {
     class TestRequestHandler : ProtoEnabledRequestHandler() {
 
         override val router = router {
+            defaultProducing = setOf("application/x-protobuf")
+            defaultConsuming = setOf("application/x-protobuf")
+
             GET("/some-proto") { _: Request<Unit> ->
                 ResponseEntity.ok(Sample.newBuilder().setHello("Hello").build())
-            }
+            }.producing("application/x-protobuf", "application/json")
             POST("/some-proto") { r: Request<Sample> ->
                 ResponseEntity.ok(r.body)
             }

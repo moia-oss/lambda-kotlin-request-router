@@ -26,6 +26,7 @@ dependencies {
     testImplementation("org.slf4j:slf4j-simple:1.7.26")
 }
 
+
 protobuf {
     protoc {
         // The artifact spec for the Protobuf Compiler

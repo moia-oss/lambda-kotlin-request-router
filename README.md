@@ -18,7 +18,9 @@ The library addresses the following aspects:
 - ease implementation of cross cutting concerns for handlers
 - ease (local) testing of REST handlers
 
-## Getting Started
+## Reference
+
+### Getting Started
 
 To use the core module we need the following:
 
@@ -50,6 +52,65 @@ class MyRequestHandler : RequestHandler() {
     }
 }
 ```
+
+### Content Negotiation
+
+The router DSL allows for configuration of the content types a handler
+- produces (according to the request's `Accept` header)
+- consumes (according to the request's `Content-Type` header)
+
+The router itself carries a default for both values.
+
+```kotlin
+var defaultConsuming = setOf("application/json")
+var defaultProducing = setOf("application/json")
+```
+
+These defaults can be overridden on the router level or on the handler level to specify the content types most of your handlers consume and produce.
+
+```kotlin
+router {
+    defaultConsuming = setOf("application/json")
+    defaultProducing = setOf("application/json")
+}
+```
+
+Exceptions from this default can be configured on a handler level.
+
+```kotlin
+router {
+    POST("/some") { r: Request<String> -> ResponseEntity.ok(MyResponse(r.body)) }
+        .producing("application/json")
+        .consuming("application/json")
+}
+```
+
+### Filters
+
+Filters are a means to add cross-cutting concerns to your request handling logic outside a handler function.
+Multiple filters can be used by composing them.
+
+```kotlin
+override val router = router {
+        filter = loggingFilter().then(mdcFilter())
+
+        GET("/some", controller::get)
+    }
+
+    private fun loggingFilter() = Filter { next -> {
+        request ->
+            log.info("Handling request ${request.apiRequest.httpMethod} ${request.apiRequest.path}")
+            next(request) }
+    }
+
+    private fun mdcFilter() = Filter { next -> {
+        request ->
+            MDC.put("requestId", request.apiRequest.requestContext?.requestId)
+            next(request) }
+    }
+}
+```
+
 
 
 

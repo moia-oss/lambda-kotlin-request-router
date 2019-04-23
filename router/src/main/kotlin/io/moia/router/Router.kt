@@ -6,8 +6,8 @@ class Router {
 
     val routes = mutableListOf<RouterFunction<*, *>>()
 
-    var defaultConsuming = setOf("application/json", "application/x-protobuf")
-    var defaultProducing = setOf("application/json", "application/x-protobuf")
+    var defaultConsuming = setOf("application/json")
+    var defaultProducing = setOf("application/json")
 
     var filter: Filter = Filter.NoOp
 
