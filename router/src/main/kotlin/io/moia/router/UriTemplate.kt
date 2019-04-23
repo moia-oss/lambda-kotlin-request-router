@@ -10,6 +10,9 @@ class UriTemplate private constructor(private val template: String) {
     private val parameterNames: List<String>
 
     init {
+        if (INVALID_GREEDY_PATH_VARIABLE_REGEX.matches(template)) {
+            throw IllegalArgumentException("Greedy path variables (e.g. '{proxy+}' are only allowed at the end of the template")
+        }
         matches = PATH_VARIABLE_REGEX.findAll(template)
         parameterNames = matches.map { it.groupValues[1] }.toList()
         templateRegex = template.replace(
@@ -18,7 +21,6 @@ class UriTemplate private constructor(private val template: String) {
             { matched ->
                 // check for greedy path variables, e.g. '{proxy+}'
                 if (matched.groupValues[1].endsWith("+")) {
-                    if (matched.next() != null) throw IllegalArgumentException("Greedy path variables (e.g. '{proxy+}' are only allowed at the end of the template")
                     return@replace "(.+)"
                 }
                 if (matched.groupValues[2].isBlank()) "([^/]+)" else "(${matched.groupValues[2]})"
@@ -28,6 +30,7 @@ class UriTemplate private constructor(private val template: String) {
 
     companion object {
         private val PATH_VARIABLE_REGEX = "\\{([^}]+?)(?::([^}]+))?}".toRegex()
+        private val INVALID_GREEDY_PATH_VARIABLE_REGEX = ".*\\{([^}]+?)(?::([^}]+))?\\+}.+".toRegex()
 
         // Removes query params
         fun from(template: String) = UriTemplate(template.split('?')[0].trimSlashes())
