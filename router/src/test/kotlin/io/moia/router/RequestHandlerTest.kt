@@ -206,9 +206,7 @@ class RequestHandlerTest {
     fun `should match request requiring permission`() {
 
         val response = TestRequestHandlerAuthorization().handleRequest(
-            APIGatewayProxyRequestEvent()
-                .withPath("/some")
-                .withHttpMethod("GET")
+            GET("/some")
                 .withHeaders(mapOf(
                     "Accept" to "application/json",
                     "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I"
@@ -219,12 +217,24 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should match request requiring permission from custom header`() {
+
+        val response = TestRequestHandlerCustomAuthorizationHeader().handleRequest(
+            GET("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "application/json",
+                    "Custom-Auth" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I"
+                )), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
     fun `should fail on missing permission`() {
 
         val response = TestRequestHandlerAuthorization().handleRequest(
-            APIGatewayProxyRequestEvent()
-                .withPath("/some")
-                .withHttpMethod("GET")
+            GET("/some")
                 .withHeaders(mapOf(
                     "Accept" to "application/json",
                     "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24yIn0.RA8ERppuFmastqFN-6C98WqMEE7L6h88WylMeq6jh1w"
@@ -244,6 +254,23 @@ class RequestHandlerTest {
         override fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
             { JwtPermissionHandler(
                 request = it,
+                permissionsClaim = "permissions",
+                permissionSeparator = ","
+            ) }
+    }
+
+    class TestRequestHandlerCustomAuthorizationHeader : RequestHandler() {
+        override val router = router {
+            GET("/some") { _: Request<Unit> ->
+                ResponseEntity.ok("hello")
+            }.requiringPermissions("permission1")
+        }
+
+        override fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
+            { JwtPermissionHandler(
+                accessor = JwtAccessor(
+                    request = it,
+                    authorizationHeaderName = "custom-auth"),
                 permissionsClaim = "permissions",
                 permissionSeparator = ","
             ) }

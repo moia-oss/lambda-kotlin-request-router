@@ -5,6 +5,7 @@ import assertk.assertions.hasSize
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import io.moia.router.Router.Companion.router
+import org.assertj.core.api.BDDAssertions.then
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -28,7 +29,19 @@ class RouterTest {
     }
 
     @Test
-    fun `should register get route with specific content types`() {
+    fun `should register routes`() {
+        val router = router {
+            PUT("/some") { r: Request<Unit> -> ResponseEntity.ok("") }
+            PATCH("/some") { r: Request<Unit> -> ResponseEntity.ok("") }
+            DELETE("/some") { r: Request<Unit> -> ResponseEntity.ok("") }
+            POST("/some") { r: Request<Unit> -> ResponseEntity.ok("") }
+        }
+
+        then(router.routes.map { it.requestPredicate.method }).containsOnly("PUT", "PATCH", "DELETE", "POST")
+    }
+
+    @Test
+    fun `should register post route with specific content types`() {
         val router = router {
             POST("/some") { r: Request<Unit> ->
                 ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")

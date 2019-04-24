@@ -21,6 +21,10 @@ data class RequestPredicate(
         return this
     }
 
+    /**
+     * Register required permissions for this route.
+     * The RequestHandler checks if any of the given permissions are found on a request.
+     */
     fun requiringPermissions(vararg permissions: String): RequestPredicate {
         requiredPermissions = permissions.toSet()
         return this

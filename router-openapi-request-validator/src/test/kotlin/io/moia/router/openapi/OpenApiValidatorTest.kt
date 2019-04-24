@@ -69,11 +69,7 @@ class OpenApiValidatorTest {
 
         override val router = Router.router {
             GET("/tests") { _: Request<Unit> ->
-                ResponseEntity.ok(
-                    TestResponseInvalid(
-                        "Hello"
-                    )
-                )
+                ResponseEntity.ok(TestResponseInvalid("Hello"))
             }
         }
     }

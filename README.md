@@ -111,6 +111,82 @@ override val router = router {
 }
 ```
 
+### Permissions
 
+Permission handling is a cross-cutting concern that can be handled outside the regular handler function.
+The routing DSL also supports expressing required permissions:
+
+```kotlin
+override val router = router {
+    GET("/some", controller::get).requiringPermissions("A_PERMISSION", "A_SECOND_PERMISSION")
+}
+```
+
+For the route above the `RequestHandler` checks if *any* of the listed permissions are found on a request.
+
+Additionally we need to configure a strategy to extract permissions from a request on the `RequestHandler`.
+By default a `RequestHandler` is using the `NoOpPermissionHandler` which always decides that any required permissions are found.
+The `JwtPermissionHandler` can be used to extract permissions from a JWT token found in a header.
+
+```kotlin
+class TestRequestHandlerAuthorization : RequestHandler() {
+    override val router = router {
+       GET("/some", controller::get).requiringPermissions("A_PERMISSION")
+    }
+
+    override fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
+        { JwtPermissionHandler(
+            request = it,
+            //the claim to use to extract the permissions - defaults to `scope`
+            permissionsClaim = "permissions",
+            //separator used to separate permissions in the claim - defaults to ` `
+            permissionSeparator = ","
+        ) }
+}
+```
+
+Given the code above the token is extracted from the `Authorization` header.
+We can also choose to extract the token from a different header:
+
+```kotlin
+JwtPermissionHandler(
+    accessor = JwtAccessor(
+        request = it,
+        authorizationHeaderName = "custom-auth"),
+)
+```
+
+### Protobuf support
+
+
+### Open API validation support
+
+The module `router-openapi-request-validator` can be used to validate a request against an [OpenAPI](https://www.openapis.org/) specification.
+Internally we use the [swagger-request-validator](https://bitbucket.org/atlassian/swagger-request-validator) to achieve this task.
+
+This library validates:
+- if the resource used is documented in the OpenApi specification
+- if request and response can be successfully validated against the request and response schema
+- ...
+
+```
+testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-openapi-request-validator:0.3.1'
+```
+
+```kotlin
+    val validator = OpenApiValidator("openapi.yml")
+
+    @Test
+    fun `should handle and validate request`() {
+        val request = GET("/tests")
+            .withHeaders(mapOf("Accept" to "application/json"))
+
+        val response = testHandler.handleRequest(request, mockk())
+
+        validator.assertValidRequest(request)
+        validator.assertValidResponse(request, response)
+        validator.assertValid(request, response)
+    }
+```
 
 
