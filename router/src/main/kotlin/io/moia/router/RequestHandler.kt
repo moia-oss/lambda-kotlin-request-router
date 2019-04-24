@@ -6,7 +6,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.google.common.net.MediaType
+import org.apache.http.entity.ContentType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
@@ -145,7 +145,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     open fun <T> createResponse(input: APIGatewayProxyRequestEvent, response: ResponseEntity<T>): APIGatewayProxyResponseEvent {
         // TODO add default accept type
-        val accept = MediaType.parse(input.acceptHeader())
+        val accept = ContentType.parse(input.acceptHeader())
         return when {
             response.body is Unit -> APIGatewayProxyResponseEvent()
                 .withStatusCode(204)

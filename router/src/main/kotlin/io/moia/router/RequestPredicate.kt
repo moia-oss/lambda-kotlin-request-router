@@ -1,7 +1,7 @@
 package io.moia.router
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
-import com.google.common.net.MediaType
+import org.apache.http.entity.ContentType
 
 data class RequestPredicate(
     val method: String,
@@ -34,7 +34,7 @@ data class RequestPredicate(
     private fun contentTypeMatches(contentType: String?, accepted: Set<String>) =
         if (accepted.isEmpty() && contentType == null) true
         else if (contentType == null) false
-        else accepted.any { MediaType.parse(contentType).`is`(MediaType.parse(it)) }
+        else accepted.any { ContentType.parse(contentType).mimeType == ContentType.parse(it).mimeType }
 
     companion object
 }
