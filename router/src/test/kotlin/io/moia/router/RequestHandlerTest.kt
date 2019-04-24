@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 
 class RequestHandlerTest {
 
-    val testRequestHandler = TestRequestHandler()
+    private val testRequestHandler = TestRequestHandler()
 
     @Test
     fun `should match request`() {
@@ -184,6 +184,22 @@ class RequestHandlerTest {
         )
 
         assert(response.statusCode).isEqualTo(500)
+    }
+
+    @Test
+    fun `should handle request with a long accept header`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "application/json, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
+                    "Content-Type" to "application/json"
+                ))
+                .withBody("""{ "greeting": "some" }"""), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.body).isEqualTo("""{"greeting":"some"}""")
     }
 
     class TestRequestHandlerWithFilter : RequestHandler() {

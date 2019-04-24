@@ -3,7 +3,7 @@ package io.moia.router
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.type.TypeFactory
-import com.google.common.net.MediaType
+import org.apache.http.entity.ContentType
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
@@ -25,12 +25,12 @@ class DeserializationHandlerChain(private val handlers: List<DeserializationHand
             handlers.firstOrNull { it.supports(input) }?.deserialize(input, target)
 }
 
-class JsonDeserializationHandler(val objectMapper: ObjectMapper) : DeserializationHandler {
+class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : DeserializationHandler {
 
-    private val json = MediaType.parse("application/json")
+    private val json = ContentType.parse("application/json")
 
     override fun supports(input: APIGatewayProxyRequestEvent) =
-            input.contentType() != null && MediaType.parse(input.contentType()).`is`(json)
+            input.contentType() != null && ContentType.parse(input.contentType()).mimeType == json.mimeType
 
     override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? {
         val targetClass = target?.classifier as KClass<*>
