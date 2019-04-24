@@ -29,6 +29,9 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             val matchResult = routerFunction.requestPredicate.match(input)
             log.debug("match result for route '$routerFunction' is '$matchResult'")
             if (matchResult.match) {
+                if (!permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions))
+                    return createApiExceptionErrorResponse(input, ApiException("unauthorized", "UNAUTHORIZED", 401))
+
                 val handler: HandlerFunction<Any, Any> = routerFunction.handler
                 return try {
                     val requestBody = deserializeRequest(handler, input)
@@ -56,11 +59,15 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             objectMapper
         )
     )
+
     open fun deserializationHandlers(): List<DeserializationHandler> = listOf(
         JsonDeserializationHandler(
             objectMapper
         )
     )
+
+    open fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
+        { NoOpPermissionHandler() }
 
     private fun deserializeRequest(
         handler: HandlerFunction<Any, Any>,
