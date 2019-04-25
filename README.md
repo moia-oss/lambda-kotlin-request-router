@@ -152,9 +152,12 @@ We can also choose to extract the token from a different header:
 JwtPermissionHandler(
     accessor = JwtAccessor(
         request = it,
-        authorizationHeaderName = "custom-auth"),
+        authorizationHeaderName = "custom-auth")
 )
 ```
+
+:warning: The implementation here assumes that JWT tokens are validated on the API Gateway. 
+So we do no validation of the JWT token.
 
 ### Protobuf support
 
