@@ -41,14 +41,14 @@ open class JwtAccessor(
 }
 open class JwtPermissionHandler(
     val accessor: JwtAccessor,
-    val permissionsClaim: String = "scope",
-    val permissionSeparator: String = " "
+    val permissionsClaim: String = defaultPermissionsClaim,
+    val permissionSeparator: String = defaultPermissionSeparator
 ) : PermissionHandler {
 
     constructor(
         request: APIGatewayProxyRequestEvent,
-        permissionsClaim: String = "scope",
-        permissionSeparator: String = " "
+        permissionsClaim: String = defaultPermissionsClaim,
+        permissionSeparator: String = defaultPermissionSeparator
     ) : this(JwtAccessor(request), permissionsClaim, permissionSeparator)
 
     override fun hasAnyRequiredPermission(requiredPermissions: Set<String>): Boolean =
@@ -65,4 +65,9 @@ open class JwtPermissionHandler(
                 }
             }
             ?: emptySet()
+
+    companion object {
+        private const val defaultPermissionsClaim = "scope"
+        private const val defaultPermissionSeparator: String = " "
+    }
 }
