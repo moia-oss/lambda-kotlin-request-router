@@ -38,9 +38,8 @@ data class RequestPredicate(
             matchContentType = contentTypeMatches(request.contentType(), consumes)
         )
 
-    private fun pathMatches(request: APIGatewayProxyRequestEvent) = UriTemplate.from(
-        pathPattern
-    ).matches(request.path)
+    private fun pathMatches(request: APIGatewayProxyRequestEvent) =
+        request.path?.let { UriTemplate.from(pathPattern).matches(it) } ?: false
     private fun methodMatches(request: APIGatewayProxyRequestEvent) = method.equals(request.httpMethod, true)
     private fun contentTypeMatches(contentType: String?, accepted: Set<String>) =
         if (accepted.isEmpty() && contentType == null) true
