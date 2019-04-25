@@ -3,8 +3,8 @@ package io.moia.router
 import assertk.assert
 import assertk.assertions.isEqualTo
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
-import io.moia.router.Router.Companion.router
 import io.mockk.mockk
+import io.moia.router.Router.Companion.router
 import org.junit.jupiter.api.Test
 
 class RequestHandlerTest {
@@ -187,7 +187,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    fun `should handle request with a long accept header`() {
+    fun `should handle request with a media type range in accept header`() {
 
         val response = testRequestHandler.handleRequest(
             POST("/some")
@@ -200,6 +200,80 @@ class RequestHandlerTest {
 
         assert(response.statusCode).isEqualTo(200)
         assert(response.body).isEqualTo("""{"greeting":"some"}""")
+    }
+
+    @Test
+    fun `should match request requiring permission`() {
+
+        val response = TestRequestHandlerAuthorization().handleRequest(
+            GET("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "application/json",
+                    "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I"
+                )), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `should match request requiring permission from custom header`() {
+
+        val response = TestRequestHandlerCustomAuthorizationHeader().handleRequest(
+            GET("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "application/json",
+                    "Custom-Auth" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I"
+                )), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
+    fun `should fail on missing permission`() {
+
+        val response = TestRequestHandlerAuthorization().handleRequest(
+            GET("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "application/json",
+                    "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24yIn0.RA8ERppuFmastqFN-6C98WqMEE7L6h88WylMeq6jh1w"
+                )), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(401)
+    }
+
+    class TestRequestHandlerAuthorization : RequestHandler() {
+        override val router = router {
+            GET("/some") { _: Request<Unit> ->
+                ResponseEntity.ok("hello")
+            }.requiringPermissions("permission1")
+        }
+
+        override fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
+            { JwtPermissionHandler(
+                request = it,
+                permissionsClaim = "permissions",
+                permissionSeparator = ","
+            ) }
+    }
+
+    class TestRequestHandlerCustomAuthorizationHeader : RequestHandler() {
+        override val router = router {
+            GET("/some") { _: Request<Unit> ->
+                ResponseEntity.ok("hello")
+            }.requiringPermissions("permission1")
+        }
+
+        override fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
+            { JwtPermissionHandler(
+                accessor = JwtAccessor(
+                    request = it,
+                    authorizationHeaderName = "custom-auth"),
+                permissionsClaim = "permissions",
+                permissionSeparator = ","
+            ) }
     }
 
     class TestRequestHandlerWithFilter : RequestHandler() {
@@ -220,6 +294,7 @@ class RequestHandlerTest {
             }
         }
     }
+
     class TestRequestHandler : RequestHandler() {
 
         data class TestResponse(val greeting: String)

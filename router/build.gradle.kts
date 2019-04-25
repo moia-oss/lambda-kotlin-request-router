@@ -4,7 +4,7 @@ dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(kotlin("reflect"))
     compile("com.amazonaws:aws-lambda-java-core:1.2.0")
-    compile("com.amazonaws:aws-lambda-java-events:2.2.5")
+    compile("com.amazonaws:aws-lambda-java-events:2.2.6")
     
     compile("org.slf4j:slf4j-api:1.7.26")
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.8")

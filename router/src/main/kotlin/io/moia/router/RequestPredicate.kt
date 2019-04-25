@@ -7,15 +7,26 @@ data class RequestPredicate(
     val method: String,
     val pathPattern: String,
     var produces: Set<String>,
-    var consumes: Set<String>
+    var consumes: Set<String>,
+    var requiredPermissions: Set<String> = emptySet()
 ) {
 
     fun consuming(vararg mediaTypes: String): RequestPredicate {
         consumes = mediaTypes.toSet()
         return this
     }
+
     fun producing(vararg mediaTypes: String): RequestPredicate {
         produces = mediaTypes.toSet()
+        return this
+    }
+
+    /**
+     * Register required permissions for this route.
+     * The RequestHandler checks if any of the given permissions are found on a request.
+     */
+    fun requiringPermissions(vararg permissions: String): RequestPredicate {
+        requiredPermissions = permissions.toSet()
         return this
     }
 

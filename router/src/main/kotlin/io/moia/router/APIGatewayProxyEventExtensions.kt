@@ -56,9 +56,9 @@ fun APIGatewayProxyResponseEvent.withLocationHeader(request: APIGatewayProxyRequ
 
 fun APIGatewayProxyResponseEvent.location() = getHeaderCaseInsensitive("location")
 
-private fun getCaseInsensitive(key: String, map: Map<String, String>): String? =
-    map.entries
-        .firstOrNull { it.key.toLowerCase() == key.toLowerCase() }
+private fun getCaseInsensitive(key: String, map: Map<String, String>?): String? =
+    map?.entries
+        ?.firstOrNull { key.equals(it.key, ignoreCase = true) }
         ?.value
 
 fun APIGatewayProxyResponseEvent.bodyAsBytes() = Base64.getDecoder().decode(body)

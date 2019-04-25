@@ -20,44 +20,24 @@ class Router {
         ).also { routes += RouterFunction(it, handlerFunction) }
 
     fun <I, T> POST(pattern: String, handlerFunction: HandlerFunction<I, T>) =
-        RequestPredicate(
-            method = "POST",
-            pathPattern = pattern,
-            consumes = defaultConsuming,
-            produces = defaultProducing
-        ).also {
-            routes += RouterFunction(it, handlerFunction)
-        }
+        defaultRequestPredicate(pattern, "POST", handlerFunction)
 
     fun <I, T> PUT(pattern: String, handlerFunction: HandlerFunction<I, T>) =
-        RequestPredicate(
-            method = "PUT",
-            pathPattern = pattern,
-            consumes = defaultConsuming,
-            produces = defaultProducing
-        ).also {
-            routes += RouterFunction(it, handlerFunction)
-        }
+        defaultRequestPredicate(pattern, "PUT", handlerFunction)
 
     fun <I, T> DELETE(pattern: String, handlerFunction: HandlerFunction<I, T>) =
-        RequestPredicate(
-            method = "DELETE",
-            pathPattern = pattern,
-            consumes = defaultConsuming,
-            produces = defaultProducing
-        ).also {
-            routes += RouterFunction(it, handlerFunction)
-        }
+        defaultRequestPredicate(pattern, "DELETE", handlerFunction)
 
     fun <I, T> PATCH(pattern: String, handlerFunction: HandlerFunction<I, T>) =
+        defaultRequestPredicate(pattern, "PATCH", handlerFunction)
+
+    private fun <I, T> defaultRequestPredicate(pattern: String, method: String, handlerFunction: HandlerFunction<I, T>) =
         RequestPredicate(
-            method = "PATCH",
+            method = method,
             pathPattern = pattern,
             consumes = defaultConsuming,
             produces = defaultProducing
-        ).also {
-            routes += RouterFunction(it, handlerFunction)
-        }
+        ).also { routes += RouterFunction(it, handlerFunction) }
 
     companion object {
         fun router(routes: Router.() -> Unit) = Router().apply(routes)
