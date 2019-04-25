@@ -244,6 +244,24 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(401)
     }
 
+    @Test
+    fun `Request without headers should return status code 406`() {
+        val response = testRequestHandler.handleRequest(
+            GET("/some"),
+            mockk()
+        )
+        assert(response.statusCode).isEqualTo(406)
+    }
+
+    @Test
+    fun `Request without request path should return status code 404`() {
+        val response = testRequestHandler.handleRequest(
+            GET(),
+            mockk()
+        )
+        assert(response.statusCode).isEqualTo(404)
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
