@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.moia-dev.lambda-kotlin-request-router:router:0.3.1' 
+    implementation 'com.github.moia-dev.lambda-kotlin-request-router:router:0.5.0' 
 }
 
 ```
@@ -173,7 +173,7 @@ This library validates:
 - ...
 
 ```
-testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-openapi-request-validator:0.3.1'
+testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-openapi-request-validator:0.5.0'
 ```
 
 ```kotlin
