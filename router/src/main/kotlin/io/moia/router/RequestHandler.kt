@@ -154,7 +154,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         // TODO add default accept type
         val accept = ContentType.parse(input.acceptHeader())
         return when {
-            response.body is Unit -> APIGatewayProxyResponseEvent()
+            // no-content response
+            response.body == null && response.statusCode == 204 -> APIGatewayProxyResponseEvent()
                 .withStatusCode(204)
                 .withHeaders(response.headers)
             serializationHandlerChain.supports(accept, response) ->
