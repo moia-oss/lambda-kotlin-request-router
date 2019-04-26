@@ -2,6 +2,7 @@ package io.moia.router
 
 import assertk.assert
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNullOrEmpty
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import io.mockk.mockk
 import io.moia.router.Router.Companion.router
@@ -262,6 +263,19 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(404)
     }
 
+    @Test
+    fun `Successful POST request should return status code 204`() {
+        val response = testRequestHandler.handleRequest(
+            POST("/no-content")
+                .withHeader("Accept", "application/json")
+                .withHeader("Content-Type", "application/json")
+                .withBody("""{ "greeting": "some" }"""),
+            mockk()
+        )
+        assert(response.statusCode).isEqualTo(204)
+        assert(response.body).isNullOrEmpty()
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
@@ -352,6 +366,9 @@ class RequestHandlerTest {
                         it.greeting
                     )
                 }.toList())
+            }
+            POST("/no-content") { _: Request<TestRequest> ->
+                ResponseEntity.noContent()
             }
         }
     }
