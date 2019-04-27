@@ -1,31 +1,31 @@
 package io.moia.router
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.http.entity.ContentType
+import com.google.common.net.MediaType
 
 interface SerializationHandler {
 
-    fun supports(acceptHeader: ContentType, response: ResponseEntity<*>): Boolean
+    fun supports(acceptHeader: MediaType, response: ResponseEntity<*>): Boolean
 
-    fun serialize(acceptHeader: ContentType, response: ResponseEntity<*>): String
+    fun serialize(acceptHeader: MediaType, response: ResponseEntity<*>): String
 }
 
 class SerializationHandlerChain(private val handlers: List<SerializationHandler>) :
     SerializationHandler {
 
-    override fun supports(acceptHeader: ContentType, response: ResponseEntity<*>): Boolean =
+    override fun supports(acceptHeader: MediaType, response: ResponseEntity<*>): Boolean =
         handlers.any { it.supports(acceptHeader, response) }
 
-    override fun serialize(acceptHeader: ContentType, response: ResponseEntity<*>): String =
+    override fun serialize(acceptHeader: MediaType, response: ResponseEntity<*>): String =
         handlers.first { it.supports(acceptHeader, response) }.serialize(acceptHeader, response)
 }
 
 class JsonSerializationHandler(private val objectMapper: ObjectMapper) : SerializationHandler {
 
-    private val json = ContentType.parse("application/json")
+    private val json = MediaType.parse("application/json")
 
-    override fun supports(acceptHeader: ContentType, response: ResponseEntity<*>): Boolean = acceptHeader.mimeType == json.mimeType
+    override fun supports(acceptHeader: MediaType, response: ResponseEntity<*>): Boolean = acceptHeader.`is`(json)
 
-    override fun serialize(acceptHeader: ContentType, response: ResponseEntity<*>): String =
+    override fun serialize(acceptHeader: MediaType, response: ResponseEntity<*>): String =
         objectMapper.writeValueAsString(response.body)
 }

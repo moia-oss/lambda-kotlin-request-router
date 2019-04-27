@@ -6,7 +6,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.apache.http.entity.ContentType
+import com.google.common.net.MediaType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
@@ -38,7 +38,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                     val request =
                         Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
                     val response = router.filter.then(handler as HandlerFunction<*, *>).invoke(request)
-                    createResponse(input, response)
+                    createResponse(routerFunction.requestPredicate.matchedAcceptType(input.acceptHeader()), input, response)
                 } catch (e: Exception) {
                     when (e) {
                         is ApiException -> createApiExceptionErrorResponse(input, e)
@@ -150,19 +150,18 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                     .withHeaders(mapOf("Content-Type" to "application/json"))
         }
 
-    open fun <T> createResponse(input: APIGatewayProxyRequestEvent, response: ResponseEntity<T>): APIGatewayProxyResponseEvent {
+    open fun <T> createResponse(contentType: MediaType?, input: APIGatewayProxyRequestEvent, response: ResponseEntity<T>): APIGatewayProxyResponseEvent {
         // TODO add default accept type
-        val accept = ContentType.parse(input.acceptHeader())
         return when {
             // no-content response
             response.body == null && response.statusCode == 204 -> APIGatewayProxyResponseEvent()
                 .withStatusCode(204)
                 .withHeaders(response.headers)
-            serializationHandlerChain.supports(accept, response) ->
+            serializationHandlerChain.supports(contentType!!, response) ->
                 APIGatewayProxyResponseEvent()
                     .withStatusCode(response.statusCode)
-                    .withBody(serializationHandlerChain.serialize(accept, response))
-                    .withHeaders(response.headers + ("Content-Type" to accept.toString()))
+                    .withBody(serializationHandlerChain.serialize(contentType, response))
+                    .withHeaders(response.headers + ("Content-Type" to contentType.toString()))
             else -> throw IllegalArgumentException("unsupported response $response")
         }
     }
