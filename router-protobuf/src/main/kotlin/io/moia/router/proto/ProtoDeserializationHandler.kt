@@ -14,7 +14,7 @@ class ProtoDeserializationHandler : DeserializationHandler {
     private val proto = MediaType.parse("application/x-protobuf")
 
     override fun supports(input: APIGatewayProxyRequestEvent): Boolean =
-        MediaType.parse(input.contentType()).`is`(proto)
+        input.contentType() != null && MediaType.parse(input.contentType()).`is`(proto)
 
     override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any {
         val bytes = Base64.getDecoder().decode(input.body)
