@@ -14,7 +14,7 @@ import java.util.Base64
 
 class RequestHandlerTest {
 
-    val testRequestHandler = TestRequestHandler()
+    private val testRequestHandler = TestRequestHandler()
 
     @Test
     fun `should match request to proto handler and return json`() {
