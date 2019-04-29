@@ -14,7 +14,6 @@ class ProtoSerializationHandler : SerializationHandler {
 
     override fun serialize(acceptHeader: MediaType, body: Any): String {
         val message = body as GeneratedMessageV3
-        println("$acceptHeader $message")
         return if (acceptHeader.`is`(json)) {
             ProtoBufUtils.toJsonWithoutWrappers(message)
         } else {
