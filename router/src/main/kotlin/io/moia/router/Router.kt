@@ -9,6 +9,8 @@ class Router {
     var defaultConsuming = setOf("application/json")
     var defaultProducing = setOf("application/json")
 
+    var defaultContentType = "application/json"
+
     var filter: Filter = Filter.NoOp
 
     fun <I, T> GET(pattern: String, handlerFunction: HandlerFunction<I, T>) =
