@@ -34,7 +34,7 @@ data class RequestPredicate(
         RequestMatchResult(
             matchPath = pathMatches(request),
             matchMethod = methodMatches(request),
-            matchAcceptType = acceptMatches(request.acceptHeader()),
+            matchAcceptType = acceptMatches(request.acceptedMediaTypes()),
             matchContentType = contentTypeMatches(request.contentType())
         )
 
@@ -46,17 +46,13 @@ data class RequestPredicate(
      * Find the media type that is compatible with the one the client requested out of the ones that the the handler can produce
      * Talking into account that an accept header can contain multiple media types (e.g. application/xhtml+xml, application/json)
      */
-    fun matchedAcceptType(acceptType: String?) =
-        if (produces.isEmpty() || acceptType == null) null
-        else produces
+    fun matchedAcceptType(acceptedMediaTypes: List<MediaType>) =
+        produces
             .map { MediaType.parse(it) }
-            // find the first media type that can be produced that is compatible with the requested type
-            .firstOrNull { acceptType.split(",")
-                .map { p -> p.trim() }
-                .any { m -> MediaType.parse(m).`is`(it) } }
+            .firstOrNull { acceptedMediaTypes.any { acceptedType -> acceptedType.`is`(it) } }
 
-    private fun acceptMatches(contentType: String?) =
-        matchedAcceptType(contentType) != null
+    private fun acceptMatches(acceptedMediaTypes: List<MediaType>) =
+        matchedAcceptType(acceptedMediaTypes) != null
 
     private fun contentTypeMatches(contentType: String?) =
         if (consumes.isEmpty() && contentType == null) true

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.reflect
 
+@Suppress("UnstableApiUsage")
 abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     open val objectMapper = jacksonObjectMapper()
@@ -29,8 +30,10 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             val matchResult = routerFunction.requestPredicate.match(input)
             log.debug("match result for route '$routerFunction' is '$matchResult'")
             if (matchResult.match) {
+                val matchedAcceptType = routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
+                    ?: MediaType.parse(router.defaultContentType)
                 if (!permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions))
-                    return createApiExceptionErrorResponse(input, ApiException("unauthorized", "UNAUTHORIZED", 401))
+                    return createApiExceptionErrorResponse(matchedAcceptType, input, ApiException("unauthorized", "UNAUTHORIZED", 401))
 
                 val handler: HandlerFunction<Any, Any> = routerFunction.handler
                 return try {
@@ -38,12 +41,12 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                     val request =
                         Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
                     val response = router.filter.then(handler as HandlerFunction<*, *>).invoke(request)
-                    createResponse(routerFunction.requestPredicate.matchedAcceptType(input.acceptHeader()), input, response)
+                    createResponse(matchedAcceptType, input, response)
                 } catch (e: Exception) {
                     when (e) {
-                        is ApiException -> createApiExceptionErrorResponse(input, e)
+                        is ApiException -> createApiExceptionErrorResponse(matchedAcceptType, input, e)
                             .also { log.info("Caught api error while handling ${input.httpMethod} ${input.path} - $e") }
-                        else -> createUnexpectedErrorResponse(input, e)
+                        else -> createUnexpectedErrorResponse(matchedAcceptType, input, e)
                             .also { log.error("Caught exception handling ${input.httpMethod} ${input.path} - $e", e) }
                     }
                 }
@@ -51,19 +54,15 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
             matchResult
         }
-        return handleNonDirectMatch(matchResults, input)
+        return handleNonDirectMatch(MediaType.parse(router.defaultContentType), matchResults, input)
     }
 
     open fun serializationHandlers(): List<SerializationHandler> = listOf(
-        JsonSerializationHandler(
-            objectMapper
-        )
+        JsonSerializationHandler(objectMapper)
     )
 
     open fun deserializationHandlers(): List<DeserializationHandler> = listOf(
-        JsonDeserializationHandler(
-            objectMapper
-        )
+        JsonDeserializationHandler(objectMapper)
     )
 
     open fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
@@ -80,89 +79,87 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         }
     }
 
-    private fun handleNonDirectMatch(matchResults: List<RequestMatchResult>, input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
+    private fun handleNonDirectMatch(defaultContentType: MediaType, matchResults: List<RequestMatchResult>, input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         // no direct match
-        if (matchResults.any { it.matchPath && it.matchMethod && !it.matchContentType }) {
-            return createApiExceptionErrorResponse(
-                input, ApiException(
-                    httpResponseStatus = 415,
-                    message = "Unsupported Media Type",
-                    code = "UNSUPPORTED_MEDIA_TYPE"
+        val apiException =
+            when {
+                matchResults.any { it.matchPath && it.matchMethod && !it.matchContentType } ->
+                    ApiException(
+                            httpResponseStatus = 415,
+                            message = "Unsupported Media Type",
+                            code = "UNSUPPORTED_MEDIA_TYPE"
+                        )
+                matchResults.any { it.matchPath && it.matchMethod && !it.matchAcceptType } ->
+                    ApiException(
+                            httpResponseStatus = 406,
+                            message = "Not Acceptable",
+                            code = "NOT_ACCEPTABLE"
+                        )
+                matchResults.any { it.matchPath && !it.matchMethod } ->
+                    ApiException(
+                        httpResponseStatus = 405,
+                        message = "Method Not Allowed",
+                        code = "METHOD_NOT_ALLOWED"
                 )
-            )
-        }
-        if (matchResults.any { it.matchPath && it.matchMethod && !it.matchAcceptType }) {
-            return createApiExceptionErrorResponse(
-                input, ApiException(
-                    httpResponseStatus = 406,
-                    message = "Not Acceptable",
-                    code = "NOT_ACCEPTABLE"
+                else -> ApiException(
+                    httpResponseStatus = 404,
+                    message = "Not found",
+                    code = "NOT_FOUND"
                 )
-            )
-        }
-        if (matchResults.any { it.matchPath && !it.matchMethod }) {
-            return createApiExceptionErrorResponse(
-                input, ApiException(
-                    httpResponseStatus = 405,
-                    message = "Method Not Allowed",
-                    code = "METHOD_NOT_ALLOWED"
-                )
-            )
-        }
-        return createApiExceptionErrorResponse(
-            input, ApiException(
-                httpResponseStatus = 404,
-                message = "Not found",
-                code = "NOT_FOUND"
-            )
-        )
+            }
+        val contentType = input.acceptedMediaTypes().firstOrNull() ?: defaultContentType
+        return createApiExceptionErrorResponse(contentType, input, apiException)
     }
 
-    open fun createApiExceptionErrorResponse(input: APIGatewayProxyRequestEvent, ex: ApiException): APIGatewayProxyResponseEvent =
-        APIGatewayProxyResponseEvent()
-            .withBody(objectMapper.writeValueAsString(mapOf(
-                "message" to ex.message,
-                "code" to ex.code,
-                "details" to ex.details
-            )))
-            .withStatusCode(ex.httpResponseStatus)
-            .withHeaders(mapOf("Content-Type" to "application/json"))
+    /**
+     * Customize the format of an api error
+     */
+    open fun createErrorBody(error: ApiError): Any = error
 
-    open fun createUnexpectedErrorResponse(input: APIGatewayProxyRequestEvent, ex: Exception): APIGatewayProxyResponseEvent =
+    /**
+     * Customize the format of an unprocessable entity error
+     */
+    open fun createUnprocessableEntityErrorBody(error: UnprocessableEntityError): Any =
+        error
+
+    open fun createApiExceptionErrorResponse(contentType: MediaType, input: APIGatewayProxyRequestEvent, ex: ApiException): APIGatewayProxyResponseEvent =
+        createErrorBody(ex.toApiError()).let {
+            APIGatewayProxyResponseEvent()
+                .withBody(
+                    // in case of 406 we might find no serializer so fall back to the default
+                    if (serializationHandlerChain.supports(contentType, it))
+                        serializationHandlerChain.serialize(contentType, it)
+                    else
+                        serializationHandlerChain.serialize(MediaType.parse(router.defaultContentType), it)
+                )
+                .withStatusCode(ex.httpResponseStatus)
+                .withHeaders(mapOf("Content-Type" to contentType.toString()))
+        }
+
+    open fun createUnexpectedErrorResponse(contentType: MediaType, input: APIGatewayProxyRequestEvent, ex: Exception): APIGatewayProxyResponseEvent =
         when (ex) {
             is MissingKotlinParameterException ->
-                APIGatewayProxyResponseEvent()
-                    .withBody(objectMapper.writeValueAsString(
-                        listOf(mapOf(
-                            "path" to ex.parameter.name.orEmpty(),
-                            "message" to "Missing required field",
-                            "code" to "MISSING_REQUIRED_FIELDS"
-                ))))
-                .withStatusCode(422)
-                .withHeaders(mapOf("Content-Type" to "application/json"))
-            else ->
-                APIGatewayProxyResponseEvent()
-                    .withBody(objectMapper.writeValueAsString(mapOf(
-                        "message" to ex.message,
-                        "code" to "INTERNAL_SERVER_ERROR"
-                    )))
-                    .withStatusCode(500)
-                    .withHeaders(mapOf("Content-Type" to "application/json"))
+                createResponse(contentType, input,
+                    ResponseEntity(422, createUnprocessableEntityErrorBody(UnprocessableEntityError(
+                        message = "Missing required field",
+                        code = "MISSING_REQUIRED_FIELDS",
+                        path = ex.parameter.name.orEmpty()))))
+            else -> createResponse(contentType, input,
+                ResponseEntity(500, createErrorBody(ApiError(ex.message.orEmpty(), "INTERNAL_SERVER_ERROR"))))
         }
 
     open fun <T> createResponse(contentType: MediaType?, input: APIGatewayProxyRequestEvent, response: ResponseEntity<T>): APIGatewayProxyResponseEvent {
-        // TODO add default accept type
         return when {
             // no-content response
-            response.body == null && response.statusCode == 204 -> APIGatewayProxyResponseEvent()
-                .withStatusCode(204)
+            response.body == null -> APIGatewayProxyResponseEvent()
+                .withStatusCode(response.statusCode)
                 .withHeaders(response.headers)
-            serializationHandlerChain.supports(contentType!!, response) ->
+            serializationHandlerChain.supports(contentType!!, response.body) ->
                 APIGatewayProxyResponseEvent()
                     .withStatusCode(response.statusCode)
-                    .withBody(serializationHandlerChain.serialize(contentType, response))
+                    .withBody(serializationHandlerChain.serialize(contentType, response.body))
                     .withHeaders(response.headers + ("Content-Type" to contentType.toString()))
-            else -> throw IllegalArgumentException("unsupported response $response")
+            else -> throw IllegalArgumentException("unsupported response ${response.body.let { (it as Any)::class.java }} and $contentType")
         }
     }
 

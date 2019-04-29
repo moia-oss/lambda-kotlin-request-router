@@ -5,27 +5,27 @@ import com.google.common.net.MediaType
 
 interface SerializationHandler {
 
-    fun supports(acceptHeader: MediaType, response: ResponseEntity<*>): Boolean
+    fun supports(acceptHeader: MediaType, body: Any): Boolean
 
-    fun serialize(acceptHeader: MediaType, response: ResponseEntity<*>): String
+    fun serialize(acceptHeader: MediaType, body: Any): String
 }
 
 class SerializationHandlerChain(private val handlers: List<SerializationHandler>) :
     SerializationHandler {
 
-    override fun supports(acceptHeader: MediaType, response: ResponseEntity<*>): Boolean =
-        handlers.any { it.supports(acceptHeader, response) }
+    override fun supports(acceptHeader: MediaType, body: Any): Boolean =
+        handlers.any { it.supports(acceptHeader, body) }
 
-    override fun serialize(acceptHeader: MediaType, response: ResponseEntity<*>): String =
-        handlers.first { it.supports(acceptHeader, response) }.serialize(acceptHeader, response)
+    override fun serialize(acceptHeader: MediaType, body: Any): String =
+        handlers.first { it.supports(acceptHeader, body) }.serialize(acceptHeader, body)
 }
 
 class JsonSerializationHandler(private val objectMapper: ObjectMapper) : SerializationHandler {
 
     private val json = MediaType.parse("application/json")
 
-    override fun supports(acceptHeader: MediaType, response: ResponseEntity<*>): Boolean = acceptHeader.`is`(json)
+    override fun supports(acceptHeader: MediaType, body: Any): Boolean = acceptHeader.`is`(json)
 
-    override fun serialize(acceptHeader: MediaType, response: ResponseEntity<*>): String =
-        objectMapper.writeValueAsString(response.body)
+    override fun serialize(acceptHeader: MediaType, body: Any): String =
+        objectMapper.writeValueAsString(body)
 }

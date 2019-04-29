@@ -2,10 +2,16 @@ package io.moia.router
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
+import com.google.common.net.MediaType
 import java.net.URI
 import java.util.Base64
 
 fun APIGatewayProxyRequestEvent.acceptHeader() = getHeaderCaseInsensitive("accept")
+fun APIGatewayProxyRequestEvent.acceptedMediaTypes() = acceptHeader()
+    ?.split(",")
+    ?.map { it.trim() }
+    ?.map { MediaType.parse(it) }
+    .orEmpty()
 fun APIGatewayProxyRequestEvent.contentType() = getHeaderCaseInsensitive("content-type")
 
 fun APIGatewayProxyRequestEvent.getHeaderCaseInsensitive(httpHeader: String): String? =

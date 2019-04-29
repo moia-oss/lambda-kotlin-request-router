@@ -6,3 +6,14 @@ message Sample {
     string hello = 1;
     string request = 2;
 }
+
+message ApiError {
+    string message = 1;
+    string code = 2;
+}
+
+message UnprocessableEntityError {
+    string message = 1;
+    string code = 2;
+    string path = 3;
+}
