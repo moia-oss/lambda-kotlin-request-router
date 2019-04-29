@@ -193,13 +193,15 @@ class RequestHandlerTest {
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(mapOf(
-                    "Accept" to "application/json, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8",
+                    "Accept" to "application/xhtml+xml, application/json, application/xml;q=0.9, image/webp, */*;q=0.8",
                     "Content-Type" to "application/json"
                 ))
                 .withBody("""{ "greeting": "some" }"""), mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
+        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/json")
+
         assert(response.body).isEqualTo("""{"greeting":"some"}""")
     }
 
