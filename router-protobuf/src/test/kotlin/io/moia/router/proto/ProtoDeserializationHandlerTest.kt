@@ -14,6 +14,11 @@ internal class ProtoDeserializationHandlerTest {
     }
 
     @Test
+    fun `Deserializer should not support if the content type of the input is json`() {
+        assertFalse(ProtoDeserializationHandler().supports(APIGatewayProxyRequestEvent().withHeader("content-type", "application/json")))
+    }
+
+    @Test
     fun `Deserializer should support if the content type of the input is protobuf`() {
         assertTrue(ProtoDeserializationHandler().supports(APIGatewayProxyRequestEvent().withHeader("content-type", "application/x-protobuf")))
     }
