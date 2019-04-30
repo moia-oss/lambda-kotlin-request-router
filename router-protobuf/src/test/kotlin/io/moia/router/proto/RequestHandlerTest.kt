@@ -2,6 +2,7 @@ package io.moia.router.proto
 
 import assertk.assert
 import assertk.assertions.isEqualTo
+import assertk.assertions.isTrue
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import io.moia.router.Request
 import io.moia.router.ResponseEntity
@@ -66,6 +67,7 @@ class RequestHandlerTest {
 
         assert(response.statusCode).isEqualTo(200)
         assert(Sample.parseFrom(response.bodyAsBytes())).isEqualTo(request)
+        assert(response.isBase64Encoded).isTrue()
     }
 
     @Test
@@ -83,7 +85,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    fun `should return api error in prots`() {
+    fun `should return api error in protos`() {
 
         val response = testRequestHandler.handleRequest(
             GET("/some-error")
