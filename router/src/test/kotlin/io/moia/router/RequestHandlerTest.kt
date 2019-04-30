@@ -9,7 +9,6 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import io.mockk.mockk
 import io.moia.router.Router.Companion.router
 import org.junit.jupiter.api.Test
-import java.net.URI
 
 class RequestHandlerTest {
 
