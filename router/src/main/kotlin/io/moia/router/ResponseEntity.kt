@@ -11,8 +11,8 @@ data class ResponseEntity<T>(
         fun <T> ok(body: T? = null, headers: Map<String, String> = emptyMap()) =
             ResponseEntity<T>(200, body, headers)
 
-        fun <T> created(body: T? = null, location: URI, headers: Map<String, String> = emptyMap()) =
-            ResponseEntity<T>(201, body, headers + ("location" to location.toString()))
+        fun <T> created(body: T? = null, location: URI? = null, headers: Map<String, String> = emptyMap()) =
+            ResponseEntity<T>(201, body, if (location == null) headers else headers + ("location" to location.toString()))
 
         fun noContent(headers: Map<String, String> = emptyMap()) =
             ResponseEntity<Unit>(204, null, headers)
