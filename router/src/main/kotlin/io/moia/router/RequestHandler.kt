@@ -33,7 +33,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 val matchedAcceptType = routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
                     ?: MediaType.parse(router.defaultContentType)
                 if (!permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions))
-                    return createApiExceptionErrorResponse(matchedAcceptType, input, ApiException("unauthorized", "UNAUTHORIZED", 401))
+                    return createApiExceptionErrorResponse(matchedAcceptType, input, ApiException("missing permissions", "MISSING_PERMISSIONS", 403))
 
                 val handler: HandlerFunction<Any, Any> = routerFunction.handler
                 return try {
