@@ -2,7 +2,9 @@ package io.moia.router
 
 import assertk.assert
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
 import assertk.assertions.isNullOrEmpty
+import assertk.assertions.isTrue
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import io.mockk.mockk
 import io.moia.router.Router.Companion.router
@@ -278,6 +280,33 @@ class RequestHandlerTest {
         assert(response.body).isNullOrEmpty()
     }
 
+    @Test
+    fun `Create should not return a location header`() {
+        val response = testRequestHandler.handleRequest(
+            POST("/create-without-location")
+                .withHeader("Accept", "application/json")
+                .withHeader("Content-Type", "application/json")
+                .withBody("""{ "greeting": "some" }"""),
+            mockk()
+        )
+        assert(response.statusCode).isEqualTo(201)
+        assert(response.headers.containsKey("location")).isFalse()
+    }
+
+    @Test
+    fun `Create should return a location header`() {
+        val response = testRequestHandler.handleRequest(
+            POST("/create-with-location")
+                .withHeader("Accept", "application/json")
+                .withHeader("Content-Type", "application/json")
+                .withBody("""{ "greeting": "some" }"""),
+            mockk()
+        )
+        assert(response.statusCode).isEqualTo(201)
+        assert(response.headers.containsKey("location")).isTrue()
+        assert(response.headers["location"]).isEqualTo("http://localhost/test")
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
@@ -371,6 +400,12 @@ class RequestHandlerTest {
             }
             POST("/no-content") { _: Request<TestRequest> ->
                 ResponseEntity.noContent()
+            }
+            POST("/create-without-location") { _: Request<TestRequest> ->
+                ResponseEntity.created(null, null, emptyMap())
+            }
+            POST("/create-with-location") { r: Request<TestRequest> ->
+                ResponseEntity.created(null, r.apiRequest.location("test"), emptyMap())
             }
         }
     }
