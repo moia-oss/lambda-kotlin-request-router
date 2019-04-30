@@ -244,7 +244,7 @@ class RequestHandlerTest {
                 )), mockk()
         )
 
-        assert(response.statusCode).isEqualTo(401)
+        assert(response.statusCode).isEqualTo(403)
     }
 
     @Test
