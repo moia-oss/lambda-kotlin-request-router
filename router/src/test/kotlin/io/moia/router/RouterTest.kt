@@ -31,10 +31,10 @@ class RouterTest {
     @Test
     fun `should register routes`() {
         val router = router {
-            PUT("/some") { r: Request<Unit> -> ResponseEntity.ok("") }
-            PATCH("/some") { r: Request<Unit> -> ResponseEntity.ok("") }
-            DELETE("/some") { r: Request<Unit> -> ResponseEntity.ok("") }
-            POST("/some") { r: Request<Unit> -> ResponseEntity.ok("") }
+            PUT("/some") { _: Request<Unit> -> ResponseEntity.ok("") }
+            PATCH("/some") { _: Request<Unit> -> ResponseEntity.ok("") }
+            DELETE("/some") { _: Request<Unit> -> ResponseEntity.ok("") }
+            POST("/some") { _: Request<Unit> -> ResponseEntity.ok("") }
         }
 
         then(router.routes.map { it.requestPredicate.method }).containsOnly("PUT", "PATCH", "DELETE", "POST")

@@ -148,6 +148,23 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should ignore content-type header when handler expects none`() {
+
+        val handler = TestRequestHandlerWithFilter()
+        val response = handler.handleRequest(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf(
+                    "Accept" to "application/json",
+                    "content-type" to "application/json"
+                )), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
+    }
+
+    @Test
     fun `should handle deserialization error`() {
 
         val response = testRequestHandler.handleRequest(

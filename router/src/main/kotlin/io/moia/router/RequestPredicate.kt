@@ -55,9 +55,11 @@ data class RequestPredicate(
         matchedAcceptType(acceptedMediaTypes) != null
 
     private fun contentTypeMatches(contentType: String?) =
-        if (consumes.isEmpty() && contentType == null) true
-        else if (contentType == null) false
-        else consumes.any { MediaType.parse(contentType).`is`(MediaType.parse(it)) }
+        when {
+            consumes.isEmpty() -> true
+            contentType == null -> false
+            else -> consumes.any { MediaType.parse(contentType).`is`(MediaType.parse(it)) }
+        }
 }
 
 internal data class RequestMatchResult(
