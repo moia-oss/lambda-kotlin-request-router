@@ -77,4 +77,6 @@ data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, 
 
     val pathParameters by lazy { UriTemplate.from(pathPattern).extract(apiRequest.path) }
     fun getPathParameter(name: String): String? = pathParameters[name]
+    fun getQueryParameter(name: String): String? = apiRequest.queryStringParameters?.get(name)
+    fun getMultiValueQueryStringParameter(name: String): Any? = apiRequest.multiValueQueryStringParameters?.get(name)
 }
