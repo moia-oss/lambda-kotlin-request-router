@@ -354,14 +354,14 @@ class RequestHandlerTest {
     }
 
     @Test
-    fun `Should handly query parameters successfully`() {
+    fun `Should handle query parameters successfully`() {
         TestQueryParamParsingHandler().handleRequest(
             GET("/search")
                 .withQueryStringParameters(mapOf(
                     "testQueryParam" to "foo"
                 ))
                 .withMultiValueQueryStringParameters(mapOf(
-                    "testMultiValueQueryStringParam" to listOf("fooo", "bar")
+                    "testMultiValueQueryStringParam" to listOf("foo", "bar")
                 )),
             mockk()
         )
@@ -438,6 +438,7 @@ class RequestHandlerTest {
                 throw IllegalArgumentException("boom")
             }
             GET("/some/{id}") { r: Request<Unit> ->
+                assert(r.pathParameters.containsKey("id")).isTrue()
                 ResponseEntity.ok(
                     TestResponse(
                         "Hello ${r.getPathParameter("id")}"
@@ -478,7 +479,9 @@ class RequestHandlerTest {
         override val router = router {
             GET("/search") { r: Request<TestRequestHandler.TestRequest> ->
                 assert(r.getQueryParameter("testQueryParam")).isNotNull()
+                assert(r.queryParameters!!["testQueryParam"]).isNotNull()
                 assert(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isNotNull()
+                assert(r.multiValueQueryStringParameters!!["testMultiValueQueryStringParam"]).isNotNull()
                 ResponseEntity.ok(null)
             }
         }

@@ -76,7 +76,9 @@ class RouterFunction<I, T>(
 data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, val pathPattern: String = apiRequest.path) {
 
     val pathParameters by lazy { UriTemplate.from(pathPattern).extract(apiRequest.path) }
+    val queryParameters: Map<String, String>? by lazy { apiRequest.queryStringParameters }
+    val multiValueQueryStringParameters: Map<String, List<String>>? by lazy { apiRequest.multiValueQueryStringParameters }
     fun getPathParameter(name: String): String? = pathParameters[name]
-    fun getQueryParameter(name: String): String? = apiRequest.queryStringParameters?.get(name)
-    fun getMultiValueQueryStringParameter(name: String): Any? = apiRequest.multiValueQueryStringParameters?.get(name)
+    fun getQueryParameter(name: String): String? = queryParameters?.get(name)
+    fun getMultiValueQueryStringParameter(name: String): Any? = multiValueQueryStringParameters?.get(name)
 }
