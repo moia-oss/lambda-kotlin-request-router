@@ -181,6 +181,22 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should handle deserialization error, when field has invalid format`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{"greeting": "hello","age": "a"}"""), mockk()
+        )
+        assert(response.statusCode).isEqualTo(422)
+    }
+
+    @Test
     fun `should handle api exception`() {
 
         val response = testRequestHandler.handleRequest(
@@ -378,7 +394,7 @@ class RequestHandlerTest {
     class TestRequestHandler : RequestHandler() {
 
         data class TestResponse(val greeting: String)
-        data class TestRequest(val greeting: String)
+        data class TestRequest(val greeting: String, val age: Int = 0)
 
         override val router = router {
             GET("/some") { _: Request<Unit> ->
