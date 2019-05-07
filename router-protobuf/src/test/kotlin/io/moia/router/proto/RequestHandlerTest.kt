@@ -121,11 +121,12 @@ class RequestHandlerTest {
                 .setCode(error.code)
                 .build()
 
-        override fun createUnprocessableEntityErrorBody(error: UnprocessableEntityError): Any =
+        override fun createUnprocessableEntityErrorBody(errors: List<UnprocessableEntityError>): Any = listOf(
             io.moia.router.proto.sample.SampleOuterClass.UnprocessableEntityError.newBuilder()
                 .setMessage(error.message)
                 .setCode(error.code)
                 .setPath(error.path)
                 .build()
+        )
     }
 }
