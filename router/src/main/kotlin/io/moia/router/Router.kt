@@ -14,12 +14,7 @@ class Router {
     var filter: Filter = Filter.NoOp
 
     fun <I, T> GET(pattern: String, handlerFunction: HandlerFunction<I, T>) =
-        RequestPredicate(
-            method = "GET",
-            pathPattern = pattern,
-            consumes = emptySet(),
-            produces = defaultProducing
-        ).also { routes += RouterFunction(it, handlerFunction) }
+        defaultRequestPredicate(pattern, "GET", handlerFunction, emptySet())
 
     fun <I, T> POST(pattern: String, handlerFunction: HandlerFunction<I, T>) =
         defaultRequestPredicate(pattern, "POST", handlerFunction)
@@ -28,16 +23,21 @@ class Router {
         defaultRequestPredicate(pattern, "PUT", handlerFunction)
 
     fun <I, T> DELETE(pattern: String, handlerFunction: HandlerFunction<I, T>) =
-        defaultRequestPredicate(pattern, "DELETE", handlerFunction)
+        defaultRequestPredicate(pattern, "DELETE", handlerFunction, emptySet())
 
     fun <I, T> PATCH(pattern: String, handlerFunction: HandlerFunction<I, T>) =
         defaultRequestPredicate(pattern, "PATCH", handlerFunction)
 
-    private fun <I, T> defaultRequestPredicate(pattern: String, method: String, handlerFunction: HandlerFunction<I, T>) =
+    private fun <I, T> defaultRequestPredicate(
+        pattern: String,
+        method: String,
+        handlerFunction: HandlerFunction<I, T>,
+        consuming: Set<String> = defaultConsuming
+    ) =
         RequestPredicate(
             method = method,
             pathPattern = pattern,
-            consumes = defaultConsuming,
+            consumes = consuming,
             produces = defaultProducing
         ).also { routes += RouterFunction(it, handlerFunction) }
 
