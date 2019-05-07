@@ -365,6 +365,10 @@ class RequestHandlerTest {
                 )),
             mockk()
         )
+        TestQueryParamParsingHandler().handleRequest(
+            GET("/search?testQueryParam=foo&testMultiValueQueryStringParam=foo&testMultiValueQueryStringParam=bar"),
+            mockk()
+        )
     }
 
     class TestRequestHandlerAuthorization : RequestHandler() {
