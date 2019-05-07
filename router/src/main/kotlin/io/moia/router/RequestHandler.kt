@@ -120,8 +120,6 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     /**
      * Customize the format of an unprocessable entity error
      */
-    open fun createUnprocessableEntityErrorBody(error: UnprocessableEntityError): Any = listOf(error)
-
     open fun createUnprocessableEntityErrorBody(errors: List<UnprocessableEntityError>): Any = errors
 
     open fun createApiExceptionErrorResponse(contentType: MediaType, input: APIGatewayProxyRequestEvent, ex: ApiException): APIGatewayProxyResponseEvent =
@@ -142,16 +140,17 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         when (ex) {
             is InvalidFormatException ->
                 createResponse(contentType, input,
-                    ResponseEntity(422, createUnprocessableEntityErrorBody(UnprocessableEntityError(
+                    ResponseEntity(422, createUnprocessableEntityErrorBody(listOf(
+                        UnprocessableEntityError(
                         message = "INVALID_FIELD_FORMAT",
                         code = "FIELD",
-                        path = ex.path.last().fieldName.orEmpty()))))
+                        path = ex.path.last().fieldName.orEmpty())))))
             is MissingKotlinParameterException ->
                 createResponse(contentType, input,
-                    ResponseEntity(422, createUnprocessableEntityErrorBody(UnprocessableEntityError(
+                    ResponseEntity(422, createUnprocessableEntityErrorBody(listOf(UnprocessableEntityError(
                         message = "MISSING_REQUIRED_FIELDS",
                         code = "FIELD",
-                        path = ex.parameter.name.orEmpty()))))
+                        path = ex.parameter.name.orEmpty())))))
             else -> createResponse(contentType, input,
                 ResponseEntity(500, createErrorBody(ApiError(ex.message.orEmpty(), "INTERNAL_SERVER_ERROR"))))
         }
