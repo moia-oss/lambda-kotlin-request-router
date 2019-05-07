@@ -32,7 +32,8 @@ class Router {
         pattern: String,
         method: String,
         handlerFunction: HandlerFunction<I, T>,
-        consuming: Set<String> = defaultConsuming) =
+        consuming: Set<String> = defaultConsuming
+    ) =
         RequestPredicate(
             method = method,
             pathPattern = pattern,
