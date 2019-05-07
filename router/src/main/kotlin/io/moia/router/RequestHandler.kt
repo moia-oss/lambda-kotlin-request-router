@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
+import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.common.net.MediaType
@@ -119,8 +120,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     /**
      * Customize the format of an unprocessable entity error
      */
-    open fun createUnprocessableEntityErrorBody(error: UnprocessableEntityError): Any =
-        error
+    open fun createUnprocessableEntityErrorBody(errors: List<UnprocessableEntityError>): Any = errors
 
     open fun createApiExceptionErrorResponse(contentType: MediaType, input: APIGatewayProxyRequestEvent, ex: ApiException): APIGatewayProxyResponseEvent =
         createErrorBody(ex.toApiError()).let {
@@ -138,12 +138,19 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     open fun createUnexpectedErrorResponse(contentType: MediaType, input: APIGatewayProxyRequestEvent, ex: Exception): APIGatewayProxyResponseEvent =
         when (ex) {
+            is InvalidFormatException ->
+                createResponse(contentType, input,
+                    ResponseEntity(422, createUnprocessableEntityErrorBody(listOf(
+                        UnprocessableEntityError(
+                        message = "INVALID_FIELD_FORMAT",
+                        code = "FIELD",
+                        path = ex.path.last().fieldName.orEmpty())))))
             is MissingKotlinParameterException ->
                 createResponse(contentType, input,
-                    ResponseEntity(422, createUnprocessableEntityErrorBody(UnprocessableEntityError(
-                        message = "Missing required field",
-                        code = "MISSING_REQUIRED_FIELDS",
-                        path = ex.parameter.name.orEmpty()))))
+                    ResponseEntity(422, createUnprocessableEntityErrorBody(listOf(UnprocessableEntityError(
+                        message = "MISSING_REQUIRED_FIELDS",
+                        code = "FIELD",
+                        path = ex.parameter.name.orEmpty())))))
             else -> createResponse(contentType, input,
                 ResponseEntity(500, createErrorBody(ApiError(ex.message.orEmpty(), "INTERNAL_SERVER_ERROR"))))
         }
