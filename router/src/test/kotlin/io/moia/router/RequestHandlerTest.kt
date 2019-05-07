@@ -324,6 +324,18 @@ class RequestHandlerTest {
         assert(response.headers["location"]).isEqualTo("http://localhost/test")
     }
 
+    @Test
+    fun `Deletion should ignore the body and content-type`() {
+        val response = testRequestHandler.handleRequest(
+            DELETE("/delete-me")
+                .withHeader("Accept", "application/json")
+                .withHeader("Content-Type", "text/csv")
+                .withBody("this may be faulty"),
+            mockk()
+        )
+        assert(response.statusCode).isEqualTo(204)
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
@@ -423,6 +435,9 @@ class RequestHandlerTest {
             }
             POST("/create-with-location") { r: Request<TestRequest> ->
                 ResponseEntity.created(null, r.apiRequest.location("test"), emptyMap())
+            }
+            DELETE("/delete-me") { _: Request<Unit> ->
+                ResponseEntity.noContent()
             }
         }
     }

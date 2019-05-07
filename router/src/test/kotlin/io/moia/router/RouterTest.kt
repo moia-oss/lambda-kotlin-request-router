@@ -92,4 +92,16 @@ class RouterTest {
             assertTrue(UriTemplate.from(pathPattern).matches("/some/sub/sub/sub/path"))
         }
     }
+
+    @Test
+    fun `should not consume for a deletion route`() {
+        val router = router {
+            DELETE("/delete-me") { r: Request<Unit> ->
+                ResponseEntity.ok(null)
+            }
+        }
+        with(router.routes.first().requestPredicate) {
+            assert(consumes).isEqualTo(setOf<String>())
+        }
+    }
 }
