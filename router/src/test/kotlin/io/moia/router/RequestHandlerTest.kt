@@ -3,6 +3,7 @@ package io.moia.router
 import assertk.assert
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isNotNull
 import assertk.assertions.isNullOrEmpty
 import assertk.assertions.isTrue
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
@@ -352,6 +353,24 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(204)
     }
 
+    @Test
+    fun `Should handle query parameters successfully`() {
+        TestQueryParamParsingHandler().handleRequest(
+            GET("/search")
+                .withQueryStringParameters(mapOf(
+                    "testQueryParam" to "foo"
+                ))
+                .withMultiValueQueryStringParameters(mapOf(
+                    "testMultiValueQueryStringParam" to listOf("foo", "bar")
+                )),
+            mockk()
+        )
+        TestQueryParamParsingHandler().handleRequest(
+            GET("/search?testQueryParam=foo&testMultiValueQueryStringParam=foo&testMultiValueQueryStringParam=bar"),
+            mockk()
+        )
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
@@ -423,6 +442,7 @@ class RequestHandlerTest {
                 throw IllegalArgumentException("boom")
             }
             GET("/some/{id}") { r: Request<Unit> ->
+                assert(r.pathParameters.containsKey("id")).isTrue()
                 ResponseEntity.ok(
                     TestResponse(
                         "Hello ${r.getPathParameter("id")}"
@@ -454,6 +474,21 @@ class RequestHandlerTest {
             }
             DELETE("/delete-me") { _: Request<Unit> ->
                 ResponseEntity.noContent()
+            }
+        }
+    }
+
+    class TestQueryParamParsingHandler : RequestHandler() {
+
+        override val router = router {
+            GET("/search") { r: Request<TestRequestHandler.TestRequest> ->
+                assert(r.getQueryParameter("testQueryParam")).isNotNull()
+                assert(r.getQueryParameter("testQueryParam")).isEqualTo("foo")
+                assert(r.queryParameters!!["testQueryParam"]).isNotNull()
+                assert(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isNotNull()
+                assert(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isEqualTo(listOf("foo", "bar"))
+                assert(r.multiValueQueryStringParameters!!["testMultiValueQueryStringParam"]).isNotNull()
+                ResponseEntity.ok(null)
             }
         }
     }
