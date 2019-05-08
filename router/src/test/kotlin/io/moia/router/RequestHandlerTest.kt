@@ -483,8 +483,10 @@ class RequestHandlerTest {
         override val router = router {
             GET("/search") { r: Request<TestRequestHandler.TestRequest> ->
                 assert(r.getQueryParameter("testQueryParam")).isNotNull()
+                assert(r.getQueryParameter("testQueryParam")).isEqualTo("foo")
                 assert(r.queryParameters!!["testQueryParam"]).isNotNull()
                 assert(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isNotNull()
+                assert(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isEqualTo(listOf("foo", "bar"))
                 assert(r.multiValueQueryStringParameters!!["testMultiValueQueryStringParam"]).isNotNull()
                 ResponseEntity.ok(null)
             }

@@ -80,5 +80,5 @@ data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, 
     val multiValueQueryStringParameters: Map<String, List<String>>? by lazy { apiRequest.multiValueQueryStringParameters }
     fun getPathParameter(name: String): String? = pathParameters[name]
     fun getQueryParameter(name: String): String? = queryParameters?.get(name)
-    fun getMultiValueQueryStringParameter(name: String): Any? = multiValueQueryStringParameters?.get(name)
+    fun getMultiValueQueryStringParameter(name: String): List<String>? = multiValueQueryStringParameters?.get(name)
 }
