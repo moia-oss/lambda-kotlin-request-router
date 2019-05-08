@@ -9,6 +9,7 @@ import assertk.assertions.isTrue
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import io.mockk.mockk
 import io.moia.router.Router.Companion.router
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class RequestHandlerTest {
@@ -371,6 +372,17 @@ class RequestHandlerTest {
         )
     }
 
+    @Test
+    fun `Not existing path parameter should throw an error`() {
+        val response = testRequestHandler.handleRequest(
+            GET("/non-existing-path-parameter")
+                .withHeader("accept", "application/json"),
+            mockk()
+        )
+        assertEquals(500, response.statusCode)
+        assertEquals("{\"message\":\"Could not find path parameter 'foo\",\"code\":\"INTERNAL_SERVER_ERROR\",\"details\":{}}", response.body)
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
@@ -474,6 +486,10 @@ class RequestHandlerTest {
             }
             DELETE("/delete-me") { _: Request<Unit> ->
                 ResponseEntity.noContent()
+            }
+            GET("/non-existing-path-parameter") { request: Request<Unit> ->
+                request.getPathParameter("foo")
+                ResponseEntity.ok(null)
             }
         }
     }

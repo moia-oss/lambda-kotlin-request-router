@@ -78,7 +78,7 @@ data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, 
     val pathParameters by lazy { UriTemplate.from(pathPattern).extract(apiRequest.path) }
     val queryParameters: Map<String, String>? by lazy { apiRequest.queryStringParameters }
     val multiValueQueryStringParameters: Map<String, List<String>>? by lazy { apiRequest.multiValueQueryStringParameters }
-    fun getPathParameter(name: String): String? = pathParameters[name]
+    fun getPathParameter(name: String): String = pathParameters[name] ?: error("Could not find path parameter '$name")
     fun getQueryParameter(name: String): String? = queryParameters?.get(name)
     fun getMultiValueQueryStringParameter(name: String): List<String>? = multiValueQueryStringParameters?.get(name)
 }
