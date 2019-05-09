@@ -7,6 +7,7 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNullOrEmpty
 import assertk.assertions.isTrue
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
+import com.google.common.net.MediaType
 import io.mockk.mockk
 import io.moia.router.Router.Companion.router
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -383,6 +384,26 @@ class RequestHandlerTest {
         assertEquals("{\"message\":\"Could not find path parameter 'foo\",\"code\":\"INTERNAL_SERVER_ERROR\",\"details\":{}}", response.body)
     }
 
+    @Test
+    fun `Handler should return the content type that is accepted`() {
+        val jsonResponse = AcceptTypeDependingHandler().handleRequest(
+            GET("/all-objects")
+                .withHeader("accept", "application/json"),
+            mockk()
+        )
+        assertEquals(200, jsonResponse.statusCode)
+        assertEquals("application/json", jsonResponse.getHeaderCaseInsensitive("content-type"))
+        assertEquals("[{\"text\":\"foo\",\"number\":1},{\"text\":\"bar\",\"number\":2}]", jsonResponse.body)
+        val plainTextResponse = AcceptTypeDependingHandler().handleRequest(
+            GET("/all-objects")
+                .withHeader("accept", "text/plain"),
+            mockk()
+        )
+        assertEquals(200, plainTextResponse.statusCode)
+        assertEquals("text/plain", plainTextResponse.getHeaderCaseInsensitive("content-type"))
+        assertEquals("[CustomObject(text=foo, number=1), CustomObject(text=bar, number=2)]", plainTextResponse.body)
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
@@ -505,6 +526,35 @@ class RequestHandlerTest {
                 assert(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isEqualTo(listOf("foo", "bar"))
                 assert(r.multiValueQueryStringParameters!!["testMultiValueQueryStringParam"]).isNotNull()
                 ResponseEntity.ok(null)
+            }
+        }
+    }
+
+    class AcceptTypeDependingHandler : RequestHandler() {
+
+        data class CustomObject(val text: String, val number: Int)
+
+        class PlainTextSerializationHandler : SerializationHandler {
+            override fun supports(acceptHeader: MediaType, body: Any): Boolean {
+                return acceptHeader.`is`(MediaType.parse("text/plain"))
+            }
+
+            override fun serialize(acceptHeader: MediaType, body: Any): String {
+                return body.toString()
+            }
+        }
+
+        override fun serializationHandlers() =
+            listOf(JsonSerializationHandler(objectMapper), PlainTextSerializationHandler())
+
+        override fun deserializationHandlers() =
+            listOf(JsonDeserializationHandler(objectMapper))
+
+        override val router = router {
+            defaultConsuming = setOf("application/json", "text/plain")
+            defaultProducing = setOf("application/json", "text/plain")
+            GET("/all-objects") { _: Request<Unit> ->
+                ResponseEntity.ok(body = listOf(CustomObject("foo", 1), CustomObject("bar", 2)))
             }
         }
     }
