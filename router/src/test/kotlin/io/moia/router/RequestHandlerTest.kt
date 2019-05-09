@@ -536,7 +536,7 @@ class RequestHandlerTest {
 
         class PlainTextSerializationHandler : SerializationHandler {
             override fun supports(acceptHeader: MediaType, body: Any): Boolean {
-                return acceptHeader.toString() == "text/plain"
+                return acceptHeader.`is`(MediaType.parse("text/plain"))
             }
 
             override fun serialize(acceptHeader: MediaType, body: Any): String {
