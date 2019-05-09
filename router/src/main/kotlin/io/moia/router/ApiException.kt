@@ -19,10 +19,12 @@ open class ApiException(
 data class ApiError(
     val message: String,
     val code: String,
-    val details: Map<String, Any> = emptyMap())
+    val details: Map<String, Any> = emptyMap()
+)
 
 data class UnprocessableEntityError(
     val message: String,
     val code: String,
-    val path: String
+    val path: String,
+    val details: Map<String, Any> = emptyMap()
 )
