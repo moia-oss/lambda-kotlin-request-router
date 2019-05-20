@@ -12,6 +12,7 @@ import io.mockk.mockk
 import io.moia.router.Router.Companion.router
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class RequestHandlerTest {
 
@@ -195,6 +196,38 @@ class RequestHandlerTest {
                     )
                 )
                 .withBody("""{"greeting": "hello","age": "a"}"""), mockk()
+        )
+        assert(response.statusCode).isEqualTo(422)
+    }
+
+    @Test
+    fun `should handle deserialization error, when field can not be parsed to class`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{"greeting": "hello","age": 1, "bday": "2000-01-AA"}"""), mockk()
+        )
+        assert(response.statusCode).isEqualTo(422)
+    }
+
+    @Test
+    fun `should handle deserialization error, when json can not be parsed`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{"greeting": "hello", bday: "2000-01-01"}"""), mockk()
         )
         assert(response.statusCode).isEqualTo(422)
     }
@@ -458,7 +491,7 @@ class RequestHandlerTest {
     class TestRequestHandler : RequestHandler() {
 
         data class TestResponse(val greeting: String)
-        data class TestRequest(val greeting: String, val age: Int = 0)
+        data class TestRequest(val greeting: String, val age: Int = 0, val bday: LocalDate = LocalDate.now())
 
         override val router = router {
             GET("/some") { _: Request<Unit> ->

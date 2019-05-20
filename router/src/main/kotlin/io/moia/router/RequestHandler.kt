@@ -4,6 +4,8 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
+import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -122,6 +124,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
      */
     open fun createUnprocessableEntityErrorBody(errors: List<UnprocessableEntityError>): Any = errors
 
+    private fun createUnprocessableEntityErrorBody(error: UnprocessableEntityError): Any = createUnprocessableEntityErrorBody(listOf(error))
+
     open fun createApiExceptionErrorResponse(contentType: MediaType, input: APIGatewayProxyRequestEvent, ex: ApiException): APIGatewayProxyResponseEvent =
         createErrorBody(ex.toApiError()).let {
             APIGatewayProxyResponseEvent()
@@ -138,19 +142,33 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     open fun createUnexpectedErrorResponse(contentType: MediaType, input: APIGatewayProxyRequestEvent, ex: Exception): APIGatewayProxyResponseEvent =
         when (ex) {
+            is JsonParseException -> createResponse(contentType, input,
+                ResponseEntity(422, createUnprocessableEntityErrorBody(
+                    UnprocessableEntityError(
+                        message = "INVALID_ENTITY",
+                        code = "ENTITY",
+                        path = "",
+                        details = mapOf("payload" to ex.requestPayloadAsString.orEmpty())))))
+            is InvalidDefinitionException -> createResponse(contentType, input,
+                ResponseEntity(422, createUnprocessableEntityErrorBody(
+                    UnprocessableEntityError(
+                        message = "INVALID_FIELD_FORMAT",
+                        code = "FIELD",
+                        path = ex.path.last().fieldName.orEmpty(),
+                        details = mapOf("cause" to ex.cause?.message.orEmpty())))))
             is InvalidFormatException ->
                 createResponse(contentType, input,
-                    ResponseEntity(422, createUnprocessableEntityErrorBody(listOf(
+                    ResponseEntity(422, createUnprocessableEntityErrorBody(
                         UnprocessableEntityError(
                         message = "INVALID_FIELD_FORMAT",
                         code = "FIELD",
-                        path = ex.path.last().fieldName.orEmpty())))))
+                        path = ex.path.last().fieldName.orEmpty()))))
             is MissingKotlinParameterException ->
                 createResponse(contentType, input,
-                    ResponseEntity(422, createUnprocessableEntityErrorBody(listOf(UnprocessableEntityError(
+                    ResponseEntity(422, createUnprocessableEntityErrorBody(UnprocessableEntityError(
                         message = "MISSING_REQUIRED_FIELDS",
                         code = "FIELD",
-                        path = ex.parameter.name.orEmpty())))))
+                        path = ex.parameter.name.orEmpty()))))
             else -> createResponse(contentType, input,
                 ResponseEntity(500, createErrorBody(ApiError(ex.message.orEmpty(), "INTERNAL_SERVER_ERROR"))))
         }
