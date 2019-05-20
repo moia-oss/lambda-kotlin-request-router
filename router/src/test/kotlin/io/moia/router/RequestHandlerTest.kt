@@ -6,8 +6,8 @@ import assertk.assertions.isFalse
 import assertk.assertions.isNotNull
 import assertk.assertions.isNullOrEmpty
 import assertk.assertions.isTrue
-import assertk.assertions.startsWith
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.common.net.MediaType
 import io.mockk.mockk
 import io.moia.router.Router.Companion.router
@@ -18,6 +18,7 @@ import java.time.LocalDate
 class RequestHandlerTest {
 
     private val testRequestHandler = TestRequestHandler()
+    private val mapper = testRequestHandler.objectMapper
 
     @Test
     fun `should match request`() {
@@ -199,7 +200,12 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello","age": "a"}"""), mockk()
         )
         assert(response.statusCode).isEqualTo(422)
-        assert(response.body).isEqualTo("""[{"message":"INVALID_FIELD_FORMAT","code":"FIELD","path":"age","details":{}}]""")
+        val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
+        assert(body.size).isEqualTo(1)
+        assert(body[0].code).isEqualTo("FIELD")
+        assert(body[0].message).isEqualTo("INVALID_FIELD_FORMAT")
+        assert(body[0].path).isEqualTo("age")
+        assert(body[0].details.isNotEmpty()).isEqualTo(false)
     }
 
     @Test
@@ -216,7 +222,12 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello","age": 1, "bday": "2000-01-AA"}"""), mockk()
         )
         assert(response.statusCode).isEqualTo(422)
-        assert(response.body).isEqualTo("""[{"message":"INVALID_FIELD_FORMAT","code":"FIELD","path":"bday","details":{"cause":""}}]""")
+        val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
+        assert(body.size).isEqualTo(1)
+        assert(body[0].code).isEqualTo("FIELD")
+        assert(body[0].message).isEqualTo("INVALID_FIELD_FORMAT")
+        assert(body[0].path).isEqualTo("bday")
+        assert(body[0].details.isNotEmpty()).isEqualTo(true)
     }
 
     @Test
@@ -233,7 +244,12 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello", bday: "2000-01-01"}"""), mockk()
         )
         assert(response.statusCode).isEqualTo(422)
-        assert(response.body).isEqualTo("""[{"message":"INVALID_ENTITY","code":"ENTITY","path":"","details":{"payload":"","message":"Unexpected character ('b' (code 98)): was expecting double-quote to start field name\n at [Source: (String)\"{\"greeting\": \"hello\", bday: \"2000-01-01\"}\"; line: 1, column: 24]"}}]""")
+        val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
+        assert(body.size).isEqualTo(1)
+        assert(body[0].code).isEqualTo("ENTITY")
+        assert(body[0].message).isEqualTo("INVALID_ENTITY")
+        assert(body[0].path).isEqualTo("")
+        assert(body[0].details.isNotEmpty()).isEqualTo(true)
     }
 
     @Test
