@@ -6,6 +6,7 @@ import assertk.assertions.isFalse
 import assertk.assertions.isNotNull
 import assertk.assertions.isNullOrEmpty
 import assertk.assertions.isTrue
+import assertk.assertions.startsWith
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.google.common.net.MediaType
 import io.mockk.mockk
@@ -198,6 +199,7 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello","age": "a"}"""), mockk()
         )
         assert(response.statusCode).isEqualTo(422)
+        assert(response.body).isEqualTo("""[{"message":"INVALID_FIELD_FORMAT","code":"FIELD","path":"age","details":{}}]""")
     }
 
     @Test
@@ -214,6 +216,7 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello","age": 1, "bday": "2000-01-AA"}"""), mockk()
         )
         assert(response.statusCode).isEqualTo(422)
+        assert(response.body).isEqualTo("""[{"message":"INVALID_FIELD_FORMAT","code":"FIELD","path":"bday","details":{"cause":""}}]""")
     }
 
     @Test
@@ -230,6 +233,7 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello", bday: "2000-01-01"}"""), mockk()
         )
         assert(response.statusCode).isEqualTo(422)
+        assert(response.body).isEqualTo("""[{"message":"INVALID_ENTITY","code":"ENTITY","path":"","details":{"payload":"","message":"Unexpected character ('b' (code 98)): was expecting double-quote to start field name\n at [Source: (String)\"{\"greeting\": \"hello\", bday: \"2000-01-01\"}\"; line: 1, column: 24]"}}]""")
     }
 
     @Test

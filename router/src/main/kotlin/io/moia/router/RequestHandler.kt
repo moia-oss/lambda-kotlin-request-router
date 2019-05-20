@@ -148,14 +148,20 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                         message = "INVALID_ENTITY",
                         code = "ENTITY",
                         path = "",
-                        details = mapOf("payload" to ex.requestPayloadAsString.orEmpty())))))
+                        details = mapOf(
+                            "payload" to ex.requestPayloadAsString.orEmpty(),
+                            "message" to ex.message.orEmpty()
+                        )))))
             is InvalidDefinitionException -> createResponse(contentType, input,
                 ResponseEntity(422, createUnprocessableEntityErrorBody(
                     UnprocessableEntityError(
                         message = "INVALID_FIELD_FORMAT",
                         code = "FIELD",
                         path = ex.path.last().fieldName.orEmpty(),
-                        details = mapOf("cause" to ex.cause?.message.orEmpty())))))
+                        details = mapOf(
+                            "cause" to ex.cause?.message.orEmpty(),
+                            "message" to ex.message.orEmpty()
+                        )))))
             is InvalidFormatException ->
                 createResponse(contentType, input,
                     ResponseEntity(422, createUnprocessableEntityErrorBody(
