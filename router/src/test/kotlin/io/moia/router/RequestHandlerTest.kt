@@ -202,10 +202,12 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
         assert(body.size).isEqualTo(1)
-        assert(body[0].code).isEqualTo("FIELD")
-        assert(body[0].message).isEqualTo("INVALID_FIELD_FORMAT")
-        assert(body[0].path).isEqualTo("age")
-        assert(body[0].details.isNotEmpty()).isEqualTo(false)
+        with(body.first()) {
+            assert(code).isEqualTo("FIELD")
+            assert(message).isEqualTo("INVALID_FIELD_FORMAT")
+            assert(path).isEqualTo("age")
+            assert(details.isNotEmpty()).isEqualTo(false)
+        }
     }
 
     @Test
@@ -224,10 +226,12 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
         assert(body.size).isEqualTo(1)
-        assert(body[0].code).isEqualTo("FIELD")
-        assert(body[0].message).isEqualTo("INVALID_FIELD_FORMAT")
-        assert(body[0].path).isEqualTo("bday")
-        assert(body[0].details.isNotEmpty()).isEqualTo(true)
+        with(body.first()) {
+            assert(code).isEqualTo("FIELD")
+            assert(message).isEqualTo("INVALID_FIELD_FORMAT")
+            assert(path).isEqualTo("bday")
+            assert(details.isNotEmpty()).isEqualTo(true)
+        }
     }
 
     @Test
@@ -246,10 +250,12 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
         assert(body.size).isEqualTo(1)
-        assert(body[0].code).isEqualTo("ENTITY")
-        assert(body[0].message).isEqualTo("INVALID_ENTITY")
-        assert(body[0].path).isEqualTo("")
-        assert(body[0].details.isNotEmpty()).isEqualTo(true)
+        with(body.first()) {
+            assert(code).isEqualTo("ENTITY")
+            assert(message).isEqualTo("INVALID_ENTITY")
+            assert(path).isEqualTo("")
+            assert(details.isNotEmpty()).isEqualTo(true)
+        }
     }
 
     @Test
