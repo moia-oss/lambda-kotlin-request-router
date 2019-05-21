@@ -7,15 +7,18 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNullOrEmpty
 import assertk.assertions.isTrue
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.common.net.MediaType
 import io.mockk.mockk
 import io.moia.router.Router.Companion.router
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class RequestHandlerTest {
 
     private val testRequestHandler = TestRequestHandler()
+    private val mapper = testRequestHandler.objectMapper
 
     @Test
     fun `should match request`() {
@@ -197,6 +200,62 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello","age": "a"}"""), mockk()
         )
         assert(response.statusCode).isEqualTo(422)
+        val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
+        assert(body.size).isEqualTo(1)
+        with(body.first()) {
+            assert(code).isEqualTo("FIELD")
+            assert(message).isEqualTo("INVALID_FIELD_FORMAT")
+            assert(path).isEqualTo("age")
+            assert(details.isNotEmpty()).isEqualTo(false)
+        }
+    }
+
+    @Test
+    fun `should handle deserialization error, when field can not be parsed to class`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{"greeting": "hello","age": 1, "bday": "2000-01-AA"}"""), mockk()
+        )
+        assert(response.statusCode).isEqualTo(422)
+        val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
+        assert(body.size).isEqualTo(1)
+        with(body.first()) {
+            assert(code).isEqualTo("FIELD")
+            assert(message).isEqualTo("INVALID_FIELD_FORMAT")
+            assert(path).isEqualTo("bday")
+            assert(details.isNotEmpty()).isEqualTo(true)
+        }
+    }
+
+    @Test
+    fun `should handle deserialization error, when json can not be parsed`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{"greeting": "hello", bday: "2000-01-01"}"""), mockk()
+        )
+        assert(response.statusCode).isEqualTo(422)
+        val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
+        assert(body.size).isEqualTo(1)
+        with(body.first()) {
+            assert(code).isEqualTo("ENTITY")
+            assert(message).isEqualTo("INVALID_ENTITY")
+            assert(path).isEqualTo("")
+            assert(details.isNotEmpty()).isEqualTo(true)
+        }
     }
 
     @Test
@@ -458,7 +517,7 @@ class RequestHandlerTest {
     class TestRequestHandler : RequestHandler() {
 
         data class TestResponse(val greeting: String)
-        data class TestRequest(val greeting: String, val age: Int = 0)
+        data class TestRequest(val greeting: String, val age: Int = 0, val bday: LocalDate = LocalDate.now())
 
         override val router = router {
             GET("/some") { _: Request<Unit> ->
