@@ -34,13 +34,11 @@ object ProtoBufUtils {
         private fun removeWrapperObjects(json: ObjectNode): ObjectNode {
             val result = jacksonObjectMapper().createObjectNode()
             for (entry in json.fields()) {
-                if (entry.value.isContainerNode) {
+                if (entry.value.isContainerNode && entry.value.size() > 0) {
                     if (entry.value.size() > 0) {
                         result.set(entry.key,
                             removeWrapperObjects(entry.value)
                         )
-                    } else {
-                        result.set(entry.key, jacksonObjectMapper().nodeFactory.nullNode())
                     }
                 } else {
                     result.set(entry.key, entry.value)
