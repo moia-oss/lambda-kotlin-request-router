@@ -27,7 +27,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     @Suppress("UNCHECKED_CAST")
     override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent {
-        input.headers = input.headers.entries.associate { it.key.toLowerCase() to it.value.toLowerCase() }
+        input.headers = input.headers.mapKeys { it.key.toLowerCase() }
         log.debug("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input")
         val routes = router.routes as List<RouterFunction<Any, Any>>
         val matchResults: List<RequestMatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->
