@@ -1,6 +1,5 @@
 package io.moia.router.proto
 
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.google.common.net.MediaType
 import io.moia.router.JsonDeserializationHandler
@@ -17,10 +16,9 @@ abstract class ProtoEnabledRequestHandler : RequestHandler() {
         listOf(ProtoDeserializationHandler(), JsonDeserializationHandler(objectMapper))
 
     override fun <T> createResponse(
-        contentType: MediaType?,
-        input: APIGatewayProxyRequestEvent,
+        contentType: MediaType,
         response: ResponseEntity<T>
     ): APIGatewayProxyResponseEvent {
-        return super.createResponse(contentType, input, response).withIsBase64Encoded(true)
+        return super.createResponse(contentType, response).withIsBase64Encoded(true)
     }
 }
