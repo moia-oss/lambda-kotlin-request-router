@@ -33,33 +33,50 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             val matchResult = routerFunction.requestPredicate.match(input)
             log.debug("match result for route '$routerFunction' is '$matchResult'")
             if (matchResult.match) {
+
                 val matchedAcceptType = routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
                     ?: MediaType.parse(router.defaultContentType)
-                if (!permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions))
-                    return createResponse(
-                        matchedAcceptType,
-                        ApiException("missing permissions", "MISSING_PERMISSIONS", 403).toResponseEntity()
-                    )
-                val handler: HandlerFunction<Any, Any> = routerFunction.handler
-                val responseEntity = try {
-                    val requestBody = deserializeRequest(handler, input)
-                    val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
-                    router.filter.then(handler as HandlerFunction<*, *>)(request)
-                } catch (e: Exception) {
-                    when (e) {
-                        is ApiException -> e.toResponseEntity(this::createErrorBody)
-                            .also { log.info("Caught api error while handling ${input.httpMethod} ${input.path} - $e") }
-                        else -> exceptionToResponseEntity(e)
-                            .also { log.error("Caught exception handling ${input.httpMethod} ${input.path} - $e", e) }
-                    }
-                }
-                return createResponse(matchedAcceptType, responseEntity)
-            }
 
+                // Phase 1: Deserialization
+                // TODO: find a way to also invoke the filter chain on failed deserialization
+                val handler: HandlerFunction<Any, Any> = routerFunction.handler
+                val requestBody = try {
+                    deserializeRequest(handler, input)
+                } catch (e: Exception) {
+                    return createResponse(matchedAcceptType, exceptionToResponseEntity(e))
+                }
+
+                // Phase 2: Content Handling
+                val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
+                return createResponse(matchedAcceptType, router.filter.then {
+                    try {
+                        when {
+                            missingPermissions(input, routerFunction) ->
+                                ResponseEntity(403, ApiError("missing permissions", "MISSING_PERMISSIONS"))
+                            else -> (handler as HandlerFunction<*, *>)(request)
+                        }
+                    } catch (e: Exception) {
+                        exceptionToResponseEntity(e, input)
+                    }
+                }(request))
+            }
             matchResult
         }
         return handleNonDirectMatch(MediaType.parse(router.defaultContentType), matchResults, input)
     }
+
+    private fun exceptionToResponseEntity(e: Exception, input: APIGatewayProxyRequestEvent) =
+        when (e) {
+            is ApiException -> e.toResponseEntity(this::createErrorBody)
+                .also { log.info("Caught api error while handling ${input.httpMethod} ${input.path} - $e") }
+            else -> exceptionToResponseEntity(e)
+                .also {
+                    log.error("Caught exception handling ${input.httpMethod} ${input.path} - $e", e)
+                }
+        }
+
+    private fun missingPermissions(input: APIGatewayProxyRequestEvent, routerFunction: RouterFunction<Any, Any>) =
+        !permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions)
 
     open fun serializationHandlers(): List<SerializationHandler> = listOf(
         JsonSerializationHandler(objectMapper)
@@ -191,10 +208,6 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 .withStatusCode(response.statusCode)
                 .withHeaders(response.headers + ("Content-Type" to finalContentType.toString()))
                 .withBody(response.body?.let {
-                    println(serializationHandlers())
-                    println(serializationHandlerChain.supports(finalContentType, it as Any))
-                    println(finalContentType)
-                    println(it)
                     serializationHandlerChain.serialize(finalContentType, it as Any)
                 })
         }
