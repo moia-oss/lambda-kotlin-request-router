@@ -27,6 +27,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     @Suppress("UNCHECKED_CAST")
     override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent {
+        input.headers = input.headers.entries.associate { it.key.toLowerCase() to it.value.toLowerCase() }
         log.debug("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input")
         val routes = router.routes as List<RouterFunction<Any, Any>>
         val matchResults: List<RequestMatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->
@@ -36,7 +37,11 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 val matchedAcceptType = routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
                     ?: MediaType.parse(router.defaultContentType)
                 if (!permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions))
-                    return createApiExceptionErrorResponse(matchedAcceptType, input, ApiException("missing permissions", "MISSING_PERMISSIONS", 403))
+                    return createApiExceptionErrorResponse(
+                        matchedAcceptType,
+                        input,
+                        ApiException("missing permissions", "MISSING_PERMISSIONS", 403)
+                    )
 
                 val handler: HandlerFunction<Any, Any> = routerFunction.handler
                 return try {
@@ -82,28 +87,32 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         }
     }
 
-    private fun handleNonDirectMatch(defaultContentType: MediaType, matchResults: List<RequestMatchResult>, input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
+    private fun handleNonDirectMatch(
+        defaultContentType: MediaType,
+        matchResults: List<RequestMatchResult>,
+        input: APIGatewayProxyRequestEvent
+    ): APIGatewayProxyResponseEvent {
         // no direct match
         val apiException =
             when {
                 matchResults.any { it.matchPath && it.matchMethod && !it.matchContentType } ->
                     ApiException(
-                            httpResponseStatus = 415,
-                            message = "Unsupported Media Type",
-                            code = "UNSUPPORTED_MEDIA_TYPE"
-                        )
+                        httpResponseStatus = 415,
+                        message = "Unsupported Media Type",
+                        code = "UNSUPPORTED_MEDIA_TYPE"
+                    )
                 matchResults.any { it.matchPath && it.matchMethod && !it.matchAcceptType } ->
                     ApiException(
-                            httpResponseStatus = 406,
-                            message = "Not Acceptable",
-                            code = "NOT_ACCEPTABLE"
-                        )
+                        httpResponseStatus = 406,
+                        message = "Not Acceptable",
+                        code = "NOT_ACCEPTABLE"
+                    )
                 matchResults.any { it.matchPath && !it.matchMethod } ->
                     ApiException(
                         httpResponseStatus = 405,
                         message = "Method Not Allowed",
                         code = "METHOD_NOT_ALLOWED"
-                )
+                    )
                 else -> ApiException(
                     httpResponseStatus = 404,
                     message = "Not found",
@@ -124,9 +133,14 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
      */
     open fun createUnprocessableEntityErrorBody(errors: List<UnprocessableEntityError>): Any = errors
 
-    private fun createUnprocessableEntityErrorBody(error: UnprocessableEntityError): Any = createUnprocessableEntityErrorBody(listOf(error))
+    private fun createUnprocessableEntityErrorBody(error: UnprocessableEntityError): Any =
+        createUnprocessableEntityErrorBody(listOf(error))
 
-    open fun createApiExceptionErrorResponse(contentType: MediaType, input: APIGatewayProxyRequestEvent, ex: ApiException): APIGatewayProxyResponseEvent =
+    open fun createApiExceptionErrorResponse(
+        contentType: MediaType,
+        input: APIGatewayProxyRequestEvent,
+        ex: ApiException
+    ): APIGatewayProxyResponseEvent =
         createErrorBody(ex.toApiError()).let {
             APIGatewayProxyResponseEvent()
                 .withBody(
@@ -140,46 +154,81 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 .withHeaders(mapOf("Content-Type" to contentType.toString()))
         }
 
-    open fun createUnexpectedErrorResponse(contentType: MediaType, input: APIGatewayProxyRequestEvent, ex: Exception): APIGatewayProxyResponseEvent =
+    open fun createUnexpectedErrorResponse(
+        contentType: MediaType,
+        input: APIGatewayProxyRequestEvent,
+        ex: Exception
+    ): APIGatewayProxyResponseEvent =
         when (ex) {
-            is JsonParseException -> createResponse(contentType, input,
-                ResponseEntity(422, createUnprocessableEntityErrorBody(
-                    UnprocessableEntityError(
-                        message = "INVALID_ENTITY",
-                        code = "ENTITY",
-                        path = "",
-                        details = mapOf(
-                            "payload" to ex.requestPayloadAsString.orEmpty(),
-                            "message" to ex.message.orEmpty()
-                        )))))
-            is InvalidDefinitionException -> createResponse(contentType, input,
-                ResponseEntity(422, createUnprocessableEntityErrorBody(
-                    UnprocessableEntityError(
-                        message = "INVALID_FIELD_FORMAT",
-                        code = "FIELD",
-                        path = ex.path.last().fieldName.orEmpty(),
-                        details = mapOf(
-                            "cause" to ex.cause?.message.orEmpty(),
-                            "message" to ex.message.orEmpty()
-                        )))))
-            is InvalidFormatException ->
-                createResponse(contentType, input,
-                    ResponseEntity(422, createUnprocessableEntityErrorBody(
+            is JsonParseException -> createResponse(
+                contentType, input,
+                ResponseEntity(
+                    422, createUnprocessableEntityErrorBody(
                         UnprocessableEntityError(
-                        message = "INVALID_FIELD_FORMAT",
-                        code = "FIELD",
-                        path = ex.path.last().fieldName.orEmpty()))))
+                            message = "INVALID_ENTITY",
+                            code = "ENTITY",
+                            path = "",
+                            details = mapOf(
+                                "payload" to ex.requestPayloadAsString.orEmpty(),
+                                "message" to ex.message.orEmpty()
+                            )
+                        )
+                    )
+                )
+            )
+            is InvalidDefinitionException -> createResponse(
+                contentType, input,
+                ResponseEntity(
+                    422, createUnprocessableEntityErrorBody(
+                        UnprocessableEntityError(
+                            message = "INVALID_FIELD_FORMAT",
+                            code = "FIELD",
+                            path = ex.path.last().fieldName.orEmpty(),
+                            details = mapOf(
+                                "cause" to ex.cause?.message.orEmpty(),
+                                "message" to ex.message.orEmpty()
+                            )
+                        )
+                    )
+                )
+            )
+            is InvalidFormatException ->
+                createResponse(
+                    contentType, input,
+                    ResponseEntity(
+                        422, createUnprocessableEntityErrorBody(
+                            UnprocessableEntityError(
+                                message = "INVALID_FIELD_FORMAT",
+                                code = "FIELD",
+                                path = ex.path.last().fieldName.orEmpty()
+                            )
+                        )
+                    )
+                )
             is MissingKotlinParameterException ->
-                createResponse(contentType, input,
-                    ResponseEntity(422, createUnprocessableEntityErrorBody(UnprocessableEntityError(
-                        message = "MISSING_REQUIRED_FIELDS",
-                        code = "FIELD",
-                        path = ex.parameter.name.orEmpty()))))
-            else -> createResponse(contentType, input,
-                ResponseEntity(500, createErrorBody(ApiError(ex.message.orEmpty(), "INTERNAL_SERVER_ERROR"))))
+                createResponse(
+                    contentType, input,
+                    ResponseEntity(
+                        422, createUnprocessableEntityErrorBody(
+                            UnprocessableEntityError(
+                                message = "MISSING_REQUIRED_FIELDS",
+                                code = "FIELD",
+                                path = ex.parameter.name.orEmpty()
+                            )
+                        )
+                    )
+                )
+            else -> createResponse(
+                contentType, input,
+                ResponseEntity(500, createErrorBody(ApiError(ex.message.orEmpty(), "INTERNAL_SERVER_ERROR")))
+            )
         }
 
-    open fun <T> createResponse(contentType: MediaType?, input: APIGatewayProxyRequestEvent, response: ResponseEntity<T>): APIGatewayProxyResponseEvent {
+    open fun <T> createResponse(
+        contentType: MediaType?,
+        input: APIGatewayProxyRequestEvent,
+        response: ResponseEntity<T>
+    ): APIGatewayProxyResponseEvent {
         return when {
             // no-content response
             response.body == null -> APIGatewayProxyResponseEvent()
