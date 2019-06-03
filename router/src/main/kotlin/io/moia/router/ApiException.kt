@@ -14,6 +14,9 @@ open class ApiException(
 
     fun toApiError() =
         ApiError(super.message!!, code, details)
+
+    inline fun toResponseEntity(mapper: (error: ApiError) -> Any = {}) =
+        ResponseEntity(httpResponseStatus, mapper(toApiError()))
 }
 
 data class ApiError(

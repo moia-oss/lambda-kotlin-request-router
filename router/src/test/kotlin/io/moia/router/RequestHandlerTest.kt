@@ -154,6 +154,22 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should invoke filter chain also for non successful requests`() {
+
+        val handler = TestRequestHandlerWithFilter()
+        val response = handler.handleRequest(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some-internal-server-error")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(500)
+        assert(response.headers["header"]).isEqualTo("value")
+        assert(handler.filterInvocations).isEqualTo(2)
+    }
+
+    @Test
     fun `should ignore content-type header when handler expects none`() {
 
         val handler = TestRequestHandlerWithFilter()
@@ -502,7 +518,7 @@ class RequestHandlerTest {
         private val incrementingFilter = Filter { next ->
             { request ->
                 filterInvocations += 1
-                next(request)
+                next(request).copy(headers = mapOf("header" to "value"))
             }
         }
         override val router = router {
@@ -510,6 +526,9 @@ class RequestHandlerTest {
 
             GET("/some") { _: Request<Unit> ->
                 ResponseEntity.ok("hello")
+            }
+            GET<Unit, Unit>("/some-internal-server-error") {
+                throw IllegalArgumentException("boom")
             }
         }
     }
