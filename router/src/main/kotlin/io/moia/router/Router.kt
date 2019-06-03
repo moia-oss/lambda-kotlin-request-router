@@ -1,6 +1,7 @@
 package io.moia.router
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 
 class Router {
 
@@ -46,22 +47,21 @@ class Router {
     }
 }
 
-interface Filter : (HandlerFunction<*, *>) -> HandlerFunction<*, *> {
+interface Filter : (APIGatewayRequestHandlerFunction) -> APIGatewayRequestHandlerFunction {
     companion object {
-        operator fun invoke(fn: (HandlerFunction<*, *>) -> HandlerFunction<*, *>): Filter = object :
+        operator fun invoke(fn: (APIGatewayRequestHandlerFunction) -> APIGatewayRequestHandlerFunction): Filter = object :
             Filter {
-            override operator fun invoke(next: HandlerFunction<*, *>): HandlerFunction<*, *> = fn(next)
+            override operator fun invoke(next: APIGatewayRequestHandlerFunction): APIGatewayRequestHandlerFunction = fn(next)
         }
     }
 }
 
 val Filter.Companion.NoOp: Filter get() = Filter { next -> { next(it) } }
 
-fun Filter.then(next: Filter): Filter =
-    Filter { this(next(it)) }
+fun Filter.then(next: Filter): Filter = Filter { this(next(it)) }
+fun Filter.then(next: APIGatewayRequestHandlerFunction): APIGatewayRequestHandlerFunction = { this(next)(it) }
 
-fun Filter.then(next: HandlerFunction<*, *>): HandlerFunction<*, *> = { this(next)(it) }
-
+typealias APIGatewayRequestHandlerFunction = (APIGatewayProxyRequestEvent) -> APIGatewayProxyResponseEvent
 typealias HandlerFunction<I, T> = (request: Request<I>) -> ResponseEntity<T>
 
 class RouterFunction<I, T>(
