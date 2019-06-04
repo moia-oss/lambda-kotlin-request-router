@@ -46,12 +46,12 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
                 val response =
                     try {
-                        val requestBody = deserializeRequest(handler, input)
-                        val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
-                        when {
-                            missingPermissions(input, routerFunction) ->
-                                ResponseEntity(403, ApiError("missing permissions", "MISSING_PERMISSIONS"))
-                            else -> (handler as HandlerFunction<*, *>)(request)
+                        if (missingPermissions(input, routerFunction)) {
+                            ResponseEntity(403, ApiError("missing permissions", "MISSING_PERMISSIONS"))
+                        } else {
+                            val requestBody = deserializeRequest(handler, input)
+                            val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
+                            (handler as HandlerFunction<*, *>)(request)
                         }
                     } catch (e: Exception) {
                         exceptionToResponseEntity(e, input)
