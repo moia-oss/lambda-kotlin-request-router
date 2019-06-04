@@ -25,8 +25,13 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     private val serializationHandlerChain by lazy { SerializationHandlerChain(serializationHandlers()) }
     private val deserializationHandlerChain by lazy { DeserializationHandlerChain(deserializationHandlers()) }
 
+    override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent =
+        input
+            .apply { headers = headers.mapKeys { it.key.toLowerCase() } }
+            .let { router.filter.then(this::handleRequest)(it) }
+
     @Suppress("UNCHECKED_CAST")
-    override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent {
+    private fun handleRequest(input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         log.debug("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input")
         val routes = router.routes as List<RouterFunction<Any, Any>>
         val matchResults: List<RequestMatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->
@@ -37,19 +42,12 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 val matchedAcceptType = routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
                     ?: MediaType.parse(router.defaultContentType)
 
-                // Phase 1: Deserialization
-                // TODO: find a way to also invoke the filter chain on failed deserialization
                 val handler: HandlerFunction<Any, Any> = routerFunction.handler
-                val requestBody = try {
-                    deserializeRequest(handler, input)
-                } catch (e: Exception) {
-                    return createResponse(matchedAcceptType, exceptionToResponseEntity(e))
-                }
 
-                // Phase 2: Content Handling
-                val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
-                return createResponse(matchedAcceptType, router.filter.then {
+                val response =
                     try {
+                        val requestBody = deserializeRequest(handler, input)
+                        val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
                         when {
                             missingPermissions(input, routerFunction) ->
                                 ResponseEntity(403, ApiError("missing permissions", "MISSING_PERMISSIONS"))
@@ -58,7 +56,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                     } catch (e: Exception) {
                         exceptionToResponseEntity(e, input)
                     }
-                }(request))
+                return createResponse(matchedAcceptType, response)
             }
             matchResult
         }
@@ -106,22 +104,22 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             when {
                 matchResults.any { it.matchPath && it.matchMethod && !it.matchContentType } ->
                     ApiException(
-                            httpResponseStatus = 415,
-                            message = "Unsupported Media Type",
-                            code = "UNSUPPORTED_MEDIA_TYPE"
-                        )
+                        httpResponseStatus = 415,
+                        message = "Unsupported Media Type",
+                        code = "UNSUPPORTED_MEDIA_TYPE"
+                    )
                 matchResults.any { it.matchPath && it.matchMethod && !it.matchAcceptType } ->
                     ApiException(
-                            httpResponseStatus = 406,
-                            message = "Not Acceptable",
-                            code = "NOT_ACCEPTABLE"
-                        )
+                        httpResponseStatus = 406,
+                        message = "Not Acceptable",
+                        code = "NOT_ACCEPTABLE"
+                    )
                 matchResults.any { it.matchPath && !it.matchMethod } ->
                     ApiException(
                         httpResponseStatus = 405,
                         message = "Method Not Allowed",
                         code = "METHOD_NOT_ALLOWED"
-                )
+                    )
                 else -> ApiException(
                     httpResponseStatus = 404,
                     message = "Not found",

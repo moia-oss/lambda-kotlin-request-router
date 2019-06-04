@@ -479,6 +479,27 @@ class RequestHandlerTest {
         assertEquals("[CustomObject(text=foo, number=1), CustomObject(text=bar, number=2)]", plainTextResponse.body)
     }
 
+    @Test
+    fun `headers should be case insensitive`() {
+        val request = APIGatewayProxyRequestEvent()
+            .withPath("/some")
+            .withHttpMethod("GET")
+            .withHeaders(
+                mapOf(
+                    "Accept" to "Application/Json",
+                    "User-Agent" to "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+                )
+            )
+        val response = testRequestHandler.handleRequest(request, mockk())
+
+        assert(request.headers["accept"].toString()).isEqualTo("Application/Json")
+        assert(request.headers["user-agent"].toString())
+            .isEqualTo(
+                "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+            )
+        assert(response.statusCode).isEqualTo(200)
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
@@ -518,7 +539,7 @@ class RequestHandlerTest {
         private val incrementingFilter = Filter { next ->
             { request ->
                 filterInvocations += 1
-                next(request).copy(headers = mapOf("header" to "value"))
+                next(request).apply { headers = headers + ("header" to "value") }
             }
         }
         override val router = router {
