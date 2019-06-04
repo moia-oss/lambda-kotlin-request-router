@@ -5,19 +5,16 @@ import io.moia.router.Request
 import io.moia.router.RequestHandler
 import io.moia.router.ResponseEntity
 import io.moia.router.Router.Companion.router
-import io.moia.router.getHeaderCaseInsensitive
 import io.moia.router.then
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import kotlin.concurrent.timer
-import kotlin.system.measureTimeMillis
 
 class MyRequestHandler : RequestHandler() {
     private val controller = SomeController()
 
     override val router = router {
-        //use filters to add cross-cutting concerns to each request
+        // use filters to add cross-cutting concerns to each request
         filter = loggingFilter().then(mdcFilter())
 
         // functions can be externalized...
@@ -29,13 +26,13 @@ class MyRequestHandler : RequestHandler() {
 
     private fun loggingFilter() = Filter { next -> {
         request ->
-            log.info("Handling request ${request.apiRequest.httpMethod} ${request.apiRequest.path}")
+            log.info("Handling request ${request.httpMethod} ${request.path}")
             next(request) }
     }
 
     private fun mdcFilter() = Filter { next -> {
         request ->
-            MDC.put("requestId", request.apiRequest.requestContext?.requestId)
+            MDC.put("requestId", request.requestContext?.requestId)
             next(request) }
     }
 
