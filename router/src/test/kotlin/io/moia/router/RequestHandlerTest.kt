@@ -539,7 +539,7 @@ class RequestHandlerTest {
         private val incrementingFilter = Filter { next ->
             { request ->
                 filterInvocations += 1
-                next(request).apply { headers = headers + ("header" to "value") }
+                next(request).apply { withHeader("header", "value") }
             }
         }
         override val router = router {

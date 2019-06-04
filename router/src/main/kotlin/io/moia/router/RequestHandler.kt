@@ -204,7 +204,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         }.let { finalContentType ->
             APIGatewayProxyResponseEvent()
                 .withStatusCode(response.statusCode)
-                .withHeaders(response.headers + ("Content-Type" to finalContentType.toString()))
+                .withHeaders(response.headers.toMutableMap().apply { put("Content-Type", finalContentType.toString()) })
                 .withBody(response.body?.let {
                     serializationHandlerChain.serialize(finalContentType, it as Any)
                 })
