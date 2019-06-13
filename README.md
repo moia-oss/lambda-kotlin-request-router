@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.moia-dev.lambda-kotlin-request-router:router:0.5.0' 
+    implementation 'com.github.moia-dev.lambda-kotlin-request-router:router:0.8.2' 
 }
 
 ```
@@ -99,13 +99,13 @@ override val router = router {
 
     private fun loggingFilter() = Filter { next -> {
         request ->
-            log.info("Handling request ${request.apiRequest.httpMethod} ${request.apiRequest.path}")
+            log.info("Handling request ${request.httpMethod} ${request.path}")
             next(request) }
     }
 
     private fun mdcFilter() = Filter { next -> {
         request ->
-            MDC.put("requestId", request.apiRequest.requestContext?.requestId)
+            MDC.put("requestId", request.requestContext?.requestId)
             next(request) }
     }
 }
@@ -161,6 +161,48 @@ So we do no validation of the JWT token.
 
 ### Protobuf support
 
+The module `router-protobuf` helps to ease implementation of handlers that receive and return protobuf messages.
+
+```
+implementation 'com.github.moia-dev.lambda-kotlin-request-router:router-protobuf:0.8.2'
+```
+
+A handler implementation that wants to take advantage of the protobuf support should inherit from `ProtoEnabledRequestHandler`.
+
+```kotlin
+class TestRequestHandler : ProtoEnabledRequestHandler() {
+
+        override val router = router {
+            defaultProducing = setOf("application/x-protobuf")
+            defaultConsuming = setOf("application/x-protobuf")
+
+            defaultContentType = "application/x-protobuf"
+
+            GET("/some-proto") { _: Request<Unit> -> ResponseEntity.ok(Sample.newBuilder().setHello("Hello").build()) }
+                .producing("application/x-protobuf", "application/json")
+            POST("/some-proto") { r: Request<Sample> -> ResponseEntity.ok(r.body) }
+            GET<Unit, Unit>("/some-error") { _: Request<Unit> -> throw ApiException("boom", "BOOM", 400) }
+        }
+
+        override fun createErrorBody(error: ApiError): Any =
+            io.moia.router.proto.sample.SampleOuterClass.ApiError.newBuilder()
+                .setMessage(error.message)
+                .setCode(error.code)
+                .build()
+
+        override fun createUnprocessableEntityErrorBody(errors: List<UnprocessableEntityError>): Any =
+            errors.map { error ->
+                io.moia.router.proto.sample.SampleOuterClass.UnprocessableEntityError.newBuilder()
+                    .setMessage(error.message)
+                    .setCode(error.code)
+                    .setPath(error.path)
+                    .build()
+            }
+    }
+```
+
+Make sure you override `createErrorBody` and `createUnprocessableEntityErrorBody` to map error type to your proto error messages.
+
 
 ### Open API validation support
 
@@ -173,7 +215,7 @@ This library validates:
 - ...
 
 ```
-testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-openapi-request-validator:0.5.0'
+testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-openapi-request-validator:0.8.2'
 ```
 
 ```kotlin

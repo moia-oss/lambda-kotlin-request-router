@@ -55,7 +55,7 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "img/jpg")), mockk()
+                .withHeaders(mapOf("Accept" to "image/jpg")), mockk()
         )
 
         assert(response.statusCode).isEqualTo(406)
@@ -307,6 +307,24 @@ class RequestHandlerTest {
             POST("/some")
                 .withHeaders(mapOf(
                     "Accept" to "application/xhtml+xml, application/json, application/xml;q=0.9, image/webp, */*;q=0.8",
+                    "Content-Type" to "application/json"
+                ))
+                .withBody("""{ "greeting": "some" }"""), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/json")
+
+        assert(response.body).isEqualTo("""{"greeting":"some"}""")
+    }
+
+    @Test
+    fun `should handle request with accept all header`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "*/*",
                     "Content-Type" to "application/json"
                 ))
                 .withBody("""{ "greeting": "some" }"""), mockk()

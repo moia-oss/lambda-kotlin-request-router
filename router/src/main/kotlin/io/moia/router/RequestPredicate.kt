@@ -49,7 +49,7 @@ data class RequestPredicate(
     fun matchedAcceptType(acceptedMediaTypes: List<MediaType>) =
         produces
             .map { MediaType.parse(it) }
-            .firstOrNull { acceptedMediaTypes.any { acceptedType -> acceptedType.`is`(it) } }
+            .firstOrNull { acceptedMediaTypes.any { acceptedType -> it.`is`(acceptedType) } }
 
     private fun acceptMatches(acceptedMediaTypes: List<MediaType>) =
         matchedAcceptType(acceptedMediaTypes) != null
