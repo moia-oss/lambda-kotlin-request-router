@@ -337,7 +337,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    fun `should fail with not-acceptable on non-parseable media type`() {
+    fun `should fail with 406 Not Acceptable on an unparsable media type`() {
 
         val response = testRequestHandler.handleRequest(
             POST("/some")
