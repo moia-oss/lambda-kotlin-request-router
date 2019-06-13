@@ -337,6 +337,21 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should fail with not-acceptable on non-parseable media type`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "*",
+                    "Content-Type" to "application/json"
+                ))
+                .withBody("""{ "greeting": "some" }"""), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(406)
+    }
+
+    @Test
     fun `should match request requiring permission`() {
 
         val response = TestRequestHandlerAuthorization().handleRequest(
