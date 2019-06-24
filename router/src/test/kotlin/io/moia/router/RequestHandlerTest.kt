@@ -55,7 +55,7 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "img/jpg")), mockk()
+                .withHeaders(mapOf("Accept" to "image/jpg")), mockk()
         )
 
         assert(response.statusCode).isEqualTo(406)
@@ -154,6 +154,22 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should invoke filter chain also for non successful requests`() {
+
+        val handler = TestRequestHandlerWithFilter()
+        val response = handler.handleRequest(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some-internal-server-error")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(500)
+        assert(response.headers["header"]).isEqualTo("value")
+        assert(handler.filterInvocations).isEqualTo(2)
+    }
+
+    @Test
     fun `should ignore content-type header when handler expects none`() {
 
         val handler = TestRequestHandlerWithFilter()
@@ -202,10 +218,12 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
         assert(body.size).isEqualTo(1)
-        assert(body[0].code).isEqualTo("FIELD")
-        assert(body[0].message).isEqualTo("INVALID_FIELD_FORMAT")
-        assert(body[0].path).isEqualTo("age")
-        assert(body[0].details.isNotEmpty()).isEqualTo(false)
+        with(body.first()) {
+            assert(code).isEqualTo("FIELD")
+            assert(message).isEqualTo("INVALID_FIELD_FORMAT")
+            assert(path).isEqualTo("age")
+            assert(details.isNotEmpty()).isEqualTo(false)
+        }
     }
 
     @Test
@@ -224,10 +242,12 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
         assert(body.size).isEqualTo(1)
-        assert(body[0].code).isEqualTo("FIELD")
-        assert(body[0].message).isEqualTo("INVALID_FIELD_FORMAT")
-        assert(body[0].path).isEqualTo("bday")
-        assert(body[0].details.isNotEmpty()).isEqualTo(true)
+        with(body.first()) {
+            assert(code).isEqualTo("FIELD")
+            assert(message).isEqualTo("INVALID_FIELD_FORMAT")
+            assert(path).isEqualTo("bday")
+            assert(details.isNotEmpty()).isEqualTo(true)
+        }
     }
 
     @Test
@@ -246,10 +266,12 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
         assert(body.size).isEqualTo(1)
-        assert(body[0].code).isEqualTo("ENTITY")
-        assert(body[0].message).isEqualTo("INVALID_ENTITY")
-        assert(body[0].path).isEqualTo("")
-        assert(body[0].details.isNotEmpty()).isEqualTo(true)
+        with(body.first()) {
+            assert(code).isEqualTo("ENTITY")
+            assert(message).isEqualTo("INVALID_ENTITY")
+            assert(path).isEqualTo("")
+            assert(details.isNotEmpty()).isEqualTo(true)
+        }
     }
 
     @Test
@@ -294,6 +316,39 @@ class RequestHandlerTest {
         assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/json")
 
         assert(response.body).isEqualTo("""{"greeting":"some"}""")
+    }
+
+    @Test
+    fun `should handle request with accept all header`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "*/*",
+                    "Content-Type" to "application/json"
+                ))
+                .withBody("""{ "greeting": "some" }"""), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/json")
+
+        assert(response.body).isEqualTo("""{"greeting":"some"}""")
+    }
+
+    @Test
+    fun `should fail with 406 Not Acceptable on an unparsable media type`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "*",
+                    "Content-Type" to "application/json"
+                ))
+                .withBody("""{ "greeting": "some" }"""), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(406)
     }
 
     @Test
@@ -457,6 +512,27 @@ class RequestHandlerTest {
         assertEquals("[CustomObject(text=foo, number=1), CustomObject(text=bar, number=2)]", plainTextResponse.body)
     }
 
+    @Test
+    fun `headers should be case insensitive`() {
+        val request = APIGatewayProxyRequestEvent()
+            .withPath("/some")
+            .withHttpMethod("GET")
+            .withHeaders(
+                mapOf(
+                    "Accept" to "Application/Json",
+                    "User-Agent" to "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+                )
+            )
+        val response = testRequestHandler.handleRequest(request, mockk())
+
+        assert(request.headers["accept"].toString()).isEqualTo("Application/Json")
+        assert(request.headers["user-agent"].toString())
+            .isEqualTo(
+                "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+            )
+        assert(response.statusCode).isEqualTo(200)
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
@@ -496,7 +572,7 @@ class RequestHandlerTest {
         private val incrementingFilter = Filter { next ->
             { request ->
                 filterInvocations += 1
-                next(request)
+                next(request).apply { withHeader("header", "value") }
             }
         }
         override val router = router {
@@ -504,6 +580,9 @@ class RequestHandlerTest {
 
             GET("/some") { _: Request<Unit> ->
                 ResponseEntity.ok("hello")
+            }
+            GET<Unit, Unit>("/some-internal-server-error") {
+                throw IllegalArgumentException("boom")
             }
         }
     }

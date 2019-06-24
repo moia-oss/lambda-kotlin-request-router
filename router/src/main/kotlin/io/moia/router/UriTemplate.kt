@@ -1,6 +1,5 @@
 package io.moia.router
 
-import java.lang.IllegalArgumentException
 import java.net.URLDecoder
 import java.util.regex.Pattern
 

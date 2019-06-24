@@ -10,7 +10,7 @@ fun APIGatewayProxyRequestEvent.acceptHeader() = getHeaderCaseInsensitive("accep
 fun APIGatewayProxyRequestEvent.acceptedMediaTypes() = acceptHeader()
     ?.split(",")
     ?.map { it.trim() }
-    ?.map { MediaType.parse(it) }
+    ?.mapNotNull { parseMediaTypeSafe(it) }
     .orEmpty()
 fun APIGatewayProxyRequestEvent.contentType() = getHeaderCaseInsensitive("content-type")
 
@@ -68,3 +68,10 @@ private fun getCaseInsensitive(key: String, map: Map<String, String>?): String? 
         ?.value
 
 fun APIGatewayProxyResponseEvent.bodyAsBytes() = Base64.getDecoder().decode(body)
+
+private fun parseMediaTypeSafe(input: String): MediaType? =
+    try {
+        MediaType.parse(input)
+    } catch (e: IllegalArgumentException) {
+        null
+    }

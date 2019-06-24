@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package io.moia.router.proto.sample;
 
+import "google/protobuf/wrappers.proto";
+
 message Sample {
     string hello = 1;
     string request = 2;
@@ -17,3 +19,15 @@ message UnprocessableEntityError {
     string code = 2;
     string path = 3;
 }
+
+message ComplexSample {
+    enum SampleEnum {
+        ONE = 0;
+        TWO = 1;
+    }
+
+    SampleEnum enumAttribute = 1;
+    repeated Sample samples = 2;
+    google.protobuf.StringValue someString = 3;
+}
+
