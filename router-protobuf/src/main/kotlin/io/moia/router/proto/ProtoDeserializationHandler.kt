@@ -19,7 +19,7 @@ class ProtoDeserializationHandler : DeserializationHandler {
         if (input.contentType() == null)
             false
         else {
-            MediaType.parse(input.contentType()).let { it.isCompatibleWith(proto) || it.isCompatibleWith(protoStructuredSuffixWildcard) }
+            MediaType.parse(input.contentType()).let { proto.isCompatibleWith(it) || protoStructuredSuffixWildcard.isCompatibleWith(it) }
         }
 
     override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any {
