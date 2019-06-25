@@ -21,5 +21,6 @@ internal class ProtoDeserializationHandlerTest {
     @Test
     fun `Deserializer should support if the content type of the input is protobuf`() {
         assertTrue(ProtoDeserializationHandler().supports(APIGatewayProxyRequestEvent().withHeader("content-type", "application/x-protobuf")))
+        assertTrue(ProtoDeserializationHandler().supports(APIGatewayProxyRequestEvent().withHeader("content-type", "application/vnd.moia.v1+x-protobuf")))
     }
 }

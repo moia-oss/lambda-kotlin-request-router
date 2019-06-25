@@ -36,6 +36,20 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should match request to proto handler with version accept header and return json`() {
+
+        val response = testRequestHandler.handleRequest(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some-proto")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/vnd.moia.v1+json")), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.body).isEqualTo("""{"hello":"v1","request":""}""")
+    }
+
+    @Test
     fun `should match request to proto handler and return proto`() {
 
         val response = testRequestHandler.handleRequest(
@@ -108,6 +122,9 @@ class RequestHandlerTest {
             defaultConsuming = setOf("application/x-protobuf")
 
             defaultContentType = "application/x-protobuf"
+
+            GET("/some-proto") { _: Request<Unit> -> ResponseEntity.ok(Sample.newBuilder().setHello("v1").build()) }
+                .producing("application/vnd.moia.v1+x-protobuf", "application/vnd.moia.v1+json")
 
             GET("/some-proto") { _: Request<Unit> -> ResponseEntity.ok(Sample.newBuilder().setHello("Hello").build()) }
                 .producing("application/x-protobuf", "application/json")
