@@ -331,9 +331,42 @@ class RequestHandlerTest {
         )
 
         assert(response.statusCode).isEqualTo(200)
-        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/json")
+        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/vnd.moia.v2+json")
 
+        assert(response.body).isEqualTo("""{"greeting":"v2"}""")
+    }
+
+    @Test
+    fun `should handle subtype structured suffix wildcard`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "application/vnd.moia.v1+json",
+                    "Content-Type" to "application/json"
+                ))
+                .withBody("""{ "greeting": "some" }"""), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
         assert(response.body).isEqualTo("""{"greeting":"some"}""")
+    }
+
+    @Test
+    fun `should match version`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(mapOf(
+                    "Accept" to "application/vnd.moia.v2+json",
+                    "Content-Type" to "application/json"
+                ))
+                .withBody("""{ "greeting": "v2" }"""), mockk()
+        )
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.body).isEqualTo("""{"greeting":"v2"}""")
+        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/vnd.moia.v2+json")
     }
 
     @Test
@@ -614,13 +647,23 @@ class RequestHandlerTest {
                     )
                 )
             }
+
+            POST("/some") { r: Request<TestRequest> ->
+                ResponseEntity.ok(
+                    TestResponse(
+                        "v2"
+                    )
+                )
+            }.producing("application/vnd.moia.v2+json")
+
             POST("/some") { r: Request<TestRequest> ->
                 ResponseEntity.ok(
                     TestResponse(
                         r.body.greeting
                     )
                 )
-            }
+            }.producing("application/json", "application/*+json")
+
             POST("/somes") { r: Request<List<TestRequest>> ->
                 ResponseEntity.ok(r.body.map {
                     TestResponse(

@@ -2,6 +2,7 @@ package io.moia.router
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.net.MediaType
+import isCompatibleWith
 
 interface SerializationHandler {
 
@@ -23,8 +24,10 @@ class SerializationHandlerChain(private val handlers: List<SerializationHandler>
 class JsonSerializationHandler(private val objectMapper: ObjectMapper) : SerializationHandler {
 
     private val json = MediaType.parse("application/json")
+    private val jsonStructuredSuffixWildcard = MediaType.parse("application/*+json")
 
-    override fun supports(acceptHeader: MediaType, body: Any): Boolean = acceptHeader.`is`(json)
+    override fun supports(acceptHeader: MediaType, body: Any): Boolean =
+        json.isCompatibleWith(acceptHeader) || jsonStructuredSuffixWildcard.isCompatibleWith(acceptHeader)
 
     override fun serialize(acceptHeader: MediaType, body: Any): String =
         objectMapper.writeValueAsString(body)
