@@ -2,6 +2,7 @@ package io.moia.router
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.google.common.net.MediaType
+import isCompatibleWith
 
 data class RequestPredicate(
     val method: String,
@@ -49,7 +50,7 @@ data class RequestPredicate(
     fun matchedAcceptType(acceptedMediaTypes: List<MediaType>) =
         produces
             .map { MediaType.parse(it) }
-            .firstOrNull { acceptedMediaTypes.any { acceptedType -> it.`is`(acceptedType) } }
+            .firstOrNull { acceptedMediaTypes.any { acceptedType -> it.isCompatibleWith(acceptedType) } }
 
     private fun acceptMatches(acceptedMediaTypes: List<MediaType>) =
         matchedAcceptType(acceptedMediaTypes) != null
@@ -58,7 +59,7 @@ data class RequestPredicate(
         when {
             consumes.isEmpty() -> true
             contentType == null -> false
-            else -> consumes.any { MediaType.parse(contentType).`is`(MediaType.parse(it)) }
+            else -> consumes.any { MediaType.parse(contentType).isCompatibleWith(MediaType.parse(it)) }
         }
 }
 
