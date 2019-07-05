@@ -6,6 +6,9 @@ import com.google.common.net.MediaType
 import java.net.URI
 import java.util.Base64
 
+/** Data class that represents an HTTP header */
+data class Header(val name: String, val value: String)
+
 fun APIGatewayProxyRequestEvent.acceptHeader() = getHeaderCaseInsensitive("accept")
 fun APIGatewayProxyRequestEvent.acceptedMediaTypes() = acceptHeader()
     ?.split(",")
@@ -54,8 +57,14 @@ fun APIGatewayProxyRequestEvent.location(path: String): URI {
 fun APIGatewayProxyRequestEvent.withHeader(name: String, value: String) =
     this.also { if (headers == null) headers = mutableMapOf() }.also { headers[name] = value }
 
+fun APIGatewayProxyRequestEvent.withHeader(header: Header) =
+    this.withHeader(header.name, header.value)
+
 fun APIGatewayProxyResponseEvent.withHeader(name: String, value: String) =
     this.also { if (headers == null) headers = mutableMapOf() }.also { headers[name] = value }
+
+fun APIGatewayProxyResponseEvent.withHeader(header: Header) =
+    this.withHeader(header.name, header.value)
 
 fun APIGatewayProxyResponseEvent.withLocationHeader(request: APIGatewayProxyRequestEvent, path: String) =
     this.also { if (headers == null) headers = mutableMapOf() }.also { headers["location"] = request.location(path).toString() }
