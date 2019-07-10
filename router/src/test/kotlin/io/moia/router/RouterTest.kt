@@ -4,6 +4,7 @@ import assertk.assert
 import assertk.assertions.hasSize
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import io.moia.router.Router.Companion.router
 import org.assertj.core.api.BDDAssertions.then
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -103,5 +104,25 @@ class RouterTest {
         with(router.routes.first().requestPredicate) {
             assert(consumes).isEqualTo(setOf<String>())
         }
+    }
+
+    @Test
+    fun `request should contain ProxyRequestContext`() {
+        val claims = mapOf(
+            "foobar" to "foo"
+        )
+        val context = APIGatewayProxyRequestEvent.ProxyRequestContext().apply {
+            authorizer = mapOf("claims" to claims)
+        }
+
+        val request = Request<Unit>(
+            APIGatewayProxyRequestEvent()
+                .withPath("/some-other")
+                .withHttpMethod("GET")
+                .withHeaders(mapOf("Accept" to "application/json"))
+                .withRequestContext(context),
+            Unit
+        )
+        assert(request.requestContext.authorizer!!["claims"]).isEqualTo(claims)
     }
 }
