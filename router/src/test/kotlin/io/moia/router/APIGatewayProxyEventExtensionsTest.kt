@@ -1,5 +1,6 @@
 package io.moia.router
 
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import org.assertj.core.api.BDDAssertions.then
 import org.junit.jupiter.api.Test
@@ -55,5 +56,21 @@ class APIGatewayProxyEventExtensionsTest {
         val location = request.location("/some/path")
 
         then(location.toString()).isEqualTo("http://example.com/some/path")
+    }
+
+    @Test
+    fun `header class should work as expected with APIGatewayProxyRequestEvent`() {
+
+        val request = APIGatewayProxyRequestEvent().withHeader(Header("foo", "bar"))
+
+        then(request.headers["foo"]).isEqualTo("bar")
+    }
+
+    @Test
+    fun `header class should work as expected with APIGatewayProxyResponseEvent`() {
+
+        val request = APIGatewayProxyResponseEvent().withHeader(Header("foo", "bar"))
+
+        then(request.headers["foo"]).isEqualTo("bar")
     }
 }
