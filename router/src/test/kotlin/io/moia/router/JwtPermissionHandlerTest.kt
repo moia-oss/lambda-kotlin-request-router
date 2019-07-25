@@ -52,6 +52,15 @@ class JwtPermissionHandlerTest {
     }
 
     @Test
+    fun `should return true when no permissions are required`() {
+        val handler = permissionHandler(jwtWithScopeClaimSpace)
+
+        val result = handler.hasAnyRequiredPermission(emptySet())
+
+        then(result).isTrue()
+    }
+
+    @Test
     fun `should work for missing header`() {
         val handler = JwtPermissionHandler(JwtAccessor(APIGatewayProxyRequestEvent()))
 
