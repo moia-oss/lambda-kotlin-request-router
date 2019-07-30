@@ -52,7 +52,8 @@ open class JwtPermissionHandler(
     ) : this(JwtAccessor(request), permissionsClaim, permissionSeparator)
 
     override fun hasAnyRequiredPermission(requiredPermissions: Set<String>): Boolean =
-        extractPermissions().any { requiredPermissions.contains(it) }
+        if (requiredPermissions.isEmpty()) true
+        else extractPermissions().any { requiredPermissions.contains(it) }
 
     internal open fun extractPermissions(): Set<String> =
         accessor.extractJwtClaims()
