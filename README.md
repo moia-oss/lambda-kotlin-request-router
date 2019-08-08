@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.moia-dev.lambda-kotlin-request-router:router:0.8.2' 
+    implementation 'com.github.moia-dev.lambda-kotlin-request-router:router:0.8.7' 
 }
 
 ```
@@ -164,7 +164,7 @@ So we do no validation of the JWT token.
 The module `router-protobuf` helps to ease implementation of handlers that receive and return protobuf messages.
 
 ```
-implementation 'com.github.moia-dev.lambda-kotlin-request-router:router-protobuf:0.8.2'
+implementation 'com.github.moia-dev.lambda-kotlin-request-router:router-protobuf:0.8.7'
 ```
 
 A handler implementation that wants to take advantage of the protobuf support should inherit from `ProtoEnabledRequestHandler`.
@@ -215,7 +215,7 @@ This library validates:
 - ...
 
 ```
-testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-openapi-request-validator:0.8.2'
+testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-openapi-request-validator:0.8.7'
 ```
 
 ```kotlin
