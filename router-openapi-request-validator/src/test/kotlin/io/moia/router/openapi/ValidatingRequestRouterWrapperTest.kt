@@ -53,7 +53,7 @@ class ValidatingRequestRouterWrapperTest {
         thenThrownBy { ValidatingRequestRouterWrapper(
             delegate = OpenApiValidatorTest.TestRequestHandler(),
             specUrlOrPayload = "openapi.yml",
-            additionalRequestValidationFunctions = listOf({ req-> throw RequestValidationFailedException()}))
+            additionalRequestValidationFunctions = listOf({ _ -> throw RequestValidationFailedException() }))
             .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
         }
             .isInstanceOf(RequestValidationFailedException::class.java)
@@ -64,26 +64,26 @@ class ValidatingRequestRouterWrapperTest {
         thenThrownBy { ValidatingRequestRouterWrapper(
             delegate = OpenApiValidatorTest.TestRequestHandler(),
             specUrlOrPayload = "openapi.yml",
-            additionalResponseValidationFunctions = listOf({ _, _-> throw ResponseValidationFailedException()}))
+            additionalResponseValidationFunctions = listOf({ _, _ -> throw ResponseValidationFailedException() }))
             .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
         }
             .isInstanceOf(ResponseValidationFailedException::class.java)
     }
 
-    private class RequestValidationFailedException: RuntimeException("request validation failed")
-    private class ResponseValidationFailedException: RuntimeException("request validation failed")
+    private class RequestValidationFailedException : RuntimeException("request validation failed")
+    private class ResponseValidationFailedException : RuntimeException("request validation failed")
 
-    private class TestRequestHandler: RequestHandler() {
+    private class TestRequestHandler : RequestHandler() {
         override val router = router {
-            GET("/tests") { r: Request<Unit> ->
+            GET("/tests") { _: Request<Unit> ->
                 ResponseEntity.ok("""{"name": "some"}""")
             }
         }
     }
 
-    private class InvalidTestRequestHandler: RequestHandler() {
+    private class InvalidTestRequestHandler : RequestHandler() {
         override val router = router {
-            GET("/tests") { r: Request<Unit> ->
+            GET("/tests") { _: Request<Unit> ->
                 ResponseEntity.notFound(Unit)
             }
         }
