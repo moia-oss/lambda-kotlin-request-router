@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.moia-dev.lambda-kotlin-request-router:router:0.8.7' 
+    implementation 'com.github.moia-dev.lambda-kotlin-request-router:router:0.8.8' 
 }
 
 ```
@@ -164,7 +164,7 @@ So we do no validation of the JWT token.
 The module `router-protobuf` helps to ease implementation of handlers that receive and return protobuf messages.
 
 ```
-implementation 'com.github.moia-dev.lambda-kotlin-request-router:router-protobuf:0.8.7'
+implementation 'com.github.moia-dev.lambda-kotlin-request-router:router-protobuf:0.8.8'
 ```
 
 A handler implementation that wants to take advantage of the protobuf support should inherit from `ProtoEnabledRequestHandler`.
@@ -206,8 +206,8 @@ Make sure you override `createErrorBody` and `createUnprocessableEntityErrorBody
 
 ### Open API validation support
 
-The module `router-openapi-request-validator` can be used to validate a request against an [OpenAPI](https://www.openapis.org/) specification.
-Internally we use the [swagger-request-validator](https://bitbucket.org/atlassian/swagger-request-validator) to achieve this task.
+The module `router-openapi-request-validator` can be used to validate an interaction against an [OpenAPI](https://www.openapis.org/) specification.
+Internally we use the [swagger-request-validator](https://bitbucket.org/atlassian/swagger-request-validator) to achieve this.
 
 This library validates:
 - if the resource used is documented in the OpenApi specification
@@ -215,7 +215,7 @@ This library validates:
 - ...
 
 ```
-testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-openapi-request-validator:0.8.7'
+testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-openapi-request-validator:0.8.8'
 ```
 
 ```kotlin
@@ -234,4 +234,18 @@ testImplementation 'com.github.moia-dev.lambda-kotlin-request-router:router-open
     }
 ```
 
+If you want to validate all the API interactions in your handler tests against the API specification you can use `io.moia.router.openapi.ValidatingRequestRouterWrapper`.
+This a wrapper around your `RequestHandler` which transparently validates request and response.
+
+```kotlin
+    private val validatingRequestRouter = ValidatingRequestRouterWrapper(TestRequestHandler(), "openapi.yml")
+    
+    @Test
+    fun `should return response on successful validation`() {
+        val response = validatingRequestRouter
+            .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
+
+        then(response.statusCode).isEqualTo(200)
+    }
+```
 
