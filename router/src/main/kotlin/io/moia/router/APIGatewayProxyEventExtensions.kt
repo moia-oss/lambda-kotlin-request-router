@@ -60,6 +60,12 @@ fun APIGatewayProxyRequestEvent.withHeader(name: String, value: String) =
 fun APIGatewayProxyRequestEvent.withHeader(header: Header) =
     this.withHeader(header.name, header.value)
 
+fun APIGatewayProxyRequestEvent.withAcceptHeader(accept: String) =
+    this.withHeader("accept", accept)
+
+fun APIGatewayProxyRequestEvent.withContentTypeHeader(contentType: String) =
+    this.withHeader("content-type", contentType)
+
 fun APIGatewayProxyResponseEvent.withHeader(name: String, value: String) =
     this.also { if (headers == null) headers = mutableMapOf() }.also { headers[name] = value }
 
