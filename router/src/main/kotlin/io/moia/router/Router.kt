@@ -83,4 +83,5 @@ data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, 
     fun getPathParameter(name: String): String = pathParameters[name] ?: error("Could not find path parameter '$name")
     fun getQueryParameter(name: String): String? = queryParameters?.get(name)
     fun getMultiValueQueryStringParameter(name: String): List<String>? = multiValueQueryStringParameters?.get(name)
+    fun getJwtCognitoUsername(): String? = (JwtAccessor(this.apiRequest).extractJwtClaims()?.get("cognito:username") as? String)
 }
