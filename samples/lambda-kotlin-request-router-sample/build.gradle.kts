@@ -14,9 +14,9 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version "1.3.21"
+    kotlin("jvm") version "1.3.50"
     idea
-    id("com.github.johnrengelman.shadow") version "4.0.3"
+    id("com.github.johnrengelman.shadow") version "5.1.0"
     id("org.jmailen.kotlinter") version "1.22.0"
 }
 
@@ -33,7 +33,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    compile("com.github.moia-dev.lambda-kotlin-request-router:router:0.8.0")
+    implementation("com.github.moia-dev.lambda-kotlin-request-router:router:0.8.8")
 
     implementation("com.amazonaws:aws-lambda-java-core:1.2.0")
     implementation("com.amazonaws:aws-lambda-java-log4j2:1.1.0")
