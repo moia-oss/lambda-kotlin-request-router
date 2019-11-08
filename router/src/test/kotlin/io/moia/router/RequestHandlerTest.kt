@@ -291,6 +291,40 @@ class RequestHandlerTest {
     }
 
     @Test
+    fun `should return 400 on missing body when content type stated`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some")
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody(null), mockk()
+        )
+        assert(response.statusCode).isEqualTo(400)
+        assert(mapper.readValue<ApiError>(response.body).code).isEqualTo("REQUEST_BODY_MISSING")
+    }
+
+    @Test
+    fun `should handle null body when content type is stated and request handler body type is nullable`() {
+
+        val response = testRequestHandler.handleRequest(
+            POST("/some-nullable")
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody(null), mockk()
+        )
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.body).isEqualTo("""{"greeting":""}""")
+    }
+
+    @Test
     fun `should handle api exception`() {
 
         val response = testRequestHandler.handleRequest(
@@ -542,7 +576,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    fun `Handler should return the content type that is accepted`() {
+    fun `should return the content type that is accepted`() {
         val jsonResponse = AcceptTypeDependingHandler().handleRequest(
             GET("/all-objects")
                 .withHeader("accept", "application/json"),
@@ -664,7 +698,7 @@ class RequestHandlerTest {
                 )
             }
 
-            POST("/some") { r: Request<TestRequest> ->
+            POST("/some") { _: Request<TestRequest> ->
                 ResponseEntity.ok(
                     TestResponse(
                         "v2"
@@ -679,6 +713,14 @@ class RequestHandlerTest {
                     )
                 )
             }.producing("application/json", "application/*+json")
+
+            POST("/some-nullable") { r: Request<TestRequest?> ->
+                ResponseEntity.ok(
+                    TestResponse(
+                        r.body?.greeting.orEmpty()
+                    )
+                )
+            }.producing("application/json")
 
             POST("/somes") { r: Request<List<TestRequest>> ->
                 ResponseEntity.ok(r.body.map {
