@@ -94,6 +94,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         val requestType = handler.reflect()!!.parameters.first().type.arguments.first().type
         return when {
             requestType?.classifier as KClass<*> == Unit::class -> Unit
+            input.body == null && requestType.isMarkedNullable -> null
+            input.body == null -> throw ApiException("no request body present", "REQUEST_BODY_MISSING", 400)
             else -> deserializationHandlerChain.deserialize(input, requestType)
         }
     }
