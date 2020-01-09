@@ -82,15 +82,27 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     private fun exceptionToResponseEntity(e: Exception, input: APIGatewayProxyRequestEvent) =
         when (e) {
             is ApiException -> e.toResponseEntity(this::createErrorBody)
-                .also { log.info("Caught api error while handling ${input.httpMethod} ${input.path} - $e") }
+                .also { logApiException(e, input) }
             else -> exceptionToResponseEntity(e)
-                .also {
-                    log.error("Caught exception handling ${input.httpMethod} ${input.path} - $e", e)
-                }
+                .also { logUnknownException(e, input) }
         }
 
     private fun missingPermissions(input: APIGatewayProxyRequestEvent, routerFunction: RouterFunction<Any, Any>) =
         !permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions)
+
+    /**
+     * Hook to be able to override the way ApiExceptions are logged.
+     */
+    open fun logApiException(e: ApiException, input: APIGatewayProxyRequestEvent) {
+        log.info("Caught api error while handling ${input.httpMethod} ${input.path} - $e")
+    }
+
+    /**
+     * Hook to be able to override the way non-ApiExceptions are logged.
+     */
+    open fun logUnknownException(e: Exception, input: APIGatewayProxyRequestEvent) {
+        log.error("Caught exception handling ${input.httpMethod} ${input.path} - $e", e)
+    }
 
     open fun serializationHandlers(): List<SerializationHandler> = listOf(
         JsonSerializationHandler(objectMapper)
@@ -162,6 +174,11 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     private fun createUnprocessableEntityErrorBody(error: UnprocessableEntityError): Any = createUnprocessableEntityErrorBody(listOf(error))
 
+    /**
+     * Hook to customize the way non-ApiExceptions are converted to ResponseEntity.
+     *
+     * Some common exceptions are already handled in the default implementation.
+     */
     open fun exceptionToResponseEntity(ex: Exception) =
         when (ex) {
             is JsonParseException -> ResponseEntity(
