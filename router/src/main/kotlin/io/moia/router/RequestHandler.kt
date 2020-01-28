@@ -105,7 +105,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     }
 
     open fun serializationHandlers(): List<SerializationHandler> = listOf(
-        JsonSerializationHandler(objectMapper)
+        JsonSerializationHandler(objectMapper), PlainTextSerializationHandler()
     )
 
     open fun deserializationHandlers(): List<DeserializationHandler> = listOf(
@@ -124,6 +124,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             requestType?.classifier as KClass<*> == Unit::class -> Unit
             input.body == null && requestType.isMarkedNullable -> null
             input.body == null -> throw ApiException("no request body present", "REQUEST_BODY_MISSING", 400)
+            input.body is String && requestType.classifier as KClass<*> == String::class -> input.body
             else -> deserializationHandlerChain.deserialize(input, requestType)
         }
     }

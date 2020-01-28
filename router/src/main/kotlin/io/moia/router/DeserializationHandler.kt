@@ -69,3 +69,15 @@ class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : Deser
         }
     }
 }
+
+object PlainTextDeserializationHandler : DeserializationHandler {
+    private val text = MediaType.parse("text/*")
+    override fun supports(input: APIGatewayProxyRequestEvent): Boolean =
+        if (input.contentType() == null)
+            false
+        else
+            MediaType.parse(input.contentType()).isCompatibleWith(text)
+
+    override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? =
+        input.body
+}
