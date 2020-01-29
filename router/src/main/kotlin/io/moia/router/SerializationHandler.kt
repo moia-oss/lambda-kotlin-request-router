@@ -48,3 +48,11 @@ class JsonSerializationHandler(private val objectMapper: ObjectMapper) : Seriali
     override fun serialize(acceptHeader: MediaType, body: Any): String =
         objectMapper.writeValueAsString(body)
 }
+
+class PlainTextSerializationHandler(val supportedAcceptTypes: List<MediaType> = listOf(MediaType.parse("text/*"))) : SerializationHandler {
+    override fun supports(acceptHeader: MediaType, body: Any): Boolean =
+        supportedAcceptTypes.any { acceptHeader.isCompatibleWith(it) }
+
+    override fun serialize(acceptHeader: MediaType, body: Any): String =
+        body.toString()
+}

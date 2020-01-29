@@ -24,7 +24,6 @@ import assertk.assertions.isNullOrEmpty
 import assertk.assertions.isTrue
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.google.common.net.MediaType
 import io.mockk.mockk
 import io.moia.router.Router.Companion.router
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -616,6 +615,27 @@ class RequestHandlerTest {
         assert(response.statusCode).isEqualTo(200)
     }
 
+    @Test
+    fun `should deserialize plain text`() {
+        class SampleRouter : RequestHandler() {
+            override val router = router {
+                POST("/some", { r: Request<String> -> ResponseEntity.ok(r.body) })
+                    .producing("text/plain")
+                    .consuming("text/plain")
+            }
+        }
+        val request = POST("/some")
+            .withAcceptHeader("text/plain")
+            .withContentTypeHeader("text/plain")
+            .withBody("just text")
+
+        val response = SampleRouter().handleRequest(request, mockk())
+
+        assert(response.statusCode).isEqualTo(200)
+        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("text/plain")
+        assert(response.body).isEqualTo("just text")
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router = router {
             GET("/some") { _: Request<Unit> ->
@@ -766,22 +786,6 @@ class RequestHandlerTest {
     class AcceptTypeDependingHandler : RequestHandler() {
 
         data class CustomObject(val text: String, val number: Int)
-
-        class PlainTextSerializationHandler : SerializationHandler {
-            override fun supports(acceptHeader: MediaType, body: Any): Boolean {
-                return acceptHeader.`is`(MediaType.parse("text/plain"))
-            }
-
-            override fun serialize(acceptHeader: MediaType, body: Any): String {
-                return body.toString()
-            }
-        }
-
-        override fun serializationHandlers() =
-            listOf(JsonSerializationHandler(objectMapper), PlainTextSerializationHandler())
-
-        override fun deserializationHandlers() =
-            listOf(JsonDeserializationHandler(objectMapper))
 
         override val router = router {
             defaultConsuming = setOf("application/json", "text/plain")
