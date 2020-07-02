@@ -11,5 +11,4 @@ cache:
     - "$HOME/.gradle/wrapper/"
 install: true
 script:
-  - ./gradlew clean build jacocoRootReport
-  - bash <(curl -s https://codecov.io/bash)
+  - ./gradlew clean build jacocoRootReport coveralls
