@@ -1,5 +1,6 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.kt3k.gradle.plugin.CoverallsPluginExtension
 
 buildscript {
     repositories {
@@ -12,6 +13,7 @@ plugins {
     kotlin("jvm") version "1.3.21"
     `maven-publish`
     jacoco
+    id("com.github.kt3k.coveralls") version "2.10.1"
     id("org.jmailen.kotlinter") version "1.22.0"
 }
 
@@ -65,6 +67,11 @@ subprojects {
             }
         }
     }
+}
+
+configure<CoverallsPluginExtension> {
+    sourceDirs = subprojects.flatMap { it.sourceSets["main"].allSource.srcDirs }.filter { it.exists() }.map { it.path }
+    jacocoReportPath = "$buildDir/reports/jacoco/report.xml"
 }
 
 val jacocoRootReport by tasks.creating(JacocoReport::class) {
