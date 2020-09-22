@@ -20,8 +20,8 @@ dependencies {
     compile(project(":router"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.0")
-    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.23")
-    testImplementation("org.assertj:assertj-core:3.17.2")
+    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.12")
+    testImplementation("org.assertj:assertj-core:3.11.1")
     testImplementation("io.mockk:mockk:1.10.0")
     testImplementation("org.slf4j:slf4j-simple:1.7.30")
     testImplementation("com.jayway.jsonpath:json-path:2.4.0")
