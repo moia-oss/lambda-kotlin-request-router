@@ -36,10 +36,10 @@ class DeserializationHandlerChain(private val handlers: List<DeserializationHand
     DeserializationHandler {
 
     override fun supports(input: APIGatewayProxyRequestEvent): Boolean =
-            handlers.any { it.supports(input) }
+        handlers.any { it.supports(input) }
 
     override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? =
-            handlers.firstOrNull { it.supports(input) }?.deserialize(input, target)
+        handlers.firstOrNull { it.supports(input) }?.deserialize(input, target)
 }
 
 class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : DeserializationHandler {
@@ -51,7 +51,7 @@ class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : Deser
         if (input.contentType() == null)
             false
         else {
-            MediaType.parse(input.contentType()).let { json.isCompatibleWith(it) || jsonStructuredSuffixWildcard.isCompatibleWith(it) }
+            MediaType.parse(input.contentType()!!).let { json.isCompatibleWith(it) || jsonStructuredSuffixWildcard.isCompatibleWith(it) }
         }
 
     override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? {
@@ -76,7 +76,7 @@ object PlainTextDeserializationHandler : DeserializationHandler {
         if (input.contentType() == null)
             false
         else
-            MediaType.parse(input.contentType()).isCompatibleWith(text)
+            MediaType.parse(input.contentType()!!).isCompatibleWith(text)
 
     override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? =
         input.body

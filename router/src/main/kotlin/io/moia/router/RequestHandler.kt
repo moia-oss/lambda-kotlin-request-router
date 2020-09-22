@@ -81,10 +81,12 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     private fun exceptionToResponseEntity(e: Exception, input: APIGatewayProxyRequestEvent) =
         when (e) {
-            is ApiException -> e.toResponseEntity(this::createErrorBody)
-                .also { logApiException(e, input) }
-            else -> exceptionToResponseEntity(e)
-                .also { logUnknownException(e, input) }
+            is ApiException ->
+                e.toResponseEntity(this::createErrorBody)
+                    .also { logApiException(e, input) }
+            else ->
+                exceptionToResponseEntity(e)
+                    .also { logUnknownException(e, input) }
         }
 
     private fun missingPermissions(input: APIGatewayProxyRequestEvent, routerFunction: RouterFunction<Any, Any>) =
@@ -241,9 +243,11 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             APIGatewayProxyResponseEvent()
                 .withStatusCode(response.statusCode)
                 .withHeaders(response.headers.toMutableMap().apply { put("Content-Type", finalContentType.toString()) })
-                .withBody(response.body?.let {
-                    serializationHandlerChain.serialize(finalContentType, it as Any)
-                })
+                .withBody(
+                    response.body?.let {
+                        serializationHandlerChain.serialize(finalContentType, it as Any)
+                    }
+                )
         }
 
     companion object {

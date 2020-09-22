@@ -42,7 +42,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+                .withHeaders(mapOf("Accept" to "application/json")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -56,7 +57,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some/me")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+                .withHeaders(mapOf("Accept" to "application/json")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -70,7 +72,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "image/jpg")), mockk()
+                .withHeaders(mapOf("Accept" to "image/jpg")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(406)
@@ -83,10 +86,13 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("POST")
-                .withHeaders(mapOf(
-                    "Accept" to "application/json",
-                    "Content-Type" to "image/jpg"
-                )), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "image/jpg"
+                    )
+                ),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(415)
@@ -97,11 +103,14 @@ class RequestHandlerTest {
 
         val response = testRequestHandler.handleRequest(
             POST("/some")
-                .withHeaders(mapOf(
-                    "Accept" to "application/json",
-                    "Content-Type" to "application/json"
-                ))
-                .withBody("""{ "greeting": "some" }"""), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{ "greeting": "some" }"""),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -112,12 +121,15 @@ class RequestHandlerTest {
     fun `should handle request with body as a List`() {
 
         val response = testRequestHandler.handleRequest(
-                POST("/somes")
-                        .withHeaders(mapOf(
-                                "Accept" to "application/json",
-                                "Content-Type" to "application/json"
-                        ))
-                        .withBody("""[{ "greeting": "some" },{ "greeting": "some1" }]""".trimMargin()), mockk()
+            POST("/somes")
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""[{ "greeting": "some" },{ "greeting": "some1" }]""".trimMargin()),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -131,10 +143,13 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("PUT")
-                .withHeaders(mapOf(
-                    "Accept" to "application/json",
-                    "Content-Type" to "image/jpg"
-                )), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Content-Type" to "image/jpg"
+                    )
+                ),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(405)
@@ -147,7 +162,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-other")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+                .withHeaders(mapOf("Accept" to "application/json")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(404)
@@ -161,7 +177,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+                .withHeaders(mapOf("Accept" to "application/json")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -176,7 +193,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-internal-server-error")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+                .withHeaders(mapOf("Accept" to "application/json")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(500)
@@ -192,10 +210,13 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf(
-                    "Accept" to "application/json",
-                    "content-type" to "application/json"
-                )), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "content-type" to "application/json"
+                    )
+                ),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -212,7 +233,8 @@ class RequestHandlerTest {
                         "Content-Type" to "application/json"
                     )
                 )
-                .withBody("{}"), mockk()
+                .withBody("{}"),
+            mockk()
         )
         assert(response.statusCode).isEqualTo(422)
     }
@@ -228,7 +250,8 @@ class RequestHandlerTest {
                         "Content-Type" to "application/json"
                     )
                 )
-                .withBody("""{"greeting": "hello","age": "a"}"""), mockk()
+                .withBody("""{"greeting": "hello","age": "a"}"""),
+            mockk()
         )
         assert(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
@@ -252,7 +275,8 @@ class RequestHandlerTest {
                         "Content-Type" to "application/json"
                     )
                 )
-                .withBody("""{"greeting": "hello","age": 1, "bday": "2000-01-AA"}"""), mockk()
+                .withBody("""{"greeting": "hello","age": 1, "bday": "2000-01-AA"}"""),
+            mockk()
         )
         assert(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
@@ -276,7 +300,8 @@ class RequestHandlerTest {
                         "Content-Type" to "application/json"
                     )
                 )
-                .withBody("""{"greeting": "hello", bday: "2000-01-01"}"""), mockk()
+                .withBody("""{"greeting": "hello", bday: "2000-01-01"}"""),
+            mockk()
         )
         assert(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
@@ -300,7 +325,8 @@ class RequestHandlerTest {
                         "Content-Type" to "application/json"
                     )
                 )
-                .withBody(null), mockk()
+                .withBody(null),
+            mockk()
         )
         assert(response.statusCode).isEqualTo(400)
         assert(mapper.readValue<ApiError>(response.body).code).isEqualTo("REQUEST_BODY_MISSING")
@@ -317,7 +343,8 @@ class RequestHandlerTest {
                         "Content-Type" to "application/json"
                     )
                 )
-                .withBody(null), mockk()
+                .withBody(null),
+            mockk()
         )
         assert(response.statusCode).isEqualTo(200)
         assert(response.body).isEqualTo("""{"greeting":""}""")
@@ -330,7 +357,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-api-exception")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+                .withHeaders(mapOf("Accept" to "application/json")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(400)
@@ -343,7 +371,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-internal-server-error")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+                .withHeaders(mapOf("Accept" to "application/json")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(500)
@@ -354,11 +383,14 @@ class RequestHandlerTest {
 
         val response = testRequestHandler.handleRequest(
             POST("/some")
-                .withHeaders(mapOf(
-                    "Accept" to "application/xhtml+xml, application/json, application/xml;q=0.9, image/webp, */*;q=0.8",
-                    "Content-Type" to "application/json"
-                ))
-                .withBody("""{ "greeting": "some" }"""), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/xhtml+xml, application/json, application/xml;q=0.9, image/webp, */*;q=0.8",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{ "greeting": "some" }"""),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -372,11 +404,14 @@ class RequestHandlerTest {
 
         val response = testRequestHandler.handleRequest(
             POST("/some")
-                .withHeaders(mapOf(
-                    "Accept" to "*/*",
-                    "Content-Type" to "application/json"
-                ))
-                .withBody("""{ "greeting": "some" }"""), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "*/*",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{ "greeting": "some" }"""),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -390,11 +425,14 @@ class RequestHandlerTest {
 
         val response = testRequestHandler.handleRequest(
             POST("/some")
-                .withHeaders(mapOf(
-                    "Accept" to "application/vnd.moia.v1+json",
-                    "Content-Type" to "application/json"
-                ))
-                .withBody("""{ "greeting": "some" }"""), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/vnd.moia.v1+json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{ "greeting": "some" }"""),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -406,11 +444,14 @@ class RequestHandlerTest {
 
         val response = testRequestHandler.handleRequest(
             POST("/some")
-                .withHeaders(mapOf(
-                    "Accept" to "application/vnd.moia.v2+json",
-                    "Content-Type" to "application/json"
-                ))
-                .withBody("""{ "greeting": "v2" }"""), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/vnd.moia.v2+json",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{ "greeting": "v2" }"""),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -423,11 +464,14 @@ class RequestHandlerTest {
 
         val response = testRequestHandler.handleRequest(
             POST("/some")
-                .withHeaders(mapOf(
-                    "Accept" to "*",
-                    "Content-Type" to "application/json"
-                ))
-                .withBody("""{ "greeting": "some" }"""), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "*",
+                        "Content-Type" to "application/json"
+                    )
+                )
+                .withBody("""{ "greeting": "some" }"""),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(406)
@@ -438,10 +482,13 @@ class RequestHandlerTest {
 
         val response = TestRequestHandlerAuthorization().handleRequest(
             GET("/some")
-                .withHeaders(mapOf(
-                    "Accept" to "application/json",
-                    "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I"
-                )), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I"
+                    )
+                ),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -452,10 +499,13 @@ class RequestHandlerTest {
 
         val response = TestRequestHandlerCustomAuthorizationHeader().handleRequest(
             GET("/some")
-                .withHeaders(mapOf(
-                    "Accept" to "application/json",
-                    "Custom-Auth" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I"
-                )), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Custom-Auth" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I"
+                    )
+                ),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -466,10 +516,13 @@ class RequestHandlerTest {
 
         val response = TestRequestHandlerAuthorization().handleRequest(
             GET("/some")
-                .withHeaders(mapOf(
-                    "Accept" to "application/json",
-                    "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24yIn0.RA8ERppuFmastqFN-6C98WqMEE7L6h88WylMeq6jh1w"
-                )), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/json",
+                        "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24yIn0.RA8ERppuFmastqFN-6C98WqMEE7L6h88WylMeq6jh1w"
+                    )
+                ),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(403)
@@ -549,12 +602,16 @@ class RequestHandlerTest {
     fun `Should handle query parameters successfully`() {
         TestQueryParamParsingHandler().handleRequest(
             GET("/search")
-                .withQueryStringParameters(mapOf(
-                    "testQueryParam" to "foo"
-                ))
-                .withMultiValueQueryStringParameters(mapOf(
-                    "testMultiValueQueryStringParam" to listOf("foo", "bar")
-                )),
+                .withQueryStringParameters(
+                    mapOf(
+                        "testQueryParam" to "foo"
+                    )
+                )
+                .withMultiValueQueryStringParameters(
+                    mapOf(
+                        "testMultiValueQueryStringParam" to listOf("foo", "bar")
+                    )
+                ),
             mockk()
         )
         TestQueryParamParsingHandler().handleRequest(
@@ -644,11 +701,13 @@ class RequestHandlerTest {
         }
 
         override fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
-            { JwtPermissionHandler(
-                request = it,
-                permissionsClaim = "permissions",
-                permissionSeparator = ","
-            ) }
+            {
+                JwtPermissionHandler(
+                    request = it,
+                    permissionsClaim = "permissions",
+                    permissionSeparator = ","
+                )
+            }
     }
 
     class TestRequestHandlerCustomAuthorizationHeader : RequestHandler() {
@@ -659,13 +718,16 @@ class RequestHandlerTest {
         }
 
         override fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
-            { JwtPermissionHandler(
-                accessor = JwtAccessor(
-                    request = it,
-                    authorizationHeaderName = "custom-auth"),
-                permissionsClaim = "permissions",
-                permissionSeparator = ","
-            ) }
+            {
+                JwtPermissionHandler(
+                    accessor = JwtAccessor(
+                        request = it,
+                        authorizationHeaderName = "custom-auth"
+                    ),
+                    permissionsClaim = "permissions",
+                    permissionSeparator = ","
+                )
+            }
     }
 
     class TestRequestHandlerWithFilter : RequestHandler() {
@@ -743,11 +805,13 @@ class RequestHandlerTest {
             }.producing("application/json")
 
             POST("/somes") { r: Request<List<TestRequest>> ->
-                ResponseEntity.ok(r.body.map {
-                    TestResponse(
-                        it.greeting
-                    )
-                }.toList())
+                ResponseEntity.ok(
+                    r.body.map {
+                        TestResponse(
+                            it.greeting
+                        )
+                    }.toList()
+                )
             }
             POST("/no-content") { _: Request<TestRequest> ->
                 ResponseEntity.noContent()

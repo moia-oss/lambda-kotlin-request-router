@@ -4,16 +4,16 @@ import assertk.assert
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
-import io.moia.router.Request
-import io.moia.router.ResponseEntity
-import io.moia.router.Router.Companion.router
-import io.moia.router.bodyAsBytes
-import io.moia.router.proto.sample.SampleOuterClass.Sample
 import io.mockk.mockk
 import io.moia.router.ApiError
 import io.moia.router.ApiException
 import io.moia.router.GET
+import io.moia.router.Request
+import io.moia.router.ResponseEntity
+import io.moia.router.Router.Companion.router
 import io.moia.router.UnprocessableEntityError
+import io.moia.router.bodyAsBytes
+import io.moia.router.proto.sample.SampleOuterClass.Sample
 import org.junit.jupiter.api.Test
 import java.util.Base64
 
@@ -28,7 +28,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-proto")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/json")), mockk()
+                .withHeaders(mapOf("Accept" to "application/json")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -42,7 +43,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-proto")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/vnd.moia.v1+json")), mockk()
+                .withHeaders(mapOf("Accept" to "application/vnd.moia.v1+json")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -56,7 +58,8 @@ class RequestHandlerTest {
             APIGatewayProxyRequestEvent()
                 .withPath("/some-proto")
                 .withHttpMethod("GET")
-                .withHeaders(mapOf("Accept" to "application/x-protobuf")), mockk()
+                .withHeaders(mapOf("Accept" to "application/x-protobuf")),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -73,10 +76,13 @@ class RequestHandlerTest {
                 .withPath("/some-proto")
                 .withHttpMethod("POST")
                 .withBody(Base64.getEncoder().encodeToString(request.toByteArray()))
-                .withHeaders(mapOf(
-                    "Accept" to "application/x-protobuf",
-                    "Content-Type" to "application/x-protobuf"
-                )), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/x-protobuf",
+                        "Content-Type" to "application/x-protobuf"
+                    )
+                ),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(200)
@@ -89,9 +95,12 @@ class RequestHandlerTest {
 
         val response = testRequestHandler.handleRequest(
             GET("/some-proto")
-                .withHeaders(mapOf(
-                    "Accept" to "text/plain"
-                )), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "text/plain"
+                    )
+                ),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(406)
@@ -103,9 +112,12 @@ class RequestHandlerTest {
 
         val response = testRequestHandler.handleRequest(
             GET("/some-error")
-                .withHeaders(mapOf(
-                    "Accept" to "application/x-protobuf"
-                )), mockk()
+                .withHeaders(
+                    mapOf(
+                        "Accept" to "application/x-protobuf"
+                    )
+                ),
+            mockk()
         )
 
         assert(response.statusCode).isEqualTo(400)

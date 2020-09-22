@@ -76,7 +76,7 @@ open class JwtPermissionHandler(
             ?.let { it[permissionsClaim] }
             ?.let {
                 when (it) {
-                    is List<*> -> (it as List<String>).toSet()
+                    is List<*> -> it.filterIsInstance(String::class.java).toSet()
                     is String -> it.split(permissionSeparator).map { s -> s.trim() }.toSet()
                     else -> null
                 }
