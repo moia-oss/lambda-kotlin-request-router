@@ -58,8 +58,10 @@ class JwtPermissionHandlerTest {
     @Test
     fun `should extract permissions from custom permissions claim`() {
         val handler = JwtPermissionHandler(
-            accessor = JwtAccessor(APIGatewayProxyRequestEvent()
-                .withHeader("Authorization", jwtWithCustomClaimAndSeparator)),
+            accessor = JwtAccessor(
+                APIGatewayProxyRequestEvent()
+                    .withHeader("Authorization", jwtWithCustomClaimAndSeparator)
+            ),
             permissionsClaim = "userRights",
             permissionSeparator = ","
         )
@@ -97,6 +99,10 @@ class JwtPermissionHandlerTest {
     }
 
     private fun permissionHandler(authHeader: String) =
-        JwtPermissionHandler(JwtAccessor(APIGatewayProxyRequestEvent()
-            .withHeader("Authorization", authHeader)))
+        JwtPermissionHandler(
+            JwtAccessor(
+                APIGatewayProxyRequestEvent()
+                    .withHeader("Authorization", authHeader)
+            )
+        )
 }

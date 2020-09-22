@@ -1,11 +1,11 @@
 package io.moia.router.openapi
 
+import io.mockk.mockk
 import io.moia.router.GET
 import io.moia.router.Request
 import io.moia.router.RequestHandler
 import io.moia.router.ResponseEntity
 import io.moia.router.Router
-import io.mockk.mockk
 import org.assertj.core.api.BDDAssertions.thenThrownBy
 import org.junit.jupiter.api.Test
 

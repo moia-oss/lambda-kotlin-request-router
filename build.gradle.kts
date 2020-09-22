@@ -10,11 +10,11 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version "1.3.21"
+    kotlin("jvm") version "1.4.10"
     `maven-publish`
     jacoco
-    id("com.github.kt3k.coveralls") version "2.10.1"
-    id("org.jmailen.kotlinter") version "1.22.0"
+    id("com.github.kt3k.coveralls") version "2.10.2"
+    id("org.jmailen.kotlinter") version "3.2.0"
 }
 
 group = "com.github.moia-dev"

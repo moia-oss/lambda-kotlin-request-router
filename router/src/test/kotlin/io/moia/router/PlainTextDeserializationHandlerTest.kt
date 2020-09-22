@@ -26,18 +26,34 @@ class PlainTextDeserializationHandlerTest {
 
     @Test
     fun `should support text`() {
-        assertTrue(PlainTextDeserializationHandler.supports(APIGatewayProxyRequestEvent()
-            .withHeader("content-type", "text/plain")))
-        assertTrue(PlainTextDeserializationHandler.supports(APIGatewayProxyRequestEvent()
-            .withHeader("content-type", "text/csv")))
+        assertTrue(
+            PlainTextDeserializationHandler.supports(
+                APIGatewayProxyRequestEvent()
+                    .withHeader("content-type", "text/plain")
+            )
+        )
+        assertTrue(
+            PlainTextDeserializationHandler.supports(
+                APIGatewayProxyRequestEvent()
+                    .withHeader("content-type", "text/csv")
+            )
+        )
     }
 
     @Test
     fun `should not support anything else than text`() {
-        assertFalse(PlainTextDeserializationHandler.supports(APIGatewayProxyRequestEvent()
-            .withHeader("content-type", "image/png")))
-        assertFalse(PlainTextDeserializationHandler.supports(APIGatewayProxyRequestEvent()
-            .withHeader("content-type", "application/json")))
+        assertFalse(
+            PlainTextDeserializationHandler.supports(
+                APIGatewayProxyRequestEvent()
+                    .withHeader("content-type", "image/png")
+            )
+        )
+        assertFalse(
+            PlainTextDeserializationHandler.supports(
+                APIGatewayProxyRequestEvent()
+                    .withHeader("content-type", "application/json")
+            )
+        )
     }
     @Test
     fun `should not support anything when content type is null`() {

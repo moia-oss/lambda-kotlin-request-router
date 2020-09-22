@@ -44,28 +44,32 @@ class ValidatingRequestRouterWrapperTest {
     @Test
     fun `should skip validation`() {
         val response = ValidatingRequestRouterWrapper(InvalidTestRequestHandler(), "openapi.yml")
-                .handleRequestSkippingRequestAndResponseValidation(GET("/path-not-documented").withAcceptHeader("application/json"), mockk())
+            .handleRequestSkippingRequestAndResponseValidation(GET("/path-not-documented").withAcceptHeader("application/json"), mockk())
         then(response.statusCode).isEqualTo(404)
     }
 
     @Test
     fun `should apply additional request validation`() {
-        thenThrownBy { ValidatingRequestRouterWrapper(
-            delegate = OpenApiValidatorTest.TestRequestHandler(),
-            specUrlOrPayload = "openapi.yml",
-            additionalRequestValidationFunctions = listOf({ _ -> throw RequestValidationFailedException() }))
-            .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
+        thenThrownBy {
+            ValidatingRequestRouterWrapper(
+                delegate = OpenApiValidatorTest.TestRequestHandler(),
+                specUrlOrPayload = "openapi.yml",
+                additionalRequestValidationFunctions = listOf({ _ -> throw RequestValidationFailedException() })
+            )
+                .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
         }
             .isInstanceOf(RequestValidationFailedException::class.java)
     }
 
     @Test
     fun `should apply additional response validation`() {
-        thenThrownBy { ValidatingRequestRouterWrapper(
-            delegate = OpenApiValidatorTest.TestRequestHandler(),
-            specUrlOrPayload = "openapi.yml",
-            additionalResponseValidationFunctions = listOf({ _, _ -> throw ResponseValidationFailedException() }))
-            .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
+        thenThrownBy {
+            ValidatingRequestRouterWrapper(
+                delegate = OpenApiValidatorTest.TestRequestHandler(),
+                specUrlOrPayload = "openapi.yml",
+                additionalResponseValidationFunctions = listOf({ _, _ -> throw ResponseValidationFailedException() })
+            )
+                .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
         }
             .isInstanceOf(ResponseValidationFailedException::class.java)
     }

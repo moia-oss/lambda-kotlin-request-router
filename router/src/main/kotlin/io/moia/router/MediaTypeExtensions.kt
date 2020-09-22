@@ -21,7 +21,7 @@ fun MediaType.isCompatibleWith(other: MediaType): Boolean =
         true
     else {
         type() == other.type() &&
-        (subtype().contains("+") && other.subtype().contains("+")) &&
+            (subtype().contains("+") && other.subtype().contains("+")) &&
             this.subtype().substringBeforeLast("+") == "*" &&
-                this.subtype().substringAfterLast("+") == other.subtype().substringAfterLast("+")
+            this.subtype().substringAfterLast("+") == other.subtype().substringAfterLast("+")
     }
