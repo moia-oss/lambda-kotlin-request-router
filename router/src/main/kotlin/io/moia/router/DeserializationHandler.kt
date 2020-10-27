@@ -44,14 +44,14 @@ class DeserializationHandlerChain(private val handlers: List<DeserializationHand
 
 class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : DeserializationHandler {
 
-    private val json = MediaType.parse("application/json")
-    private val jsonStructuredSuffixWildcard = MediaType.parse("application/*+json")
+    private val json = MediaType.parse("application/json; charset=UTF-8")
+    private val jsonStructuredSuffixWildcard = MediaType.parse("application/*+json; charset=UTF-8")
 
     override fun supports(input: APIGatewayProxyRequestEvent) =
         if (input.contentType() == null)
             false
         else {
-            MediaType.parse(input.contentType()!!).withoutParameters()
+            MediaType.parse(input.contentType()!!)
                 .let { json.isCompatibleWith(it) || jsonStructuredSuffixWildcard.isCompatibleWith(it) }
         }
 
