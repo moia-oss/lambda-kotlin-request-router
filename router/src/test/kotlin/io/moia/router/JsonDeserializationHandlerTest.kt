@@ -57,4 +57,20 @@ class JsonDeserializationHandlerTest {
             )
         )
     }
+
+    @Test
+    fun `should support json with charset parameter`() {
+        assertTrue(
+            deserializationHandler.supports(
+                APIGatewayProxyRequestEvent()
+                    .withHeader("content-type", "application/json; charset=UTF-8")
+            )
+        )
+        assertTrue(
+            deserializationHandler.supports(
+                APIGatewayProxyRequestEvent()
+                    .withHeader("content-type", "application/vnd.moia.v1+json; charset=UTF-8")
+            )
+        )
+    }
 }

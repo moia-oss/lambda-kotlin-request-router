@@ -51,7 +51,8 @@ class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : Deser
         if (input.contentType() == null)
             false
         else {
-            MediaType.parse(input.contentType()!!).let { json.isCompatibleWith(it) || jsonStructuredSuffixWildcard.isCompatibleWith(it) }
+            MediaType.parse(input.contentType()!!).withoutParameters()
+                .let { json.isCompatibleWith(it) || jsonStructuredSuffixWildcard.isCompatibleWith(it) }
         }
 
     override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? {
