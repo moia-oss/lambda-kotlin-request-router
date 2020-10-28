@@ -20,8 +20,7 @@ fun MediaType.isCompatibleWith(other: MediaType): Boolean =
     if (this.`is`(other))
         true
     else {
-        type() == other.type() &&
-            (subtype().contains("+") && other.subtype().contains("+")) &&
-            this.subtype().substringBeforeLast("+") == "*" &&
-            this.subtype().substringAfterLast("+") == other.subtype().substringAfterLast("+")
+        type() == other.type() && (subtype().contains("+") && other.subtype().contains("+")) && this.subtype()
+            .substringBeforeLast("+") == "*" && this.subtype().substringAfterLast("+") == other.subtype()
+            .substringAfterLast("+") && (other.parameters().isEmpty || this.parameters() == other.parameters())
     }
