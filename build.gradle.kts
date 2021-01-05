@@ -14,7 +14,7 @@ plugins {
     `maven-publish`
     jacoco
     id("com.github.kt3k.coveralls") version "2.10.2"
-    id("org.jmailen.kotlinter") version "3.2.0"
+    id("org.jmailen.kotlinter") version "3.3.0"
 }
 
 group = "com.github.moia-dev"
