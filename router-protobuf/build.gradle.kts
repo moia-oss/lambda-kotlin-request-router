@@ -16,7 +16,7 @@ dependencies {
     compile("org.slf4j:slf4j-api:1.7.30")
     compile("com.google.protobuf:protobuf-java:3.13.0")
     compile("com.google.protobuf:protobuf-java-util:3.13.0")
-    compile("com.google.guava:guava:29.0-jre")
+    compile("com.google.guava:guava:30.1-jre")
     compile(project(":router"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.0")
