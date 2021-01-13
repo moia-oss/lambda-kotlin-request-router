@@ -16,7 +16,7 @@
 
 package io.moia.router
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEmpty
 import assertk.assertions.isNotNull
@@ -35,9 +35,9 @@ class ResponseEntityTest {
 
         val response = ResponseEntity.ok(body, headers)
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.headers).isNotEmpty()
-        assert(response.body).isNotNull()
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.headers).isNotEmpty()
+        assertThat(response.body).isNotNull()
     }
 
     @Test
@@ -45,9 +45,9 @@ class ResponseEntityTest {
 
         val response = ResponseEntity.accepted(body, headers)
 
-        assert(response.statusCode).isEqualTo(202)
-        assert(response.headers).isNotEmpty()
-        assert(response.body).isNotNull()
+        assertThat(response.statusCode).isEqualTo(202)
+        assertThat(response.headers).isNotEmpty()
+        assertThat(response.body).isNotNull()
     }
 
     @Test
@@ -55,9 +55,9 @@ class ResponseEntityTest {
 
         val response = ResponseEntity.noContent(headers)
 
-        assert(response.statusCode).isEqualTo(204)
-        assert(response.headers).isNotEmpty()
-        assert(response.body).isNull()
+        assertThat(response.statusCode).isEqualTo(204)
+        assertThat(response.headers).isNotEmpty()
+        assertThat(response.body).isNull()
     }
 
     @Test
@@ -65,9 +65,9 @@ class ResponseEntityTest {
 
         val response = ResponseEntity.badRequest(body, headers)
 
-        assert(response.statusCode).isEqualTo(400)
-        assert(response.headers).isNotEmpty()
-        assert(response.body).isNotNull()
+        assertThat(response.statusCode).isEqualTo(400)
+        assertThat(response.headers).isNotEmpty()
+        assertThat(response.body).isNotNull()
     }
 
     @Test
@@ -75,9 +75,9 @@ class ResponseEntityTest {
 
         val response = ResponseEntity.notFound(body, headers)
 
-        assert(response.statusCode).isEqualTo(404)
-        assert(response.headers).isNotEmpty()
-        assert(response.body).isNotNull()
+        assertThat(response.statusCode).isEqualTo(404)
+        assertThat(response.headers).isNotEmpty()
+        assertThat(response.body).isNotNull()
     }
 
     @Test
@@ -85,8 +85,8 @@ class ResponseEntityTest {
 
         val response = ResponseEntity.unprocessableEntity(body, headers)
 
-        assert(response.statusCode).isEqualTo(422)
-        assert(response.headers).isNotEmpty()
-        assert(response.body).isNotNull()
+        assertThat(response.statusCode).isEqualTo(422)
+        assertThat(response.headers).isNotEmpty()
+        assertThat(response.body).isNotNull()
     }
 }

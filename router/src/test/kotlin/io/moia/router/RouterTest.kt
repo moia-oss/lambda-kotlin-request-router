@@ -16,7 +16,7 @@
 
 package io.moia.router
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.hasSize
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
@@ -36,12 +36,12 @@ class RouterTest {
             }
         }
 
-        assert(router.routes).hasSize(1)
+        assertThat(router.routes).hasSize(1)
         with(router.routes.first().requestPredicate) {
-            assert(method).isEqualTo("GET")
-            assert(pathPattern).isEqualTo("/some")
-            assert(consumes).isEmpty()
-            assert(produces).isEqualTo(setOf("application/json"))
+            assertThat(method).isEqualTo("GET")
+            assertThat(pathPattern).isEqualTo("/some")
+            assertThat(consumes).isEmpty()
+            assertThat(produces).isEqualTo(setOf("application/json"))
         }
     }
 
@@ -67,12 +67,12 @@ class RouterTest {
                 .consuming("text/plain")
         }
 
-        assert(router.routes).hasSize(1)
+        assertThat(router.routes).hasSize(1)
         with(router.routes.first().requestPredicate) {
-            assert(method).isEqualTo("POST")
-            assert(pathPattern).isEqualTo("/some")
-            assert(consumes).isEqualTo(setOf("text/plain"))
-            assert(produces).isEqualTo(setOf("text/plain"))
+            assertThat(method).isEqualTo("POST")
+            assertThat(pathPattern).isEqualTo("/some")
+            assertThat(consumes).isEqualTo(setOf("text/plain"))
+            assertThat(produces).isEqualTo(setOf("text/plain"))
         }
     }
 
@@ -88,12 +88,12 @@ class RouterTest {
             }
         }
 
-        assert(router.routes).hasSize(1)
+        assertThat(router.routes).hasSize(1)
         with(router.routes.first().requestPredicate) {
-            assert(method).isEqualTo("POST")
-            assert(pathPattern).isEqualTo("/some")
-            assert(consumes).isEqualTo(setOf("text/plain"))
-            assert(produces).isEqualTo(setOf("text/plain"))
+            assertThat(method).isEqualTo("POST")
+            assertThat(pathPattern).isEqualTo("/some")
+            assertThat(consumes).isEqualTo(setOf("text/plain"))
+            assertThat(produces).isEqualTo(setOf("text/plain"))
         }
     }
 
@@ -104,7 +104,7 @@ class RouterTest {
                 ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
             }
         }
-        assert(router.routes).hasSize(1)
+        assertThat(router.routes).hasSize(1)
         with(router.routes.first().requestPredicate) {
             assertTrue(UriTemplate.from(pathPattern).matches("/some/sub/sub/sub/path"))
         }
@@ -118,7 +118,7 @@ class RouterTest {
             }
         }
         with(router.routes.first().requestPredicate) {
-            assert(consumes).isEqualTo(setOf<String>())
+            assertThat(consumes).isEqualTo(setOf<String>())
         }
     }
 
@@ -139,6 +139,6 @@ class RouterTest {
                 .withRequestContext(context),
             Unit
         )
-        assert(request.requestContext.authorizer!!["claims"]).isEqualTo(claims)
+        assertThat(request.requestContext.authorizer!!["claims"]).isEqualTo(claims)
     }
 }

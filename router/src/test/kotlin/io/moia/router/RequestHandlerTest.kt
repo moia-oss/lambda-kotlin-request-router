@@ -16,7 +16,7 @@
 
 package io.moia.router
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isNotNull
@@ -46,8 +46,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""{"greeting":"Hello"}""")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo("""{"greeting":"Hello"}""")
     }
 
     @Test
@@ -61,8 +61,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""{"greeting":"Hello me"}""")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo("""{"greeting":"Hello me"}""")
     }
 
     @Test
@@ -76,7 +76,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(406)
+        assertThat(response.statusCode).isEqualTo(406)
     }
 
     @Test
@@ -95,7 +95,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(415)
+        assertThat(response.statusCode).isEqualTo(415)
     }
 
     @Test
@@ -113,8 +113,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""{"greeting":"some"}""")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo("""{"greeting":"some"}""")
     }
 
     @Test
@@ -132,8 +132,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""[{"greeting":"some"},{"greeting":"some1"}]""")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo("""[{"greeting":"some"},{"greeting":"some1"}]""")
     }
 
     @Test
@@ -152,7 +152,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(405)
+        assertThat(response.statusCode).isEqualTo(405)
     }
 
     @Test
@@ -166,7 +166,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(404)
+        assertThat(response.statusCode).isEqualTo(404)
     }
 
     @Test
@@ -181,8 +181,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(handler.filterInvocations).isEqualTo(2)
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(handler.filterInvocations).isEqualTo(2)
     }
 
     @Test
@@ -197,9 +197,9 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(500)
-        assert(response.headers["header"]).isEqualTo("value")
-        assert(handler.filterInvocations).isEqualTo(2)
+        assertThat(response.statusCode).isEqualTo(500)
+        assertThat(response.headers["header"]).isEqualTo("value")
+        assertThat(handler.filterInvocations).isEqualTo(2)
     }
 
     @Test
@@ -219,7 +219,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
+        assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test
@@ -236,7 +236,7 @@ class RequestHandlerTest {
                 .withBody("{}"),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(422)
+        assertThat(response.statusCode).isEqualTo(422)
     }
 
     @Test
@@ -253,14 +253,14 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello","age": "a"}"""),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(422)
+        assertThat(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
-        assert(body.size).isEqualTo(1)
+        assertThat(body.size).isEqualTo(1)
         with(body.first()) {
-            assert(code).isEqualTo("FIELD")
-            assert(message).isEqualTo("INVALID_FIELD_FORMAT")
-            assert(path).isEqualTo("age")
-            assert(details.isNotEmpty()).isEqualTo(false)
+            assertThat(code).isEqualTo("FIELD")
+            assertThat(message).isEqualTo("INVALID_FIELD_FORMAT")
+            assertThat(path).isEqualTo("age")
+            assertThat(details.isNotEmpty()).isEqualTo(false)
         }
     }
 
@@ -278,14 +278,14 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello","age": 1, "bday": "2000-01-AA"}"""),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(422)
+        assertThat(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
-        assert(body.size).isEqualTo(1)
+        assertThat(body.size).isEqualTo(1)
         with(body.first()) {
-            assert(code).isEqualTo("FIELD")
-            assert(message).isEqualTo("INVALID_FIELD_FORMAT")
-            assert(path).isEqualTo("bday")
-            assert(details.isNotEmpty()).isEqualTo(true)
+            assertThat(code).isEqualTo("FIELD")
+            assertThat(message).isEqualTo("INVALID_FIELD_FORMAT")
+            assertThat(path).isEqualTo("bday")
+            assertThat(details.isNotEmpty()).isEqualTo(true)
         }
     }
 
@@ -303,14 +303,14 @@ class RequestHandlerTest {
                 .withBody("""{"greeting": "hello", bday: "2000-01-01"}"""),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(422)
+        assertThat(response.statusCode).isEqualTo(422)
         val body = mapper.readValue<List<UnprocessableEntityError>>(response.body)
-        assert(body.size).isEqualTo(1)
+        assertThat(body.size).isEqualTo(1)
         with(body.first()) {
-            assert(code).isEqualTo("ENTITY")
-            assert(message).isEqualTo("INVALID_ENTITY")
-            assert(path).isEqualTo("")
-            assert(details.isNotEmpty()).isEqualTo(true)
+            assertThat(code).isEqualTo("ENTITY")
+            assertThat(message).isEqualTo("INVALID_ENTITY")
+            assertThat(path).isEqualTo("")
+            assertThat(details.isNotEmpty()).isEqualTo(true)
         }
     }
 
@@ -328,8 +328,8 @@ class RequestHandlerTest {
                 .withBody(null),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(400)
-        assert(mapper.readValue<ApiError>(response.body).code).isEqualTo("REQUEST_BODY_MISSING")
+        assertThat(response.statusCode).isEqualTo(400)
+        assertThat(mapper.readValue<ApiError>(response.body).code).isEqualTo("REQUEST_BODY_MISSING")
     }
 
     @Test
@@ -346,8 +346,8 @@ class RequestHandlerTest {
                 .withBody(null),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""{"greeting":""}""")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo("""{"greeting":""}""")
     }
 
     @Test
@@ -361,7 +361,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(400)
+        assertThat(response.statusCode).isEqualTo(400)
     }
 
     @Test
@@ -375,7 +375,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(500)
+        assertThat(response.statusCode).isEqualTo(500)
     }
 
     @Test
@@ -393,10 +393,10 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/json")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/json")
 
-        assert(response.body).isEqualTo("""{"greeting":"some"}""")
+        assertThat(response.body).isEqualTo("""{"greeting":"some"}""")
     }
 
     @Test
@@ -414,10 +414,10 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/vnd.moia.v2+json")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/vnd.moia.v2+json")
 
-        assert(response.body).isEqualTo("""{"greeting":"v2"}""")
+        assertThat(response.body).isEqualTo("""{"greeting":"v2"}""")
     }
 
     @Test
@@ -435,8 +435,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""{"greeting":"some"}""")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo("""{"greeting":"some"}""")
     }
 
     @Test
@@ -454,9 +454,9 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""{"greeting":"v2"}""")
-        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/vnd.moia.v2+json")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo("""{"greeting":"v2"}""")
+        assertThat(response.getHeaderCaseInsensitive("content-type")).isEqualTo("application/vnd.moia.v2+json")
     }
 
     @Test
@@ -474,7 +474,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(406)
+        assertThat(response.statusCode).isEqualTo(406)
     }
 
     @Test
@@ -491,7 +491,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
+        assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test
@@ -508,7 +508,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
+        assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test
@@ -525,7 +525,7 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(403)
+        assertThat(response.statusCode).isEqualTo(403)
     }
 
     @Test
@@ -534,7 +534,7 @@ class RequestHandlerTest {
             GET("/some"),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(406)
+        assertThat(response.statusCode).isEqualTo(406)
     }
 
     @Test
@@ -543,7 +543,7 @@ class RequestHandlerTest {
             GET(),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(404)
+        assertThat(response.statusCode).isEqualTo(404)
     }
 
     @Test
@@ -555,8 +555,8 @@ class RequestHandlerTest {
                 .withBody("""{ "greeting": "some" }"""),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(204)
-        assert(response.body).isNullOrEmpty()
+        assertThat(response.statusCode).isEqualTo(204)
+        assertThat(response.body).isNullOrEmpty()
     }
 
     @Test
@@ -568,8 +568,8 @@ class RequestHandlerTest {
                 .withBody("""{ "greeting": "some" }"""),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(201)
-        assert(response.headers.containsKey("location")).isFalse()
+        assertThat(response.statusCode).isEqualTo(201)
+        assertThat(response.headers.containsKey("location")).isFalse()
     }
 
     @Test
@@ -581,9 +581,9 @@ class RequestHandlerTest {
                 .withBody("""{ "greeting": "some" }"""),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(201)
-        assert(response.headers.containsKey("location")).isTrue()
-        assert(response.headers["location"]).isEqualTo("http://localhost/test")
+        assertThat(response.statusCode).isEqualTo(201)
+        assertThat(response.headers.containsKey("location")).isTrue()
+        assertThat(response.headers["location"]).isEqualTo("http://localhost/test")
     }
 
     @Test
@@ -595,7 +595,7 @@ class RequestHandlerTest {
                 .withBody("this may be faulty"),
             mockk()
         )
-        assert(response.statusCode).isEqualTo(204)
+        assertThat(response.statusCode).isEqualTo(204)
     }
 
     @Test
@@ -664,12 +664,12 @@ class RequestHandlerTest {
             )
         val response = testRequestHandler.handleRequest(request, mockk())
 
-        assert(request.headers["accept"].toString()).isEqualTo("Application/Json")
-        assert(request.headers["user-agent"].toString())
+        assertThat(request.headers["accept"].toString()).isEqualTo("Application/Json")
+        assertThat(request.headers["user-agent"].toString())
             .isEqualTo(
                 "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
             )
-        assert(response.statusCode).isEqualTo(200)
+        assertThat(response.statusCode).isEqualTo(200)
     }
 
     @Test
@@ -688,9 +688,9 @@ class RequestHandlerTest {
 
         val response = SampleRouter().handleRequest(request, mockk())
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.getHeaderCaseInsensitive("content-type")).isEqualTo("text/plain")
-        assert(response.body).isEqualTo("just text")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.getHeaderCaseInsensitive("content-type")).isEqualTo("text/plain")
+        assertThat(response.body).isEqualTo("just text")
     }
 
     class TestRequestHandlerAuthorization : RequestHandler() {
@@ -772,7 +772,7 @@ class RequestHandlerTest {
                 throw IllegalArgumentException("boom")
             }
             GET("/some/{id}") { r: Request<Unit> ->
-                assert(r.pathParameters.containsKey("id")).isTrue()
+                assertThat(r.pathParameters.containsKey("id")).isTrue()
                 ResponseEntity.ok(
                     TestResponse(
                         "Hello ${r.getPathParameter("id")}"
@@ -836,12 +836,12 @@ class RequestHandlerTest {
 
         override val router = router {
             GET("/search") { r: Request<TestRequestHandler.TestRequest> ->
-                assert(r.getQueryParameter("testQueryParam")).isNotNull()
-                assert(r.getQueryParameter("testQueryParam")).isEqualTo("foo")
-                assert(r.queryParameters!!["testQueryParam"]).isNotNull()
-                assert(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isNotNull()
-                assert(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isEqualTo(listOf("foo", "bar"))
-                assert(r.multiValueQueryStringParameters!!["testMultiValueQueryStringParam"]).isNotNull()
+                assertThat(r.getQueryParameter("testQueryParam")).isNotNull()
+                assertThat(r.getQueryParameter("testQueryParam")).isEqualTo("foo")
+                assertThat(r.queryParameters!!["testQueryParam"]).isNotNull()
+                assertThat(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isNotNull()
+                assertThat(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isEqualTo(listOf("foo", "bar"))
+                assertThat(r.multiValueQueryStringParameters!!["testMultiValueQueryStringParam"]).isNotNull()
                 ResponseEntity.ok(null)
             }
         }
