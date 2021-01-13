@@ -1,6 +1,6 @@
 package io.moia.router.proto
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
@@ -32,8 +32,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""{"hello":"Hello","request":""}""")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo("""{"hello":"Hello","request":""}""")
     }
 
     @Test
@@ -47,8 +47,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(response.body).isEqualTo("""{"hello":"v1","request":""}""")
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(response.body).isEqualTo("""{"hello":"v1","request":""}""")
     }
 
     @Test
@@ -62,8 +62,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(Sample.parseFrom(response.bodyAsBytes())).isEqualTo(Sample.newBuilder().setHello("Hello").setRequest("").build())
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(Sample.parseFrom(response.bodyAsBytes())).isEqualTo(Sample.newBuilder().setHello("Hello").setRequest("").build())
     }
 
     @Test
@@ -85,9 +85,9 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(200)
-        assert(Sample.parseFrom(response.bodyAsBytes())).isEqualTo(request)
-        assert(response.isBase64Encoded).isTrue()
+        assertThat(response.statusCode).isEqualTo(200)
+        assertThat(Sample.parseFrom(response.bodyAsBytes())).isEqualTo(request)
+        assertThat(response.isBase64Encoded).isTrue()
     }
 
     @Test
@@ -103,8 +103,8 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(406)
-        assert(io.moia.router.proto.sample.SampleOuterClass.ApiError.parseFrom(response.bodyAsBytes()).getCode()).isEqualTo("NOT_ACCEPTABLE")
+        assertThat(response.statusCode).isEqualTo(406)
+        assertThat(io.moia.router.proto.sample.SampleOuterClass.ApiError.parseFrom(response.bodyAsBytes()).getCode()).isEqualTo("NOT_ACCEPTABLE")
     }
 
     @Test
@@ -120,10 +120,10 @@ class RequestHandlerTest {
             mockk()
         )
 
-        assert(response.statusCode).isEqualTo(400)
+        assertThat(response.statusCode).isEqualTo(400)
         with(io.moia.router.proto.sample.SampleOuterClass.ApiError.parseFrom(response.bodyAsBytes())) {
-            assert(getCode()).isEqualTo("BOOM")
-            assert(getMessage()).isEqualTo("boom")
+            assertThat(getCode()).isEqualTo("BOOM")
+            assertThat(getMessage()).isEqualTo("boom")
         }
     }
 
