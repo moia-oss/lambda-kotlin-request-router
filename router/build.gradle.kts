@@ -7,7 +7,7 @@ dependencies {
     compile("com.amazonaws:aws-lambda-java-events:3.7.0")
     
     compile("org.slf4j:slf4j-api:1.7.30")
-    compile("com.fasterxml.jackson.core:jackson-databind:2.12.0")
+    compile("com.fasterxml.jackson.core:jackson-databind:2.12.1")
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0")
     compile("com.google.guava:guava:30.1-jre")
 
