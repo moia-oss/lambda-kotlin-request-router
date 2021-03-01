@@ -6,7 +6,7 @@ dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(kotlin("reflect"))
 
-    compile("com.atlassian.oai:swagger-request-validator-core:2.12.1")
+    compile("com.atlassian.oai:swagger-request-validator-core:2.15.1")
     compile(project(":router"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.0")
