@@ -1,5 +1,5 @@
 [![](https://jitpack.io/v/moia-oss/lambda-kotlin-request-router.svg)](https://jitpack.io/#moia-oss/lambda-kotlin-request-router)
-[![Build Status](https://travis-ci.org/moia-dev/lambda-kotlin-request-router.svg?branch=master)](https://travis-ci.org/moia-dev/lambda-kotlin-request-router)
+[![Build Status](https://travis-ci.org/moia-oss/lambda-kotlin-request-router.svg?branch=master)](https://travis-ci.org/moia-oss/lambda-kotlin-request-router)
 [![Coverage Status](https://coveralls.io/repos/github/moia-dev/lambda-kotlin-request-router/badge.svg?branch=master)](https://coveralls.io/github/moia-dev/lambda-kotlin-request-router?branch=master)
 # lambda-kotlin-request-router
 
