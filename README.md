@@ -1,6 +1,6 @@
 [![](https://jitpack.io/v/io.moia/lambda-kotlin-request-router.svg)](https://jitpack.io/#io.moia/lambda-kotlin-request-router)
 [![Build Status](https://travis-ci.org/moia-oss/lambda-kotlin-request-router.svg?branch=master)](https://travis-ci.org/moia-oss/lambda-kotlin-request-router)
-[![Coverage Status](https://coveralls.io/repos/github/moia-dev/lambda-kotlin-request-router/badge.svg?branch=master)](https://coveralls.io/github/moia-dev/lambda-kotlin-request-router?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/moia-oss/lambda-kotlin-request-router/badge.svg?branch=master)](https://coveralls.io/github/moia-oss/lambda-kotlin-request-router?branch=master)
 # lambda-kotlin-request-router
 
 A REST request routing layer for AWS lambda handlers written in Kotlin.
