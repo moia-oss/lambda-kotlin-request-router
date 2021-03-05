@@ -1,4 +1,4 @@
-[![](https://jitpack.io/v/moia-oss/lambda-kotlin-request-router.svg)](https://jitpack.io/#moia-oss/lambda-kotlin-request-router)
+[![](https://jitpack.io/v/io.moia/lambda-kotlin-request-router.svg)](https://jitpack.io/#io.moia/lambda-kotlin-request-router)
 [![Build Status](https://travis-ci.org/moia-oss/lambda-kotlin-request-router.svg?branch=master)](https://travis-ci.org/moia-oss/lambda-kotlin-request-router)
 [![Coverage Status](https://coveralls.io/repos/github/moia-dev/lambda-kotlin-request-router/badge.svg?branch=master)](https://coveralls.io/github/moia-dev/lambda-kotlin-request-router?branch=master)
 # lambda-kotlin-request-router
@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.moia-oss.lambda-kotlin-request-router:router:0.9.7' 
+    implementation 'io.moia.lambda-kotlin-request-router:router:0.9.7' 
 }
 
 ```
@@ -163,7 +163,7 @@ So we do no validation of the JWT token.
 The module `router-protobuf` helps to ease implementation of handlers that receive and return protobuf messages.
 
 ```
-implementation 'com.github.moia-dev.lambda-kotlin-request-router:router-protobuf:0.8.8'
+implementation 'io.moia.lambda-kotlin-request-router:router-protobuf:0.9.7'
 ```
 
 A handler implementation that wants to take advantage of the protobuf support should inherit from `ProtoEnabledRequestHandler`.
@@ -214,7 +214,7 @@ This library validates:
 - ...
 
 ```
-testImplementation 'com.github.moia-oss.lambda-kotlin-request-router:router-openapi-request-validator:0.9.7'
+testImplementation 'io.moia.lambda-kotlin-request-router:router-openapi-request-validator:0.9.7'
 ```
 
 ```kotlin
