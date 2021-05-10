@@ -43,7 +43,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent =
         input
-            .apply { headers = headers.mapKeys { it.key.toLowerCase() } }
+            .apply { headers = headers.mapKeys { it.key.lowercase() } }
             .let { router.filter.then(this::handleRequest)(it) }
 
     @Suppress("UNCHECKED_CAST")
