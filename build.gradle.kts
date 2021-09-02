@@ -13,7 +13,7 @@ plugins {
     kotlin("jvm") version "1.4.31"
     `maven-publish`
     jacoco
-    id("com.github.kt3k.coveralls") version "2.10.2"
+    id("com.github.kt3k.coveralls") version "2.12.0"
     id("org.jmailen.kotlinter") version "3.3.0"
 }
 
