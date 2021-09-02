@@ -10,11 +10,11 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version "1.4.31"
+    kotlin("jvm") version "1.5.30"
     `maven-publish`
     jacoco
     id("com.github.kt3k.coveralls") version "2.12.0"
-    id("org.jmailen.kotlinter") version "3.3.0"
+    id("org.jmailen.kotlinter") version "3.5.1"
 }
 
 group = "com.github.moia-dev"
@@ -25,8 +25,8 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(kotlin("reflect"))
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
 }
 
 subprojects {
@@ -42,14 +42,13 @@ subprojects {
 
     tasks {
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.jvmTarget = "11"
         }
 
         withType<Test> {
             useJUnitPlatform()
             testLogging.showStandardStreams = true
         }
-
     }
     
     publishing {

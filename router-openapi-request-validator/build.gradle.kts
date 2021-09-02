@@ -3,11 +3,11 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(kotlin("reflect"))
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
 
-    compile("com.atlassian.oai:swagger-request-validator-core:2.15.1")
-    compile(project(":router"))
+    api("com.atlassian.oai:swagger-request-validator-core:2.15.1")
+    api(project(":router"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.1")
     testImplementation("org.assertj:assertj-core:3.19.0")
