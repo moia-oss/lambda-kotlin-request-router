@@ -31,6 +31,6 @@ dependencies {
 protobuf {
     protoc {
         // The artifact spec for the Protobuf Compiler
-        artifact = "com.google.protobuf:protoc:3.15.3"
+        artifact = "com.google.protobuf:protoc:3.17.3"
     }
 }
