@@ -29,6 +29,7 @@ import com.google.common.net.MediaType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
+import kotlin.reflect.jvm.ExperimentalReflectionOnLambdas
 import kotlin.reflect.jvm.reflect
 
 @Suppress("UnstableApiUsage")
@@ -43,7 +44,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent =
         input
-            .apply { headers = headers.mapKeys { it.key.toLowerCase() } }
+            .apply { headers = headers.mapKeys { it.key.lowercase() } }
             .let { router.filter.then(this::handleRequest)(it) }
 
     @Suppress("UNCHECKED_CAST")
@@ -117,6 +118,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     open fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
         { NoOpPermissionHandler() }
 
+    @ExperimentalReflectionOnLambdas
     private fun deserializeRequest(
         handler: HandlerFunction<Any, Any>,
         input: APIGatewayProxyRequestEvent

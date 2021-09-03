@@ -10,14 +10,14 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(kotlin("reflect"))
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
 
-    compile("org.slf4j:slf4j-api:1.7.30")
-    compile("com.google.protobuf:protobuf-java:3.15.3")
-    compile("com.google.protobuf:protobuf-java-util:3.15.3")
-    compile("com.google.guava:guava:30.1-jre")
-    compile(project(":router"))
+    implementation("org.slf4j:slf4j-api:1.7.30")
+    api("com.google.protobuf:protobuf-java:3.15.3")
+    api("com.google.protobuf:protobuf-java-util:3.15.3")
+    implementation("com.google.guava:guava:30.1-jre")
+    api(project(":router"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.1")
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.23.1")
