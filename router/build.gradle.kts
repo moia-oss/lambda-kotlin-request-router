@@ -11,7 +11,7 @@ dependencies {
     api("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
     api("com.google.guava:guava:31.0.1-jre")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.1")
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
     testImplementation("org.assertj:assertj-core:3.21.0")
