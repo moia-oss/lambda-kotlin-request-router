@@ -13,7 +13,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("org.slf4j:slf4j-api:1.7.32")
     api("com.google.protobuf:protobuf-java:3.17.3")
     api("com.google.protobuf:protobuf-java-util:3.19.1")
     implementation("com.google.guava:guava:31.0.1-jre")
@@ -31,6 +31,6 @@ dependencies {
 protobuf {
     protoc {
         // The artifact spec for the Protobuf Compiler
-        artifact = "com.google.protobuf:protoc:3.17.3"
+        artifact = "com.google.protobuf:protoc:3.19.1"
     }
 }
