@@ -13,7 +13,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    implementation("org.slf4j:slf4j-api:1.7.32")
+    implementation("org.slf4j:slf4j-api:1.7.35")
     api("com.google.protobuf:protobuf-java:3.19.1")
     api("com.google.protobuf:protobuf-java-util:3.19.1")
     implementation("com.google.guava:guava:31.0.1-jre")
