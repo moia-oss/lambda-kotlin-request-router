@@ -28,6 +28,7 @@ import io.mockk.mockk
 import io.moia.router.Router.Companion.router
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class RequestHandlerTest {
@@ -691,6 +692,28 @@ class RequestHandlerTest {
         assertThat(response.statusCode).isEqualTo(200)
         assertThat(response.getHeaderCaseInsensitive("content-type")).isEqualTo("text/plain")
         assertThat(response.body).isEqualTo("just text")
+    }
+
+    @Test
+    fun `should fail for function references when using Kotlin 1_6_10`() {
+        class DummyHandler : RequestHandler() {
+            val dummy = object {
+                fun handler(r: Request<Unit>) = ResponseEntity.ok(Unit)
+            }
+            override fun exceptionToResponseEntity(ex: Exception) = throw ex
+            override val router = router {
+                GET("/some", dummy::handler).producing("application/json")
+            }
+        }
+        assertThrows<IllegalArgumentException> {
+            DummyHandler().handleRequest(
+                APIGatewayProxyRequestEvent()
+                    .withHttpMethod("GET")
+                    .withPath("/some")
+                    .withAcceptHeader("application/json"),
+                mockk()
+            )
+        }
     }
 
     class TestRequestHandlerAuthorization : RequestHandler() {

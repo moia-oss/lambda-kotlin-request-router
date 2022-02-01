@@ -47,6 +47,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             .apply { headers = headers.mapKeys { it.key.lowercase() } }
             .let { router.filter.then(this::handleRequest)(it) }
 
+    @ExperimentalReflectionOnLambdas
     @Suppress("UNCHECKED_CAST")
     private fun handleRequest(input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         log.debug("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input")
@@ -123,9 +124,10 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         handler: HandlerFunction<Any, Any>,
         input: APIGatewayProxyRequestEvent
     ): Any? {
-        val requestType = handler.reflect()!!.parameters.first().type.arguments.first().type
+        val requestType = handler.reflect()?.parameters?.first()?.type?.arguments?.first()?.type
+            ?: throw IllegalArgumentException("reflection failed, try using a real lambda instead of function references (Kotlin 1.6 bug?)")
         return when {
-            requestType?.classifier as KClass<*> == Unit::class -> Unit
+            requestType.classifier as KClass<*> == Unit::class -> Unit
             input.body == null && requestType.isMarkedNullable -> null
             input.body == null -> throw ApiException("no request body present", "REQUEST_BODY_MISSING", 400)
             input.body is String && requestType.classifier as KClass<*> == String::class -> input.body
