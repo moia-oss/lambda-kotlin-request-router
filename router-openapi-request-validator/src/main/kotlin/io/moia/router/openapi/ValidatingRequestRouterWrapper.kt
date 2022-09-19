@@ -31,7 +31,6 @@ class ValidatingRequestRouterWrapper(
         handleRequest(input = input, context = context, skipRequestValidation = true, skipResponseValidation = true)
 
     private fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context, skipRequestValidation: Boolean, skipResponseValidation: Boolean): APIGatewayProxyResponseEvent {
-
         if (!skipRequestValidation) {
             try {
                 openApiValidator.assertValidRequest(input)

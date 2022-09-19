@@ -20,32 +20,38 @@ class OpenApiValidator(val specUrlOrPayload: String) {
 
     fun assertValid(request: APIGatewayProxyRequestEvent, response: APIGatewayProxyResponseEvent) {
         return validate(request, response).let {
-            if (it.hasErrors()) throw ApiInteractionInvalid(
-                specUrlOrPayload,
-                request,
-                response,
-                it
-            )
+            if (it.hasErrors()) {
+                throw ApiInteractionInvalid(
+                    specUrlOrPayload,
+                    request,
+                    response,
+                    it
+                )
+            }
         }
     }
 
     fun assertValidRequest(request: APIGatewayProxyRequestEvent) =
         validator.validateRequest(request.toRequest()).let {
-            if (it.hasErrors()) throw ApiInteractionInvalid(
-                spec = specUrlOrPayload,
-                request = request,
-                validationReport = it
-            )
+            if (it.hasErrors()) {
+                throw ApiInteractionInvalid(
+                    spec = specUrlOrPayload,
+                    request = request,
+                    validationReport = it
+                )
+            }
         }
 
     fun assertValidResponse(request: APIGatewayProxyRequestEvent, response: APIGatewayProxyResponseEvent) =
         request.toRequest().let { r ->
             validator.validateResponse(r.path, r.method, response.toResponse()).let {
-                if (it.hasErrors()) throw ApiInteractionInvalid(
-                    spec = specUrlOrPayload,
-                    request = request,
-                    validationReport = it
-                )
+                if (it.hasErrors()) {
+                    throw ApiInteractionInvalid(
+                        spec = specUrlOrPayload,
+                        request = request,
+                        validationReport = it
+                    )
+                }
             }
         }
 
