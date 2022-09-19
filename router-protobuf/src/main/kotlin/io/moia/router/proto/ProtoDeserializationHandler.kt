@@ -16,9 +16,9 @@ class ProtoDeserializationHandler : DeserializationHandler {
     private val protoStructuredSuffixWildcard = MediaType.parse("application/*+x-protobuf")
 
     override fun supports(input: APIGatewayProxyRequestEvent): Boolean =
-        if (input.contentType() == null)
+        if (input.contentType() == null) {
             false
-        else {
+        } else {
             MediaType.parse(input.contentType()).let { proto.isCompatibleWith(it) || protoStructuredSuffixWildcard.isCompatibleWith(it) }
         }
 
