@@ -31,6 +31,7 @@ class JwtPermissionHandlerTest {
     }
     */
     val jwtWithScopeClaimSpace = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJzY29wZSI6Im9uZSB0d28ifQ.2tPrDymXDejHfVjNlVh4XUj22ZuDrKHP6dvWN7JNAWY"
+
     /*
     {
       "sub": "1234567890",

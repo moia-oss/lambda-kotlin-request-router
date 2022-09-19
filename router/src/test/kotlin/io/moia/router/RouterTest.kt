@@ -79,7 +79,6 @@ class RouterTest {
     @Test
     fun `should register get route with custom default content types`() {
         val router = router {
-
             defaultConsuming = setOf("text/plain")
             defaultProducing = setOf("text/plain")
 

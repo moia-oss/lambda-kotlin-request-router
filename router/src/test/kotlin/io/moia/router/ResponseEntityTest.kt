@@ -32,7 +32,6 @@ class ResponseEntityTest {
 
     @Test
     fun `should process ok response`() {
-
         val response = ResponseEntity.ok(body, headers)
 
         assertThat(response.statusCode).isEqualTo(200)
@@ -42,7 +41,6 @@ class ResponseEntityTest {
 
     @Test
     fun `should process accepted response`() {
-
         val response = ResponseEntity.accepted(body, headers)
 
         assertThat(response.statusCode).isEqualTo(202)
@@ -52,7 +50,6 @@ class ResponseEntityTest {
 
     @Test
     fun `should process no content response`() {
-
         val response = ResponseEntity.noContent(headers)
 
         assertThat(response.statusCode).isEqualTo(204)
@@ -62,7 +59,6 @@ class ResponseEntityTest {
 
     @Test
     fun `should process bad request response`() {
-
         val response = ResponseEntity.badRequest(body, headers)
 
         assertThat(response.statusCode).isEqualTo(400)
@@ -72,7 +68,6 @@ class ResponseEntityTest {
 
     @Test
     fun `should process not found response`() {
-
         val response = ResponseEntity.notFound(body, headers)
 
         assertThat(response.statusCode).isEqualTo(404)
@@ -82,7 +77,6 @@ class ResponseEntityTest {
 
     @Test
     fun `should process unprocessable entity response`() {
-
         val response = ResponseEntity.unprocessableEntity(body, headers)
 
         assertThat(response.statusCode).isEqualTo(422)

@@ -38,7 +38,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should match request`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
@@ -53,7 +52,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should match request with path parameter`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some/me")
@@ -68,7 +66,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should return not acceptable on unsupported accept header`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
@@ -82,7 +79,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should return unsupported media type`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
@@ -101,7 +97,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle request with body`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -120,7 +115,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle request with body as a List`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/somes")
                 .withHeaders(
@@ -139,7 +133,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should return method not allowed`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some")
@@ -158,7 +151,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should return not found`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some-other")
@@ -172,7 +164,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should invoke filter chain`() {
-
         val handler = TestRequestHandlerWithFilter()
         val response = handler.handleRequest(
             APIGatewayProxyRequestEvent()
@@ -188,7 +179,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should invoke filter chain also for non successful requests`() {
-
         val handler = TestRequestHandlerWithFilter()
         val response = handler.handleRequest(
             APIGatewayProxyRequestEvent()
@@ -205,7 +195,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should ignore content-type header when handler expects none`() {
-
         val handler = TestRequestHandlerWithFilter()
         val response = handler.handleRequest(
             APIGatewayProxyRequestEvent()
@@ -225,7 +214,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle deserialization error`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -242,7 +230,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle deserialization error, when field has invalid format`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -267,7 +254,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle deserialization error, when field can not be parsed to class`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -292,7 +278,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle deserialization error, when json can not be parsed`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -317,7 +302,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should return 400 on missing body when content type stated`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -335,7 +319,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle null body when content type is stated and request handler body type is nullable`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some-nullable")
                 .withHeaders(
@@ -353,7 +336,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle api exception`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some-api-exception")
@@ -367,7 +349,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle internal server error`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some-internal-server-error")
@@ -381,7 +362,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle request with a media type range in accept header`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -402,7 +382,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle request with accept all header`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -423,7 +402,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should handle subtype structured suffix wildcard`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -442,7 +420,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should match version`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -462,7 +439,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should fail with 406 Not Acceptable on an unparsable media type`() {
-
         val response = testRequestHandler.handleRequest(
             POST("/some")
                 .withHeaders(
@@ -480,7 +456,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should match request requiring permission`() {
-
         val response = TestRequestHandlerAuthorization().handleRequest(
             GET("/some")
                 .withHeaders(
@@ -497,7 +472,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should match request requiring permission from custom header`() {
-
         val response = TestRequestHandlerCustomAuthorizationHeader().handleRequest(
             GET("/some")
                 .withHeaders(
@@ -514,7 +488,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should fail on missing permission`() {
-
         val response = TestRequestHandlerAuthorization().handleRequest(
             GET("/some")
                 .withHeaders(
