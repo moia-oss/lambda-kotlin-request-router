@@ -23,7 +23,7 @@ dependencies {
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("io.mockk:mockk:1.12.3")
-    testImplementation("org.slf4j:slf4j-simple:1.7.36")
+    testImplementation("org.slf4j:slf4j-simple:2.0.1")
     testImplementation("com.jayway.jsonpath:json-path:2.7.0")
 }
 
