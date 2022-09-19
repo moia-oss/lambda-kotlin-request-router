@@ -48,9 +48,9 @@ class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : Deser
     private val jsonStructuredSuffixWildcard = MediaType.parse("application/*+json; charset=UTF-8")
 
     override fun supports(input: APIGatewayProxyRequestEvent) =
-        if (input.contentType() == null)
+        if (input.contentType() == null) {
             false
-        else {
+        } else {
             MediaType.parse(input.contentType()!!)
                 .let { json.isCompatibleWith(it) || jsonStructuredSuffixWildcard.isCompatibleWith(it) }
         }
@@ -74,10 +74,11 @@ class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : Deser
 object PlainTextDeserializationHandler : DeserializationHandler {
     private val text = MediaType.parse("text/*")
     override fun supports(input: APIGatewayProxyRequestEvent): Boolean =
-        if (input.contentType() == null)
+        if (input.contentType() == null) {
             false
-        else
+        } else {
             MediaType.parse(input.contentType()!!).isCompatibleWith(text)
+        }
 
     override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? =
         input.body

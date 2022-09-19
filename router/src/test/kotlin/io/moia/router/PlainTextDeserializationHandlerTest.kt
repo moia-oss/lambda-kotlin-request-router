@@ -55,6 +55,7 @@ class PlainTextDeserializationHandlerTest {
             )
         )
     }
+
     @Test
     fun `should not support anything when content type is null`() {
         assertFalse(PlainTextDeserializationHandler.supports(APIGatewayProxyRequestEvent()))

@@ -56,7 +56,6 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             val matchResult = routerFunction.requestPredicate.match(input)
             log.debug("match result for route '$routerFunction' is '$matchResult'")
             if (matchResult.match) {
-
                 val matchedAcceptType = routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
                     ?: MediaType.parse(router.defaultContentType)
 
@@ -109,7 +108,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     }
 
     open fun serializationHandlers(): List<SerializationHandler> = listOf(
-        JsonSerializationHandler(objectMapper), PlainTextSerializationHandler()
+        JsonSerializationHandler(objectMapper),
+        PlainTextSerializationHandler()
     )
 
     open fun deserializationHandlers(): List<DeserializationHandler> = listOf(
