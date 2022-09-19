@@ -14,7 +14,7 @@ dependencies {
     implementation(kotlin("reflect"))
 
     implementation("org.slf4j:slf4j-api:1.7.36")
-    api("com.google.protobuf:protobuf-java:3.19.4")
+    api("com.google.protobuf:protobuf-java:3.21.6")
     api("com.google.protobuf:protobuf-java-util:3.21.5")
     implementation("com.google.guava:guava:31.1-jre")
     api(project(":router"))
