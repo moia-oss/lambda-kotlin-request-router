@@ -23,7 +23,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should match request to proto handler and return json`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some-proto")
@@ -38,7 +37,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should match request to proto handler with version accept header and return json`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some-proto")
@@ -53,7 +51,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should match request to proto handler and return proto`() {
-
         val response = testRequestHandler.handleRequest(
             APIGatewayProxyRequestEvent()
                 .withPath("/some-proto")
@@ -68,7 +65,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should match request to proto handler and deserialize and return proto`() {
-
         val request = Sample.newBuilder().setHello("Hello").setRequest("").build()
 
         val response = testRequestHandler.handleRequest(
@@ -92,7 +88,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should return 406-unacceptable error in proto`() {
-
         val response = testRequestHandler.handleRequest(
             GET("/some-proto")
                 .withHeaders(
@@ -109,7 +104,6 @@ class RequestHandlerTest {
 
     @Test
     fun `should return api error in protos`() {
-
         val response = testRequestHandler.handleRequest(
             GET("/some-error")
                 .withHeaders(
