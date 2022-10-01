@@ -12,7 +12,7 @@ dependencies {
     api("com.google.guava:guava:31.1-jre")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.1")
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("io.mockk:mockk:1.12.8")
