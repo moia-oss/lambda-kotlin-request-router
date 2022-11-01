@@ -16,5 +16,5 @@ dependencies {
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("io.mockk:mockk:1.12.8")
-    testImplementation("ch.qos.logback:logback-classic:1.4.1")
+    testImplementation("ch.qos.logback:logback-classic:1.4.4")
 }
