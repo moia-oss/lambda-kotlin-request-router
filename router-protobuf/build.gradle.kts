@@ -24,7 +24,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("io.mockk:mockk:1.13.3")
     testImplementation("org.slf4j:slf4j-simple:2.0.9")
-    testImplementation("com.jayway.jsonpath:json-path:2.7.0")
+    testImplementation("com.jayway.jsonpath:json-path:2.8.0")
 }
 
 
