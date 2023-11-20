@@ -20,7 +20,7 @@ dependencies {
     api(project(":router"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.25")
+    testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.27.0")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("org.slf4j:slf4j-simple:2.0.9")
