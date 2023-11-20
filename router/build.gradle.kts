@@ -9,7 +9,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.9")
     api("com.fasterxml.jackson.core:jackson-databind:2.16.0")
     api("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.0")
-    api("com.google.guava:guava:31.1-jre")
+    api("com.google.guava:guava:32.1.3-jre")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
