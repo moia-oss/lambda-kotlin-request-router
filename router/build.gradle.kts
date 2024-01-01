@@ -4,7 +4,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
     api("com.amazonaws:aws-lambda-java-core:1.2.3")
-    api("com.amazonaws:aws-lambda-java-events:3.11.3")
+    api("com.amazonaws:aws-lambda-java-events:3.11.4")
 
     implementation("org.slf4j:slf4j-api:2.0.9")
     api("com.fasterxml.jackson.core:jackson-databind:2.16.0")
