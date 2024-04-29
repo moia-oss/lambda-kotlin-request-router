@@ -90,8 +90,12 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                     .also { logUnknownException(e, input) }
         }
 
-    private fun missingPermissions(input: APIGatewayProxyRequestEvent, routerFunction: RouterFunction<Any, Any>) =
-        !permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions)
+    private fun missingPermissions(input: APIGatewayProxyRequestEvent, routerFunction: RouterFunction<Any, Any>): Boolean {
+        if (permissionHandlerV2Supplier() != null) {
+            return !permissionHandlerV2Supplier()!!(input).hasAnyRequiredPermission(routerFunction.requestPredicate)
+        }
+        return !permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions)
+    }
 
     /**
      * Hook to be able to override the way ApiExceptions are logged.
@@ -118,6 +122,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     open fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
         { NoOpPermissionHandler() }
+
+    open fun permissionHandlerV2Supplier(): ((r: APIGatewayProxyRequestEvent) -> PermissionHandlerV2)? = null
 
     @ExperimentalReflectionOnLambdas
     private fun deserializeRequest(

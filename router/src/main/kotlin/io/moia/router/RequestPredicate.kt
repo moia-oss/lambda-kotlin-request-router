@@ -20,7 +20,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.google.common.net.MediaType
 import isCompatibleWith
 
-data class RequestPredicate(
+open class RequestPredicate(
     val method: String,
     val pathPattern: String,
     var produces: Set<String>,

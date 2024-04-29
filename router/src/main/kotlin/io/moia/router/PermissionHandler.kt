@@ -22,8 +22,11 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.Base64
 
 interface PermissionHandler {
-
     fun hasAnyRequiredPermission(requiredPermissions: Set<String>): Boolean
+}
+
+interface PermissionHandlerV2 {
+    fun hasAnyRequiredPermission(predicate: RequestPredicate): Boolean
 }
 
 class NoOpPermissionHandler : PermissionHandler {
