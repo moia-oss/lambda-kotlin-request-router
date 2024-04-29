@@ -91,8 +91,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         }
 
     private fun missingPermissions(input: APIGatewayProxyRequestEvent, routerFunction: RouterFunction<Any, Any>): Boolean {
-        if (permissionHandlerV2Supplier() != null) {
-            return !permissionHandlerV2Supplier()!!(input).hasAnyRequiredPermission(routerFunction.requestPredicate)
+        if (predicatePermissionHandlerSupplier() != null) {
+            return !predicatePermissionHandlerSupplier()!!(input).hasAnyRequiredPermission(routerFunction.requestPredicate)
         }
         return !permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions)
     }
@@ -123,7 +123,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     open fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
         { NoOpPermissionHandler() }
 
-    open fun permissionHandlerV2Supplier(): ((r: APIGatewayProxyRequestEvent) -> PermissionHandlerV2)? = null
+    open fun predicatePermissionHandlerSupplier(): ((r: APIGatewayProxyRequestEvent) -> PredicatePermissionHandler)? = null
 
     @ExperimentalReflectionOnLambdas
     private fun deserializeRequest(

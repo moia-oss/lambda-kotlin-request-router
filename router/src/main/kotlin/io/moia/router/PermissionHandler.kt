@@ -25,7 +25,7 @@ interface PermissionHandler {
     fun hasAnyRequiredPermission(requiredPermissions: Set<String>): Boolean
 }
 
-interface PermissionHandlerV2 {
+interface PredicatePermissionHandler {
     fun hasAnyRequiredPermission(predicate: RequestPredicate): Boolean
 }
 
