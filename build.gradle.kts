@@ -80,8 +80,8 @@ val jacocoRootReport by tasks.creating(JacocoReport::class) {
     executionData(fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec"))
 
     reports {
-        // html.isEnabled = true
-        // xml.isEnabled = true
+        html.isEnabled = true
+        xml.isEnabled = true
         xml.setDestination(File(project.buildDir, "reports/jacoco/report.xml"))
     }
 }
