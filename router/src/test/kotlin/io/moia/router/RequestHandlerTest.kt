@@ -671,6 +671,7 @@ class RequestHandlerTest {
     fun `should fail for function references when using Kotlin 1_6_10`() {
         class DummyHandler : RequestHandler() {
             val dummy = object {
+                @Suppress("UNUSED_PARAMETER")
                 fun handler(r: Request<Unit>) = ResponseEntity.ok(Unit)
             }
             override fun exceptionToResponseEntity(ex: Exception) = throw ex
