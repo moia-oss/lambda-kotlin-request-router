@@ -20,7 +20,9 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.ProxyRequestContext
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 
-class Router {
+typealias PredicateFactory = (String, String, Set<String>, Set<String>) -> RequestPredicate
+
+class Router(private val predicateFactory: PredicateFactory) {
 
     val routes = mutableListOf<RouterFunction<*, *>>()
 
@@ -51,16 +53,20 @@ class Router {
         method: String,
         handlerFunction: HandlerFunction<I, T>,
         consuming: Set<String> = defaultConsuming
-    ) =
-        RequestPredicate(
-            method = method,
-            pathPattern = pattern,
-            consumes = consuming,
-            produces = defaultProducing
-        ).also { routes += RouterFunction(it, handlerFunction) }
+    ) = predicateFactory(method, pattern, consuming, defaultProducing)
+       .also { routes += RouterFunction(it, handlerFunction) }
 
     companion object {
-        fun router(routes: Router.() -> Unit) = Router().apply(routes)
+
+        fun defaultPredicateFactory(method: String, pattern: String, consuming: Set<String>, producing: Set<String>): RequestPredicate =
+            RequestPredicateImpl(
+                method = method,
+                pathPattern = pattern,
+                consumes = consuming,
+                produces = producing
+            )
+        fun router(routes: Router.() -> Unit) = Router(Router::defaultPredicateFactory).apply(routes)
+        fun router(factory: PredicateFactory, routes: Router.() -> Unit) = Router(factory).apply(routes)
     }
 }
 
