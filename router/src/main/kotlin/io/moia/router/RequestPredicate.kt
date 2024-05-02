@@ -42,16 +42,16 @@ open class RequestPredicateImpl(
     override val method: String,
     override val pathPattern: String,
     override var produces: Set<String>,
-    override var consumes: Set<String>,
-): RequestPredicate {
+    override var consumes: Set<String>
+) : RequestPredicate {
 
-    override  var requiredPermissions: Set<String> = emptySet()
-    override  fun consuming(vararg mediaTypes: String): RequestPredicate {
+    override var requiredPermissions: Set<String> = emptySet()
+    override fun consuming(vararg mediaTypes: String): RequestPredicate {
         consumes = mediaTypes.toSet()
         return this
     }
 
-    override  fun producing(vararg mediaTypes: String): RequestPredicate {
+    override fun producing(vararg mediaTypes: String): RequestPredicate {
         produces = mediaTypes.toSet()
         return this
     }

@@ -54,7 +54,7 @@ class Router(private val predicateFactory: PredicateFactory) {
         handlerFunction: HandlerFunction<I, T>,
         consuming: Set<String> = defaultConsuming
     ) = predicateFactory(method, pattern, consuming, defaultProducing)
-       .also { routes += RouterFunction(it, handlerFunction) }
+        .also { routes += RouterFunction(it, handlerFunction) }
 
     companion object {
 
