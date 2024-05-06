@@ -1,0 +1,21 @@
+name: Update Gradle Wrapper
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * MON"
+
+env:
+  ARTIFACTORY_USER: ${{ secrets.CI_JFROG_ACCESS_TOKEN_USER }}
+  ARTIFACTORY_API_KEY: ${{ secrets.ORG_CI_JFROG_ACCESS_TOKEN }}
+
+jobs:
+  update-gradle-wrapper:
+    name: "Update"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update Gradle Wrapper
+        uses: gradle-update/update-gradle-wrapper-action@v1
+        with:
+          repo-token: ${{ secrets.MOIA_PIPELINE_PAT }}
