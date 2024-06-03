@@ -22,11 +22,13 @@ import isCompatibleWith
 
 interface RequestPredicate {
     fun consuming(vararg mediaTypes: String): RequestPredicate
+
     fun producing(vararg mediaTypes: String): RequestPredicate
 
     fun requiringPermissions(vararg permissions: String): RequestPredicate
 
     fun match(request: APIGatewayProxyRequestEvent): RequestMatchResult
+
     fun matchedAcceptType(acceptedMediaTypes: List<MediaType>): MediaType?
 
     val pathPattern: String
@@ -42,10 +44,10 @@ open class RequestPredicateImpl(
     override val method: String,
     override val pathPattern: String,
     override var produces: Set<String>,
-    override var consumes: Set<String>
+    override var consumes: Set<String>,
 ) : RequestPredicate {
-
     override var requiredPermissions: Set<String> = emptySet()
+
     override fun consuming(vararg mediaTypes: String): RequestPredicate {
         consumes = mediaTypes.toSet()
         return this

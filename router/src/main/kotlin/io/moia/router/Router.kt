@@ -61,21 +61,30 @@ class Router(private val predicateFactory: PredicateFactory) {
         pattern: String,
         method: String,
         handlerFunction: HandlerFunction<I, T>,
-        consuming: Set<String> = defaultConsuming
+        consuming: Set<String> = defaultConsuming,
     ) = predicateFactory(method, pattern, consuming, defaultProducing)
         .also { routes += RouterFunction(it, handlerFunction) }
 
     companion object {
-
-        fun defaultPredicateFactory(method: String, pattern: String, consuming: Set<String>, producing: Set<String>): RequestPredicate =
+        fun defaultPredicateFactory(
+            method: String,
+            pattern: String,
+            consuming: Set<String>,
+            producing: Set<String>,
+        ): RequestPredicate =
             RequestPredicateImpl(
                 method = method,
                 pathPattern = pattern,
                 consumes = consuming,
-                produces = producing
+                produces = producing,
             )
+
         fun router(routes: Router.() -> Unit) = Router(Router::defaultPredicateFactory).apply(routes)
-        fun router(factory: PredicateFactory, routes: Router.() -> Unit) = Router(factory).apply(routes)
+
+        fun router(
+            factory: PredicateFactory,
+            routes: Router.() -> Unit,
+        ) = Router(factory).apply(routes)
     }
 }
 

@@ -98,7 +98,10 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 .also { logUnknownException(e, input) }
     }
 
-    private fun missingPermissions(input: APIGatewayProxyRequestEvent, routerFunction: RouterFunction<Any, Any>): Boolean {
+    private fun missingPermissions(
+        input: APIGatewayProxyRequestEvent,
+        routerFunction: RouterFunction<Any, Any>,
+    ): Boolean {
         if (predicatePermissionHandlerSupplier() != null) {
             return !predicatePermissionHandlerSupplier()!!(input).hasAnyRequiredPermission(routerFunction.requestPredicate)
         }
