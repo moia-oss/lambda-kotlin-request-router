@@ -53,7 +53,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     @Suppress("UNCHECKED_CAST")
     private fun handleRequest(input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         log.debug(
-            "handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input",
+            "handling request with method '${input.httpMethod}' and path '${input.path}' - " +
+                "Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input",
         )
         val routes = router.routes as List<RouterFunction<Any, Any>>
         val matchResults: List<RequestMatchResult> =
