@@ -20,17 +20,33 @@ class ValidatingRequestRouterWrapper(
     val delegate: RequestHandler,
     specUrlOrPayload: String,
     private val additionalRequestValidationFunctions: List<(APIGatewayProxyRequestEvent) -> Unit> = emptyList(),
-    private val additionalResponseValidationFunctions: List<(APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent) -> Unit> = emptyList()
+    private val additionalResponseValidationFunctions: List<
+        (
+            APIGatewayProxyRequestEvent,
+            APIGatewayProxyResponseEvent,
+        ) -> Unit,
+    > = emptyList(),
 ) {
     private val openApiValidator = OpenApiValidator(specUrlOrPayload)
 
-    fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent =
+    fun handleRequest(
+        input: APIGatewayProxyRequestEvent,
+        context: Context,
+    ): APIGatewayProxyResponseEvent =
         handleRequest(input = input, context = context, skipRequestValidation = false, skipResponseValidation = false)
 
-    fun handleRequestSkippingRequestAndResponseValidation(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent =
+    fun handleRequestSkippingRequestAndResponseValidation(
+        input: APIGatewayProxyRequestEvent,
+        context: Context,
+    ): APIGatewayProxyResponseEvent =
         handleRequest(input = input, context = context, skipRequestValidation = true, skipResponseValidation = true)
 
-    private fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context, skipRequestValidation: Boolean, skipResponseValidation: Boolean): APIGatewayProxyResponseEvent {
+    private fun handleRequest(
+        input: APIGatewayProxyRequestEvent,
+        context: Context,
+        skipRequestValidation: Boolean,
+        skipResponseValidation: Boolean,
+    ): APIGatewayProxyResponseEvent {
         if (!skipRequestValidation) {
             try {
                 openApiValidator.assertValidRequest(input)
@@ -58,7 +74,10 @@ class ValidatingRequestRouterWrapper(
         additionalRequestValidationFunctions.forEach { it(requestEvent) }
     }
 
-    private fun runAdditionalResponseValidations(requestEvent: APIGatewayProxyRequestEvent, responseEvent: APIGatewayProxyResponseEvent) {
+    private fun runAdditionalResponseValidations(
+        requestEvent: APIGatewayProxyRequestEvent,
+        responseEvent: APIGatewayProxyResponseEvent,
+    ) {
         additionalResponseValidationFunctions.forEach { it(requestEvent, responseEvent) }
     }
 
