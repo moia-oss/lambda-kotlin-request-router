@@ -34,7 +34,7 @@ repositories {
 
 val proto = "3.11.1"
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
     implementation("io.moia.lambda-kotlin-request-router:router-protobuf:0.10.2")
