@@ -22,7 +22,6 @@ import org.assertj.core.api.BDDAssertions.then
 import org.junit.jupiter.api.Test
 
 class MediaTypeTest {
-
     @Test
     fun `should match`() {
         then(MediaType.parse("application/json").isCompatibleWith(MediaType.parse("application/json"))).isTrue()

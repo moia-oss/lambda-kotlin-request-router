@@ -22,11 +22,13 @@ import isCompatibleWith
 
 interface RequestPredicate {
     fun consuming(vararg mediaTypes: String): RequestPredicate
+
     fun producing(vararg mediaTypes: String): RequestPredicate
 
     fun requiringPermissions(vararg permissions: String): RequestPredicate
 
     fun match(request: APIGatewayProxyRequestEvent): RequestMatchResult
+
     fun matchedAcceptType(acceptedMediaTypes: List<MediaType>): MediaType?
 
     val pathPattern: String
@@ -42,10 +44,10 @@ open class RequestPredicateImpl(
     override val method: String,
     override val pathPattern: String,
     override var produces: Set<String>,
-    override var consumes: Set<String>
+    override var consumes: Set<String>,
 ) : RequestPredicate {
-
     override var requiredPermissions: Set<String> = emptySet()
+
     override fun consuming(vararg mediaTypes: String): RequestPredicate {
         consumes = mediaTypes.toSet()
         return this
@@ -70,11 +72,11 @@ open class RequestPredicateImpl(
             matchPath = pathMatches(request),
             matchMethod = methodMatches(request),
             matchAcceptType = acceptMatches(request.acceptedMediaTypes()),
-            matchContentType = contentTypeMatches(request.contentType())
+            matchContentType = contentTypeMatches(request.contentType()),
         )
 
-    private fun pathMatches(request: APIGatewayProxyRequestEvent) =
-        request.path?.let { UriTemplate.from(pathPattern).matches(it) } ?: false
+    private fun pathMatches(request: APIGatewayProxyRequestEvent) = request.path?.let { UriTemplate.from(pathPattern).matches(it) } ?: false
+
     private fun methodMatches(request: APIGatewayProxyRequestEvent) = method.equals(request.httpMethod, true)
 
     /**
@@ -86,8 +88,7 @@ open class RequestPredicateImpl(
             .map { MediaType.parse(it) }
             .firstOrNull { acceptedMediaTypes.any { acceptedType -> it.isCompatibleWith(acceptedType) } }
 
-    private fun acceptMatches(acceptedMediaTypes: List<MediaType>) =
-        matchedAcceptType(acceptedMediaTypes) != null
+    private fun acceptMatches(acceptedMediaTypes: List<MediaType>) = matchedAcceptType(acceptedMediaTypes) != null
 
     private fun contentTypeMatches(contentType: String?) =
         when {
@@ -101,7 +102,7 @@ data class RequestMatchResult(
     val matchPath: Boolean = false,
     val matchMethod: Boolean = false,
     val matchAcceptType: Boolean = false,
-    val matchContentType: Boolean = false
+    val matchContentType: Boolean = false,
 ) {
     val match
         get() = matchPath && matchMethod && matchAcceptType && matchContentType

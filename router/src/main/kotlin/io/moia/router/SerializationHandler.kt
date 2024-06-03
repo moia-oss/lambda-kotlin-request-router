@@ -21,38 +21,53 @@ import com.google.common.net.MediaType
 import isCompatibleWith
 
 interface SerializationHandler {
+    fun supports(
+        acceptHeader: MediaType,
+        body: Any,
+    ): Boolean
 
-    fun supports(acceptHeader: MediaType, body: Any): Boolean
-
-    fun serialize(acceptHeader: MediaType, body: Any): String
+    fun serialize(
+        acceptHeader: MediaType,
+        body: Any,
+    ): String
 }
 
 class SerializationHandlerChain(private val handlers: List<SerializationHandler>) :
     SerializationHandler {
+    override fun supports(
+        acceptHeader: MediaType,
+        body: Any,
+    ): Boolean = handlers.any { it.supports(acceptHeader, body) }
 
-    override fun supports(acceptHeader: MediaType, body: Any): Boolean =
-        handlers.any { it.supports(acceptHeader, body) }
-
-    override fun serialize(acceptHeader: MediaType, body: Any): String =
-        handlers.first { it.supports(acceptHeader, body) }.serialize(acceptHeader, body)
+    override fun serialize(
+        acceptHeader: MediaType,
+        body: Any,
+    ): String = handlers.first { it.supports(acceptHeader, body) }.serialize(acceptHeader, body)
 }
 
 class JsonSerializationHandler(private val objectMapper: ObjectMapper) : SerializationHandler {
-
     private val json = MediaType.parse("application/json")
     private val jsonStructuredSuffixWildcard = MediaType.parse("application/*+json")
 
-    override fun supports(acceptHeader: MediaType, body: Any): Boolean =
-        json.isCompatibleWith(acceptHeader) || jsonStructuredSuffixWildcard.isCompatibleWith(acceptHeader)
+    override fun supports(
+        acceptHeader: MediaType,
+        body: Any,
+    ): Boolean = json.isCompatibleWith(acceptHeader) || jsonStructuredSuffixWildcard.isCompatibleWith(acceptHeader)
 
-    override fun serialize(acceptHeader: MediaType, body: Any): String =
-        objectMapper.writeValueAsString(body)
+    override fun serialize(
+        acceptHeader: MediaType,
+        body: Any,
+    ): String = objectMapper.writeValueAsString(body)
 }
 
 class PlainTextSerializationHandler(val supportedAcceptTypes: List<MediaType> = listOf(MediaType.parse("text/*"))) : SerializationHandler {
-    override fun supports(acceptHeader: MediaType, body: Any): Boolean =
-        supportedAcceptTypes.any { acceptHeader.isCompatibleWith(it) }
+    override fun supports(
+        acceptHeader: MediaType,
+        body: Any,
+    ): Boolean = supportedAcceptTypes.any { acceptHeader.isCompatibleWith(it) }
 
-    override fun serialize(acceptHeader: MediaType, body: Any): String =
-        body.toString()
+    override fun serialize(
+        acceptHeader: MediaType,
+        body: Any,
+    ): String = body.toString()
 }

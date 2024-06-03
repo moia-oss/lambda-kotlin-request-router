@@ -6,16 +6,13 @@ import io.moia.router.RequestHandler
 import io.moia.router.ResponseEntity
 
 abstract class ProtoEnabledRequestHandler : RequestHandler() {
+    override fun serializationHandlers() = listOf(ProtoSerializationHandler()) + super.serializationHandlers()
 
-    override fun serializationHandlers() =
-        listOf(ProtoSerializationHandler()) + super.serializationHandlers()
-
-    override fun deserializationHandlers() =
-        listOf(ProtoDeserializationHandler()) + super.deserializationHandlers()
+    override fun deserializationHandlers() = listOf(ProtoDeserializationHandler()) + super.deserializationHandlers()
 
     override fun <T> createResponse(
         contentType: MediaType,
-        response: ResponseEntity<T>
+        response: ResponseEntity<T>,
     ): APIGatewayProxyResponseEvent {
         return super.createResponse(contentType, response).withIsBase64Encoded(true)
     }

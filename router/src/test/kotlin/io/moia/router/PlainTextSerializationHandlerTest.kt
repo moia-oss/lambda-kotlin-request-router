@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PlainTextSerializationHandlerTest {
-
     @Test
     fun `should support text`() {
         assertTrue(PlainTextSerializationHandler().supports(MediaType.parse("text/plain"), "some"))
