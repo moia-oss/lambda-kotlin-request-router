@@ -22,7 +22,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.Base64
 
 interface PermissionHandler {
-
     fun hasAnyRequiredPermission(requiredPermissions: Set<String>): Boolean
 }
 
@@ -32,9 +31,8 @@ class NoOpPermissionHandler : PermissionHandler {
 
 open class JwtAccessor(
     private val request: APIGatewayProxyRequestEvent,
-    private val authorizationHeaderName: String = "authorization"
+    private val authorizationHeaderName: String = "authorization",
 ) {
-
     private val objectMapper = jacksonObjectMapper()
 
     fun extractJwtToken(): String? =
@@ -55,16 +53,16 @@ open class JwtAccessor(
             }
             ?.let { objectMapper.readValue<Map<String, Any>>(it) }
 }
+
 open class JwtPermissionHandler(
     val accessor: JwtAccessor,
     val permissionsClaim: String = defaultPermissionsClaim,
-    val permissionSeparator: String = defaultPermissionSeparator
+    val permissionSeparator: String = defaultPermissionSeparator,
 ) : PermissionHandler {
-
     constructor(
         request: APIGatewayProxyRequestEvent,
         permissionsClaim: String = defaultPermissionsClaim,
-        permissionSeparator: String = defaultPermissionSeparator
+        permissionSeparator: String = defaultPermissionSeparator,
     ) : this(JwtAccessor(request), permissionsClaim, permissionSeparator)
 
     override fun hasAnyRequiredPermission(requiredPermissions: Set<String>): Boolean =

@@ -25,9 +25,8 @@ data class RequestPredicate(
     val pathPattern: String,
     var produces: Set<String>,
     var consumes: Set<String>,
-    var requiredPermissions: Set<String> = emptySet()
+    var requiredPermissions: Set<String> = emptySet(),
 ) {
-
     fun consuming(vararg mediaTypes: String): RequestPredicate {
         consumes = mediaTypes.toSet()
         return this
@@ -52,11 +51,11 @@ data class RequestPredicate(
             matchPath = pathMatches(request),
             matchMethod = methodMatches(request),
             matchAcceptType = acceptMatches(request.acceptedMediaTypes()),
-            matchContentType = contentTypeMatches(request.contentType())
+            matchContentType = contentTypeMatches(request.contentType()),
         )
 
-    private fun pathMatches(request: APIGatewayProxyRequestEvent) =
-        request.path?.let { UriTemplate.from(pathPattern).matches(it) } ?: false
+    private fun pathMatches(request: APIGatewayProxyRequestEvent) = request.path?.let { UriTemplate.from(pathPattern).matches(it) } ?: false
+
     private fun methodMatches(request: APIGatewayProxyRequestEvent) = method.equals(request.httpMethod, true)
 
     /**
@@ -68,8 +67,7 @@ data class RequestPredicate(
             .map { MediaType.parse(it) }
             .firstOrNull { acceptedMediaTypes.any { acceptedType -> it.isCompatibleWith(acceptedType) } }
 
-    private fun acceptMatches(acceptedMediaTypes: List<MediaType>) =
-        matchedAcceptType(acceptedMediaTypes) != null
+    private fun acceptMatches(acceptedMediaTypes: List<MediaType>) = matchedAcceptType(acceptedMediaTypes) != null
 
     private fun contentTypeMatches(contentType: String?) =
         when {
@@ -83,7 +81,7 @@ internal data class RequestMatchResult(
     val matchPath: Boolean = false,
     val matchMethod: Boolean = false,
     val matchAcceptType: Boolean = false,
-    val matchContentType: Boolean = false
+    val matchContentType: Boolean = false,
 ) {
     val match
         get() = matchPath && matchMethod && matchAcceptType && matchContentType
