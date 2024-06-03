@@ -36,7 +36,7 @@ dependencies {
     implementation("io.moia.lambda-kotlin-request-router:router:0.9.7")
 
     implementation("com.amazonaws:aws-lambda-java-core:1.2.0")
-    implementation("com.amazonaws:aws-lambda-java-log4j2:1.1.0")
+    implementation("com.amazonaws:aws-lambda-java-log4j2:1.6.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0")
     implementation("com.google.guava:guava:23.0")
