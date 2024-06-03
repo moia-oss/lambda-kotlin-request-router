@@ -20,7 +20,7 @@ plugins {
     idea
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jmailen.kotlinter") version "4.3.0"
-    id("com.google.protobuf") version "0.8.7"
+    id("com.google.protobuf") version "0.8.13"
 }
 
 
@@ -52,7 +52,7 @@ dependencies {
 
 tasks {
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "17"
     }
 
     withType<Test> {
