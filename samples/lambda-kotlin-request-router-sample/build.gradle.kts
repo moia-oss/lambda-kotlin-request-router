@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
     implementation("io.moia.lambda-kotlin-request-router:router:0.10.2")
@@ -49,7 +49,7 @@ dependencies {
 
 tasks {
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "17"
     }
 
     withType<Test> {

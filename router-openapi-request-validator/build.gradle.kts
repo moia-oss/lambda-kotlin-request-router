@@ -3,7 +3,7 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
     api("com.atlassian.oai:swagger-request-validator-core:2.40.0")
