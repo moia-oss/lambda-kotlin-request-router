@@ -41,7 +41,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0")
     implementation("com.google.guava:guava:23.0")
 
-    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("ch.qos.logback:logback-classic:1.5.6")
     implementation("org.slf4j:log4j-over-slf4j:1.7.26")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.1")
