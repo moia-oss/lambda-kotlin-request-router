@@ -47,7 +47,7 @@ dependencies {
     implementation("com.google.protobuf:protobuf-java:$proto")
     implementation("com.google.protobuf:protobuf-java-util:$proto")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 }
 
 tasks {
