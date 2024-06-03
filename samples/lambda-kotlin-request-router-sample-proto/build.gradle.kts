@@ -19,7 +19,7 @@ plugins {
     kotlin("jvm") version "2.0.0"
     idea
     id("com.github.johnrengelman.shadow") version "5.1.0"
-    id("org.jmailen.kotlinter") version "1.22.0"
+    id("org.jmailen.kotlinter") version "4.3.0"
     id("com.google.protobuf") version "0.8.7"
 }
 
