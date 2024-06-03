@@ -20,8 +20,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import org.assertj.core.api.BDDAssertions.then
 import org.junit.jupiter.api.Test
 
+@Suppress("ktlint:standard:max-line-length")
 class JwtPermissionHandlerTest {
-
     /*
     {
         "sub": "1234567890",
@@ -29,7 +29,7 @@ class JwtPermissionHandlerTest {
         "iat": 1516239022,
         "scope": "one two"
     }
-    */
+     */
     val jwtWithScopeClaimSpace = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJzY29wZSI6Im9uZSB0d28ifQ.2tPrDymXDejHfVjNlVh4XUj22ZuDrKHP6dvWN7JNAWY"
 
     /*
@@ -58,14 +58,16 @@ class JwtPermissionHandlerTest {
 
     @Test
     fun `should extract permissions from custom permissions claim`() {
-        val handler = JwtPermissionHandler(
-            accessor = JwtAccessor(
-                APIGatewayProxyRequestEvent()
-                    .withHeader("Authorization", jwtWithCustomClaimAndSeparator)
-            ),
-            permissionsClaim = "userRights",
-            permissionSeparator = ","
-        )
+        val handler =
+            JwtPermissionHandler(
+                accessor =
+                    JwtAccessor(
+                        APIGatewayProxyRequestEvent()
+                            .withHeader("Authorization", jwtWithCustomClaimAndSeparator),
+                    ),
+                permissionsClaim = "userRights",
+                permissionSeparator = ",",
+            )
 
         thenRecognizesRequiredPermissions(handler)
     }
@@ -103,7 +105,7 @@ class JwtPermissionHandlerTest {
         JwtPermissionHandler(
             JwtAccessor(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("Authorization", authHeader)
-            )
+                    .withHeader("Authorization", authHeader),
+            ),
         )
 }

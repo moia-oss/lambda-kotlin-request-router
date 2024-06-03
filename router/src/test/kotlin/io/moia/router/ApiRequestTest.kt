@@ -22,7 +22,6 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import org.junit.jupiter.api.Test
 
 class ApiRequestTest {
-
     @Test
     fun `should match header`() {
         val request = APIGatewayProxyRequestEvent().withHeaders(mapOf("Accept" to "application/json"))

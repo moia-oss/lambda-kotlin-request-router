@@ -23,20 +23,19 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PlainTextDeserializationHandlerTest {
-
     @Test
     fun `should support text`() {
         assertTrue(
             PlainTextDeserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "text/plain")
-            )
+                    .withHeader("content-type", "text/plain"),
+            ),
         )
         assertTrue(
             PlainTextDeserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "text/csv")
-            )
+                    .withHeader("content-type", "text/csv"),
+            ),
         )
     }
 
@@ -45,14 +44,14 @@ class PlainTextDeserializationHandlerTest {
         assertFalse(
             PlainTextDeserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "image/png")
-            )
+                    .withHeader("content-type", "image/png"),
+            ),
         )
         assertFalse(
             PlainTextDeserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "application/json")
-            )
+                    .withHeader("content-type", "application/json"),
+            ),
         )
     }
 
