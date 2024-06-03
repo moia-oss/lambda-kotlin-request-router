@@ -22,7 +22,10 @@ class ProtoDeserializationHandler : DeserializationHandler {
             MediaType.parse(input.contentType()).let { proto.isCompatibleWith(it) || protoStructuredSuffixWildcard.isCompatibleWith(it) }
         }
 
-    override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any {
+    override fun deserialize(
+        input: APIGatewayProxyRequestEvent,
+        target: KType?,
+    ): Any {
         val bytes = Base64.getDecoder().decode(input.body)
         val parser = (target?.classifier as KClass<*>).staticFunctions.first { it.name == "parser" }.call() as Parser<*>
         return parser.parseFrom(bytes)
