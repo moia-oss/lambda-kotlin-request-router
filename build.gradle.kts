@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "1.9.23"
     `maven-publish`
     jacoco
     id("com.github.kt3k.coveralls") version "2.12.2"
@@ -42,7 +42,7 @@ subprojects {
 
     tasks {
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "11"
+            kotlinOptions.jvmTarget = "17"
         }
 
         withType<Test> {
@@ -80,8 +80,6 @@ val jacocoRootReport by tasks.creating(JacocoReport::class) {
     executionData(fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec"))
 
     reports {
-        html.isEnabled = true
-        xml.isEnabled = true
         xml.setDestination(File(project.buildDir, "reports/jacoco/report.xml"))
     }
 }

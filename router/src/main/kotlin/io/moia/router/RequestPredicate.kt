@@ -20,19 +20,38 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.google.common.net.MediaType
 import isCompatibleWith
 
-data class RequestPredicate(
-    val method: String,
-    val pathPattern: String,
-    var produces: Set<String>,
-    var consumes: Set<String>,
-    var requiredPermissions: Set<String> = emptySet(),
-) {
-    fun consuming(vararg mediaTypes: String): RequestPredicate {
+interface RequestPredicate {
+    fun consuming(vararg mediaTypes: String): RequestPredicate
+    fun producing(vararg mediaTypes: String): RequestPredicate
+
+    fun requiringPermissions(vararg permissions: String): RequestPredicate
+
+    fun match(request: APIGatewayProxyRequestEvent): RequestMatchResult
+    fun matchedAcceptType(acceptedMediaTypes: List<MediaType>): MediaType?
+
+    val pathPattern: String
+
+    val method: String
+    var consumes: Set<String>
+    var produces: Set<String>
+
+    var requiredPermissions: Set<String>
+}
+
+open class RequestPredicateImpl(
+    override val method: String,
+    override val pathPattern: String,
+    override var produces: Set<String>,
+    override var consumes: Set<String>
+) : RequestPredicate {
+
+    override var requiredPermissions: Set<String> = emptySet()
+    override fun consuming(vararg mediaTypes: String): RequestPredicate {
         consumes = mediaTypes.toSet()
         return this
     }
 
-    fun producing(vararg mediaTypes: String): RequestPredicate {
+    override fun producing(vararg mediaTypes: String): RequestPredicate {
         produces = mediaTypes.toSet()
         return this
     }
@@ -41,12 +60,12 @@ data class RequestPredicate(
      * Register required permissions for this route.
      * The RequestHandler checks if any of the given permissions are found on a request.
      */
-    fun requiringPermissions(vararg permissions: String): RequestPredicate {
+    override fun requiringPermissions(vararg permissions: String): RequestPredicate {
         requiredPermissions = permissions.toSet()
         return this
     }
 
-    internal fun match(request: APIGatewayProxyRequestEvent) =
+    override fun match(request: APIGatewayProxyRequestEvent) =
         RequestMatchResult(
             matchPath = pathMatches(request),
             matchMethod = methodMatches(request),
@@ -62,7 +81,7 @@ data class RequestPredicate(
      * Find the media type that is compatible with the one the client requested out of the ones that the the handler can produce
      * Talking into account that an accept header can contain multiple media types (e.g. application/xhtml+xml, application/json)
      */
-    fun matchedAcceptType(acceptedMediaTypes: List<MediaType>) =
+    override fun matchedAcceptType(acceptedMediaTypes: List<MediaType>) =
         produces
             .map { MediaType.parse(it) }
             .firstOrNull { acceptedMediaTypes.any { acceptedType -> it.isCompatibleWith(acceptedType) } }
@@ -77,7 +96,7 @@ data class RequestPredicate(
         }
 }
 
-internal data class RequestMatchResult(
+data class RequestMatchResult(
     val matchPath: Boolean = false,
     val matchMethod: Boolean = false,
     val matchAcceptType: Boolean = false,
