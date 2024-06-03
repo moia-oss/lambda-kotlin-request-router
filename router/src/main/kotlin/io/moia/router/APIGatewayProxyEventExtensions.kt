@@ -40,24 +40,34 @@ fun APIGatewayProxyRequestEvent.getHeaderCaseInsensitive(httpHeader: String): St
 
 fun APIGatewayProxyResponseEvent.getHeaderCaseInsensitive(httpHeader: String): String? = getCaseInsensitive(httpHeader, headers)
 
+@Suppress("FunctionName")
 fun GET() = APIGatewayProxyRequestEvent().withHttpMethod("get").withHeaders(mutableMapOf())
 
+@Suppress("FunctionName")
 fun GET(path: String) = GET().withPath(path)
 
+@Suppress("FunctionName")
 fun POST() = APIGatewayProxyRequestEvent().withHttpMethod("post").withHeaders(mutableMapOf())
 
+@Suppress("FunctionName")
 fun POST(path: String) = POST().withPath(path)
 
+@Suppress("FunctionName")
 fun PUT() = APIGatewayProxyRequestEvent().withHttpMethod("put").withHeaders(mutableMapOf())
 
+@Suppress("FunctionName")
 fun PUT(path: String) = PUT().withPath(path)
 
+@Suppress("FunctionName")
 fun PATCH() = APIGatewayProxyRequestEvent().withHttpMethod("patch").withHeaders(mutableMapOf())
 
+@Suppress("FunctionName")
 fun PATCH(path: String) = PATCH().withPath(path)
 
+@Suppress("FunctionName")
 fun DELETE() = APIGatewayProxyRequestEvent().withHttpMethod("delete").withHeaders(mutableMapOf())
 
+@Suppress("FunctionName")
 fun DELETE(path: String) = DELETE().withPath(path)
 
 /**

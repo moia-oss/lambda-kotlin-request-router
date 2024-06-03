@@ -22,6 +22,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 
 typealias PredicateFactory = (String, String, Set<String>, Set<String>) -> RequestPredicate
 
+@Suppress("FunctionName")
 class Router(private val predicateFactory: PredicateFactory) {
     val routes = mutableListOf<RouterFunction<*, *>>()
 
