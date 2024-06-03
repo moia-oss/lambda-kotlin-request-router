@@ -33,7 +33,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 
-    implementation("io.moia.lambda-kotlin-request-router:router:0.9.7")
+    implementation("io.moia.lambda-kotlin-request-router:router:0.10.2")
 
     implementation("com.amazonaws:aws-lambda-java-core:1.2.3")
     implementation("com.amazonaws:aws-lambda-java-log4j2:1.6.0")
