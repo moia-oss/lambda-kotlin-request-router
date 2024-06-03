@@ -1,7 +1,7 @@
 
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
     api("com.amazonaws:aws-lambda-java-core:1.2.3")
     api("com.amazonaws:aws-lambda-java-events:3.11.5")
