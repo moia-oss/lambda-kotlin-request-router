@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ProtoDeserializationHandlerTest {
-
     @Test
     fun `Deserializer should not support if the content type of the input is null`() {
         assertFalse(ProtoDeserializationHandler().supports(APIGatewayProxyRequestEvent()))
@@ -20,7 +19,13 @@ internal class ProtoDeserializationHandlerTest {
 
     @Test
     fun `Deserializer should support if the content type of the input is protobuf`() {
-        assertTrue(ProtoDeserializationHandler().supports(APIGatewayProxyRequestEvent().withHeader("content-type", "application/x-protobuf")))
-        assertTrue(ProtoDeserializationHandler().supports(APIGatewayProxyRequestEvent().withHeader("content-type", "application/vnd.moia.v1+x-protobuf")))
+        assertTrue(
+            ProtoDeserializationHandler().supports(APIGatewayProxyRequestEvent().withHeader("content-type", "application/x-protobuf")),
+        )
+        assertTrue(
+            ProtoDeserializationHandler().supports(
+                APIGatewayProxyRequestEvent().withHeader("content-type", "application/vnd.moia.v1+x-protobuf"),
+            ),
+        )
     }
 }

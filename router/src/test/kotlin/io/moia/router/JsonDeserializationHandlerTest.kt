@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class JsonDeserializationHandlerTest {
-
     val deserializationHandler = JsonDeserializationHandler(jacksonObjectMapper())
 
     @Test
@@ -31,14 +30,14 @@ class JsonDeserializationHandlerTest {
         assertTrue(
             deserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "application/json")
-            )
+                    .withHeader("content-type", "application/json"),
+            ),
         )
         assertTrue(
             deserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "application/vnd.moia.v1+json")
-            )
+                    .withHeader("content-type", "application/vnd.moia.v1+json"),
+            ),
         )
     }
 
@@ -47,14 +46,14 @@ class JsonDeserializationHandlerTest {
         assertFalse(
             deserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "image/png")
-            )
+                    .withHeader("content-type", "image/png"),
+            ),
         )
         assertFalse(
             deserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "text/plain")
-            )
+                    .withHeader("content-type", "text/plain"),
+            ),
         )
     }
 
@@ -63,14 +62,14 @@ class JsonDeserializationHandlerTest {
         assertTrue(
             deserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "application/json; charset=UTF-8")
-            )
+                    .withHeader("content-type", "application/json; charset=UTF-8"),
+            ),
         )
         assertTrue(
             deserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "application/vnd.moia.v1+json; charset=UTF-8")
-            )
+                    .withHeader("content-type", "application/vnd.moia.v1+json; charset=UTF-8"),
+            ),
         )
     }
 
@@ -79,14 +78,14 @@ class JsonDeserializationHandlerTest {
         assertFalse(
             deserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "application/json; charset=UTF-16")
-            )
+                    .withHeader("content-type", "application/json; charset=UTF-16"),
+            ),
         )
         assertFalse(
             deserializationHandler.supports(
                 APIGatewayProxyRequestEvent()
-                    .withHeader("content-type", "application/vnd.moia.v1+json; charset=UTF-16")
-            )
+                    .withHeader("content-type", "application/vnd.moia.v1+json; charset=UTF-16"),
+            ),
         )
     }
 }

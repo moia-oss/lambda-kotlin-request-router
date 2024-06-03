@@ -8,12 +8,12 @@ import org.assertj.core.api.BDDAssertions.then
 import org.junit.jupiter.api.Test
 
 class ProtoBufUtilsTest {
-
     @Test
     fun `should serialize empty list`() {
-        val message = ComplexSample.newBuilder()
-            .addAllSamples(emptyList())
-            .build()
+        val message =
+            ComplexSample.newBuilder()
+                .addAllSamples(emptyList())
+                .build()
 
         val json = ProtoBufUtils.toJsonWithoutWrappers(message)
 
@@ -22,9 +22,10 @@ class ProtoBufUtilsTest {
 
     @Test
     fun `should remove wrapper object`() {
-        val message = ComplexSample.newBuilder()
-            .setSomeString(StringValue.newBuilder().setValue("some").build())
-            .build()
+        val message =
+            ComplexSample.newBuilder()
+                .setSomeString(StringValue.newBuilder().setValue("some").build())
+                .build()
 
         val json = ProtoBufUtils.toJsonWithoutWrappers(message)
 
@@ -33,9 +34,10 @@ class ProtoBufUtilsTest {
 
     @Test
     fun `should serialize value when it is the default`() {
-        val message = ComplexSample.newBuilder()
-            .setEnumAttribute(ONE) // enum zero value
-            .build()
+        val message =
+            ComplexSample.newBuilder()
+                .setEnumAttribute(ONE) // enum zero value
+                .build()
 
         val json = ProtoBufUtils.toJsonWithoutWrappers(message)
 

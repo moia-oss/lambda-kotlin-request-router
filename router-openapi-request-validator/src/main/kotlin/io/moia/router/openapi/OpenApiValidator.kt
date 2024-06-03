@@ -13,19 +13,25 @@ import org.slf4j.LoggerFactory
 class OpenApiValidator(val specUrlOrPayload: String) {
     val validator = OpenApiInteractionValidator.createFor(specUrlOrPayload).build()
 
-    fun validate(request: APIGatewayProxyRequestEvent, response: APIGatewayProxyResponseEvent): ValidationReport {
+    fun validate(
+        request: APIGatewayProxyRequestEvent,
+        response: APIGatewayProxyResponseEvent,
+    ): ValidationReport {
         return validator.validate(request.toRequest(), response.toResponse())
             .also { if (it.hasErrors()) log.error("error validating request and response against $specUrlOrPayload - $it") }
     }
 
-    fun assertValid(request: APIGatewayProxyRequestEvent, response: APIGatewayProxyResponseEvent) {
+    fun assertValid(
+        request: APIGatewayProxyRequestEvent,
+        response: APIGatewayProxyResponseEvent,
+    ) {
         return validate(request, response).let {
             if (it.hasErrors()) {
                 throw ApiInteractionInvalid(
                     specUrlOrPayload,
                     request,
                     response,
-                    it
+                    it,
                 )
             }
         }
@@ -37,38 +43,45 @@ class OpenApiValidator(val specUrlOrPayload: String) {
                 throw ApiInteractionInvalid(
                     spec = specUrlOrPayload,
                     request = request,
-                    validationReport = it
+                    validationReport = it,
                 )
             }
         }
 
-    fun assertValidResponse(request: APIGatewayProxyRequestEvent, response: APIGatewayProxyResponseEvent) =
-        request.toRequest().let { r ->
-            validator.validateResponse(r.path, r.method, response.toResponse()).let {
-                if (it.hasErrors()) {
-                    throw ApiInteractionInvalid(
-                        spec = specUrlOrPayload,
-                        request = request,
-                        validationReport = it
-                    )
-                }
+    fun assertValidResponse(
+        request: APIGatewayProxyRequestEvent,
+        response: APIGatewayProxyResponseEvent,
+    ) = request.toRequest().let { r ->
+        validator.validateResponse(r.path, r.method, response.toResponse()).let {
+            if (it.hasErrors()) {
+                throw ApiInteractionInvalid(
+                    spec = specUrlOrPayload,
+                    request = request,
+                    validationReport = it,
+                )
             }
         }
+    }
 
-    class ApiInteractionInvalid(val spec: String, val request: APIGatewayProxyRequestEvent, val response: APIGatewayProxyResponseEvent? = null, val validationReport: ValidationReport) :
-        RuntimeException("Error validating request and response against $spec - $validationReport")
+    class ApiInteractionInvalid(
+        val spec: String,
+        val request: APIGatewayProxyRequestEvent,
+        val response: APIGatewayProxyResponseEvent? = null,
+        val validationReport: ValidationReport,
+    ) : RuntimeException("Error validating request and response against $spec - $validationReport")
 
     private fun APIGatewayProxyRequestEvent.toRequest(): Request {
-        val builder = when (httpMethod.toLowerCase()) {
-            "get" -> SimpleRequest.Builder.get(path)
-            "post" -> SimpleRequest.Builder.post(path)
-            "put" -> SimpleRequest.Builder.put(path)
-            "patch" -> SimpleRequest.Builder.patch(path)
-            "delete" -> SimpleRequest.Builder.delete(path)
-            "options" -> SimpleRequest.Builder.options(path)
-            "head" -> SimpleRequest.Builder.head(path)
-            else -> throw IllegalArgumentException("Unsupported method $httpMethod")
-        }
+        val builder =
+            when (httpMethod.toLowerCase()) {
+                "get" -> SimpleRequest.Builder.get(path)
+                "post" -> SimpleRequest.Builder.post(path)
+                "put" -> SimpleRequest.Builder.put(path)
+                "patch" -> SimpleRequest.Builder.patch(path)
+                "delete" -> SimpleRequest.Builder.delete(path)
+                "options" -> SimpleRequest.Builder.options(path)
+                "head" -> SimpleRequest.Builder.head(path)
+                else -> throw IllegalArgumentException("Unsupported method $httpMethod")
+            }
         headers?.forEach { builder.withHeader(it.key, it.value) }
         queryStringParameters?.forEach { builder.withQueryParam(it.key, it.value) }
         builder.withBody(body)

@@ -12,11 +12,11 @@ import org.assertj.core.api.BDDAssertions.thenThrownBy
 import org.junit.jupiter.api.Test
 
 class ValidatingRequestRouterWrapperTest {
-
     @Test
     fun `should return response on successful validation`() {
-        val response = ValidatingRequestRouterWrapper(TestRequestHandler(), "openapi.yml")
-            .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
+        val response =
+            ValidatingRequestRouterWrapper(TestRequestHandler(), "openapi.yml")
+                .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
 
         then(response.statusCode).isEqualTo(200)
     }
@@ -43,8 +43,12 @@ class ValidatingRequestRouterWrapperTest {
 
     @Test
     fun `should skip validation`() {
-        val response = ValidatingRequestRouterWrapper(InvalidTestRequestHandler(), "openapi.yml")
-            .handleRequestSkippingRequestAndResponseValidation(GET("/path-not-documented").withAcceptHeader("application/json"), mockk())
+        val response =
+            ValidatingRequestRouterWrapper(InvalidTestRequestHandler(), "openapi.yml")
+                .handleRequestSkippingRequestAndResponseValidation(
+                    GET("/path-not-documented").withAcceptHeader("application/json"),
+                    mockk(),
+                )
         then(response.statusCode).isEqualTo(404)
     }
 
@@ -54,7 +58,7 @@ class ValidatingRequestRouterWrapperTest {
             ValidatingRequestRouterWrapper(
                 delegate = OpenApiValidatorTest.TestRequestHandler(),
                 specUrlOrPayload = "openapi.yml",
-                additionalRequestValidationFunctions = listOf({ _ -> throw RequestValidationFailedException() })
+                additionalRequestValidationFunctions = listOf({ _ -> throw RequestValidationFailedException() }),
             )
                 .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
         }
@@ -67,7 +71,7 @@ class ValidatingRequestRouterWrapperTest {
             ValidatingRequestRouterWrapper(
                 delegate = OpenApiValidatorTest.TestRequestHandler(),
                 specUrlOrPayload = "openapi.yml",
-                additionalResponseValidationFunctions = listOf({ _, _ -> throw ResponseValidationFailedException() })
+                additionalResponseValidationFunctions = listOf({ _, _ -> throw ResponseValidationFailedException() }),
             )
                 .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
         }
@@ -75,21 +79,24 @@ class ValidatingRequestRouterWrapperTest {
     }
 
     private class RequestValidationFailedException : RuntimeException("request validation failed")
+
     private class ResponseValidationFailedException : RuntimeException("request validation failed")
 
     private class TestRequestHandler : RequestHandler() {
-        override val router = router {
-            GET("/tests") { _: Request<Unit> ->
-                ResponseEntity.ok("""{"name": "some"}""")
+        override val router =
+            router {
+                GET("/tests") { _: Request<Unit> ->
+                    ResponseEntity.ok("""{"name": "some"}""")
+                }
             }
-        }
     }
 
     private class InvalidTestRequestHandler : RequestHandler() {
-        override val router = router {
-            GET("/tests") { _: Request<Unit> ->
-                ResponseEntity.notFound(Unit)
+        override val router =
+            router {
+                GET("/tests") { _: Request<Unit> ->
+                    ResponseEntity.notFound(Unit)
+                }
             }
-        }
     }
 }
