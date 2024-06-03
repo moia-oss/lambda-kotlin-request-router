@@ -17,7 +17,7 @@ plugins {
     kotlin("jvm") version "1.3.50"
     idea
     id("com.github.johnrengelman.shadow") version "5.1.0"
-    id("org.jmailen.kotlinter") version "1.22.0"
+    id("org.jmailen.kotlinter") version "4.3.0"
 }
 
 
