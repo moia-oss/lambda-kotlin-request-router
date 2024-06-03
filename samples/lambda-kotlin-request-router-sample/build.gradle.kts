@@ -14,7 +14,7 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "2.0.0"
     idea
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jmailen.kotlinter") version "4.3.0"
