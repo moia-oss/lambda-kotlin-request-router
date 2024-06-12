@@ -29,8 +29,6 @@ import io.moia.router.Router.Companion.router
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
 
 @Suppress("ktlint:standard:max-line-length")
 class RequestHandlerTest {
@@ -100,17 +98,8 @@ class RequestHandlerTest {
         assertThat(response.statusCode).isEqualTo(415)
     }
 
-    inline fun <reified I, reified T> getTheType(a: ConcreteHandlerFunction<I, T>): Pair<KType, KType> {
-        return Pair(typeOf<I>(), typeOf<T>())
-    }
-
     @Test
     fun `should handle request with body`() {
-        val a =
-            getTheType {
-                    _: Request<TestRequestHandler.TestRequest?> ->
-                ResponseEntity.ok(TestRequestHandler.TestResponse("aws"))
-            }
         val response =
             testRequestHandler.handleRequest(
                 POST("/some")
@@ -701,7 +690,7 @@ class RequestHandlerTest {
         class SampleRouter : RequestHandler() {
             override val router =
                 router {
-                    POST("/some", HandlerFunction { r: Request<String> -> ResponseEntity.ok(r.body) })
+                    POST("/some", { r: Request<String> -> ResponseEntity.ok(r.body) })
                         .producing("text/plain")
                         .consuming("text/plain")
                 }
@@ -719,10 +708,41 @@ class RequestHandlerTest {
         assertThat(response.body).isEqualTo("just text")
     }
 
+    @Test
+    fun `should be able to use function references as handler`() {
+        class DummyHandler : RequestHandler() {
+            val dummy =
+                object {
+                    @Suppress("UNUSED_PARAMETER")
+                    fun handler(r: Request<Unit>) = ResponseEntity.ok(Unit)
+                }
+
+            override fun exceptionToResponseEntity(ex: Exception) = throw ex
+
+            override val router =
+                router {
+                    GET("/some", dummy::handler).producing("application/json")
+                }
+        }
+
+        val response =
+            DummyHandler().handleRequest(
+                APIGatewayProxyRequestEvent()
+                    .withHttpMethod("GET")
+                    .withPath("/some")
+                    .withAcceptHeader("application/json"),
+                mockk(),
+            )
+
+        assertThat(response.statusCode).isEqualTo(200)
+    }
+
     class TestRequestHandlerAuthorization : RequestHandler() {
         override val router =
             router {
-                GET("/some", HandlerFunction { _: Request<Unit> -> ResponseEntity.ok("hello") }).requiringPermissions("permission1")
+                GET("/some") { _: Request<Unit> ->
+                    ResponseEntity.ok("hello")
+                }.requiringPermissions("permission1")
             }
 
         override fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
@@ -738,22 +758,19 @@ class RequestHandlerTest {
     class TestRequestHandlerCustomAuthorizationHeader : RequestHandler() {
         override val router =
             router {
-                GET(
-                    "/some",
-                    HandlerFunction { _: Request<Unit> ->
-                        ResponseEntity.ok("hello")
-                    },
-                ).requiringPermissions("permission1")
+                GET("/some") { _: Request<Unit> ->
+                    ResponseEntity.ok("hello")
+                }.requiringPermissions("permission1")
             }
 
         override fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
             {
                 JwtPermissionHandler(
                     accessor =
-                    JwtAccessor(
-                        request = it,
-                        authorizationHeaderName = "custom-auth",
-                    ),
+                        JwtAccessor(
+                            request = it,
+                            authorizationHeaderName = "custom-auth",
+                        ),
                     permissionsClaim = "permissions",
                     permissionSeparator = ",",
                 )
@@ -774,18 +791,12 @@ class RequestHandlerTest {
             router {
                 filter = incrementingFilter.then(incrementingFilter)
 
-                GET(
-                    "/some",
-                    HandlerFunction { _: Request<Unit> ->
-                        ResponseEntity.ok("hello")
-                    },
-                )
-                GET<Unit, Unit>(
-                    "/some-internal-server-error",
-                    HandlerFunction {
-                        throw IllegalArgumentException("boom")
-                    },
-                )
+                GET("/some") { _: Request<Unit> ->
+                    ResponseEntity.ok("hello")
+                }
+                GET<Unit, Unit>("/some-internal-server-error") {
+                    throw IllegalArgumentException("boom")
+                }
             }
     }
 
@@ -796,134 +807,92 @@ class RequestHandlerTest {
 
         override val router =
             router {
-                GET(
-                    "/some",
-                    HandlerFunction { _: Request<Unit> ->
-                        ResponseEntity.ok(
-                            TestResponse(
-                                "Hello",
-                            ),
-                        )
-                    },
-                )
-                GET<Unit, Unit>(
-                    "/some-api-exception",
-                    HandlerFunction {
-                        throw ApiException("boom", "BOOM", 400, mapOf("more" to "info"))
-                    },
-                )
-                GET<Unit, Unit>(
-                    "/some-internal-server-error",
-                    HandlerFunction {
-                        throw IllegalArgumentException("boom")
-                    },
-                )
-                GET(
-                    "/some/{id}",
-                    HandlerFunction { r: Request<Unit> ->
-                        assertThat(r.pathParameters.containsKey("id")).isTrue()
-                        ResponseEntity.ok(
-                            TestResponse(
-                                "Hello ${r.getPathParameter("id")}",
-                            ),
-                        )
-                    },
-                )
+                GET("/some") { _: Request<Unit> ->
+                    ResponseEntity.ok(
+                        TestResponse(
+                            "Hello",
+                        ),
+                    )
+                }
+                GET<Unit, Unit>("/some-api-exception") {
+                    throw ApiException("boom", "BOOM", 400, mapOf("more" to "info"))
+                }
+                GET<Unit, Unit>("/some-internal-server-error") {
+                    throw IllegalArgumentException("boom")
+                }
+                GET("/some/{id}") { r: Request<Unit> ->
+                    assertThat(r.pathParameters.containsKey("id")).isTrue()
+                    ResponseEntity.ok(
+                        TestResponse(
+                            "Hello ${r.getPathParameter("id")}",
+                        ),
+                    )
+                }
 
-                POST(
-                    "/some",
-                    HandlerFunction { _: Request<TestRequest> ->
-                        ResponseEntity.ok(
-                            TestResponse(
-                                "v2",
-                            ),
-                        )
-                    },
-                ).producing("application/vnd.moia.v2+json")
+                POST("/some") { _: Request<TestRequest> ->
+                    ResponseEntity.ok(
+                        TestResponse(
+                            "v2",
+                        ),
+                    )
+                }.producing("application/vnd.moia.v2+json")
 
-                POST(
-                    "/some",
-                    HandlerFunction { r: Request<TestRequest> ->
-                        ResponseEntity.ok(
-                            TestResponse(
-                                r.body.greeting,
-                            ),
-                        )
-                    },
-                ).producing("application/json", "application/*+json")
+                POST("/some") { r: Request<TestRequest> ->
+                    ResponseEntity.ok(
+                        TestResponse(
+                            r.body.greeting,
+                        ),
+                    )
+                }.producing("application/json", "application/*+json")
 
-                POST(
-                    "/some-nullable",
-                    HandlerFunction { r: Request<TestRequest?> ->
-                        ResponseEntity.ok(
-                            TestResponse(
-                                r.body?.greeting.orEmpty(),
-                            ),
-                        )
-                    },
-                ).producing("application/json")
+                POST("/some-nullable") { r: Request<TestRequest?> ->
+                    ResponseEntity.ok(
+                        TestResponse(
+                            r.body?.greeting.orEmpty(),
+                        ),
+                    )
+                }.producing("application/json")
 
-                POST(
-                    "/somes",
-                    HandlerFunction { r: Request<List<TestRequest>> ->
-                        ResponseEntity.ok(
-                            r.body.map {
-                                TestResponse(
-                                    it.greeting,
-                                )
-                            }.toList(),
-                        )
-                    },
-                )
-                POST(
-                    "/no-content",
-                    HandlerFunction { _: Request<TestRequest> ->
-                        ResponseEntity.noContent()
-                    },
-                )
-                POST(
-                    "/create-without-location",
-                    HandlerFunction<TestRequest, Unit> { _: Request<TestRequest> ->
-                        ResponseEntity.created(null, null, emptyMap())
-                    },
-                )
-                POST(
-                    "/create-with-location",
-                    HandlerFunction<TestRequest, Unit> { r: Request<TestRequest> ->
-                        ResponseEntity.created(null, r.apiRequest.location("test"), emptyMap())
-                    },
-                )
-                DELETE(
-                    "/delete-me",
-                    HandlerFunction { _: Request<Unit> ->
-                        ResponseEntity.noContent()
-                    },
-                )
-                GET(
-                    "/non-existing-path-parameter",
-                    HandlerFunction<Unit, Unit> { request: Request<Unit> ->
-                        request.getPathParameter("foo")
-                        ResponseEntity.ok(null)
-                    },
-                )
+                POST("/somes") { r: Request<List<TestRequest>> ->
+                    ResponseEntity.ok(
+                        r.body.map {
+                            TestResponse(
+                                it.greeting,
+                            )
+                        }.toList(),
+                    )
+                }
+                POST("/no-content") { _: Request<TestRequest> ->
+                    ResponseEntity.noContent()
+                }
+                POST<TestRequest, Unit>("/create-without-location") { _: Request<TestRequest> ->
+                    ResponseEntity.created(null, null, emptyMap())
+                }
+                POST<TestRequest, Unit>("/create-with-location") { r: Request<TestRequest> ->
+                    ResponseEntity.created(null, r.apiRequest.location("test"), emptyMap())
+                }
+                DELETE("/delete-me") { _: Request<Unit> ->
+                    ResponseEntity.noContent()
+                }
+                GET<Unit, Unit>("/non-existing-path-parameter") { request: Request<Unit> ->
+                    request.getPathParameter("foo")
+                    ResponseEntity.ok(null)
+                }
             }
     }
 
     class TestQueryParamParsingHandler : RequestHandler() {
         override val router =
             router {
-                GET(
-                    "/search",
-                    HandlerFunction<TestRequestHandler.TestRequest, Unit> { r: Request<TestRequestHandler.TestRequest> ->
-                        assertThat(r.getQueryParameter("testQueryParam")).isNotNull()
-                        assertThat(r.getQueryParameter("testQueryParam")).isEqualTo("foo")
-                        assertThat(r.queryParameters!!["testQueryParam"]).isNotNull()
-                        assertThat(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isNotNull()
-                        assertThat(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isEqualTo(listOf("foo", "bar"))
-                        assertThat(r.multiValueQueryStringParameters!!["testMultiValueQueryStringParam"]).isNotNull()
-                        ResponseEntity.ok(null)
-                    },
-                )
+                GET<TestRequestHandler.TestRequest, Unit>("/search") { r: Request<TestRequestHandler.TestRequest> ->
+                    assertThat(r.getQueryParameter("testQueryParam")).isNotNull()
+                    assertThat(r.getQueryParameter("testQueryParam")).isEqualTo("foo")
+                    assertThat(r.queryParameters!!["testQueryParam"]).isNotNull()
+                    assertThat(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isNotNull()
+                    assertThat(r.getMultiValueQueryStringParameter("testMultiValueQueryStringParam")).isEqualTo(listOf("foo", "bar"))
+                    assertThat(r.multiValueQueryStringParameters!!["testMultiValueQueryStringParam"]).isNotNull()
+                    ResponseEntity.ok(null)
+                }
             }
     }
 
@@ -934,12 +903,9 @@ class RequestHandlerTest {
             router {
                 defaultConsuming = setOf("application/json", "text/plain")
                 defaultProducing = setOf("application/json", "text/plain")
-                GET(
-                    "/all-objects",
-                    HandlerFunction { _: Request<Unit> ->
-                        ResponseEntity.ok(body = listOf(CustomObject("foo", 1), CustomObject("bar", 2)))
-                    },
-                )
+                GET("/all-objects") { _: Request<Unit> ->
+                    ResponseEntity.ok(body = listOf(CustomObject("foo", 1), CustomObject("bar", 2)))
+                }
             }
     }
 }

@@ -35,35 +35,35 @@ class Router(private val predicateFactory: PredicateFactory) {
 
     var filter: Filter = Filter.NoOp
 
-    fun <I, T> GET(
+    inline fun <reified I, reified T> GET(
         pattern: String,
-        handlerFunction: HandlerFunction<I, T>,
-    ) = defaultRequestPredicate(pattern, "GET", handlerFunction, emptySet())
+        crossinline handlerFunction: HandlerFunction<I, T>,
+    ) = defaultRequestPredicate(pattern, "GET", HandlerFunctionWrapper.invoke(handlerFunction), emptySet())
 
-    fun <I, T> POST(
+    inline fun <reified I, reified T> POST(
         pattern: String,
-        handlerFunction: HandlerFunction<I, T>,
-    ) = defaultRequestPredicate(pattern, "POST", handlerFunction)
+        crossinline handlerFunction: HandlerFunction<I, T>,
+    ) = defaultRequestPredicate(pattern, "POST", HandlerFunctionWrapper.invoke(handlerFunction))
 
-    fun <I, T> PUT(
+    inline fun <reified I, reified T> PUT(
         pattern: String,
-        handlerFunction: HandlerFunction<I, T>,
-    ) = defaultRequestPredicate(pattern, "PUT", handlerFunction)
+        crossinline handlerFunction: HandlerFunction<I, T>,
+    ) = defaultRequestPredicate(pattern, "PUT", HandlerFunctionWrapper.invoke(handlerFunction))
 
-    fun <I, T> DELETE(
+    inline fun <reified I, reified T> DELETE(
         pattern: String,
-        handlerFunction: HandlerFunction<I, T>,
-    ) = defaultRequestPredicate(pattern, "DELETE", handlerFunction, emptySet())
+        crossinline handlerFunction: HandlerFunction<I, T>,
+    ) = defaultRequestPredicate(pattern, "DELETE", HandlerFunctionWrapper.invoke(handlerFunction), emptySet())
 
-    fun <I, T> PATCH(
+    inline fun <reified I, reified T> PATCH(
         pattern: String,
-        handlerFunction: HandlerFunction<I, T>,
-    ) = defaultRequestPredicate(pattern, "PATCH", handlerFunction)
+        crossinline handlerFunction: HandlerFunction<I, T>,
+    ) = defaultRequestPredicate(pattern, "PATCH", HandlerFunctionWrapper.invoke(handlerFunction))
 
-    private fun <I, T> defaultRequestPredicate(
+    fun <I, T> defaultRequestPredicate(
         pattern: String,
         method: String,
-        handlerFunction: HandlerFunction<I, T>,
+        handlerFunction: HandlerFunctionWrapper<I, T>,
         consuming: Set<String> = defaultConsuming,
     ) = predicateFactory(method, pattern, consuming, defaultProducing)
         .also { routes += RouterFunction(it, handlerFunction) }
@@ -108,22 +108,22 @@ fun Filter.then(next: Filter): Filter = Filter { this(next(it)) }
 fun Filter.then(next: APIGatewayRequestHandlerFunction): APIGatewayRequestHandlerFunction = { this(next)(it) }
 
 typealias APIGatewayRequestHandlerFunction = (APIGatewayProxyRequestEvent) -> APIGatewayProxyResponseEvent
-typealias ConcreteHandlerFunction<I, T> = (request: Request<I>) -> ResponseEntity<T>
+typealias HandlerFunction<I, T> = (request: Request<I>) -> ResponseEntity<T>
 
-abstract class HandlerFunction<I, T> {
+abstract class HandlerFunctionWrapper<I, T> {
     abstract val requestType: KType
     abstract val responseType: KType
 
-    abstract val handlerFunction: ConcreteHandlerFunction<I, T>
+    abstract val handlerFunction: HandlerFunction<I, T>
 
     companion object {
-        inline operator fun <reified I, reified T> invoke(crossinline handler: ConcreteHandlerFunction<I, T>): HandlerFunction<I, T> {
+        inline operator fun <reified I, reified T> invoke(crossinline handler: HandlerFunction<I, T>): HandlerFunctionWrapper<I, T> {
             val requestType = typeOf<I>()
             val responseType = typeOf<T>()
-            return object : HandlerFunction<I, T>() {
+            return object : HandlerFunctionWrapper<I, T>() {
                 override val requestType: KType = requestType
                 override val responseType: KType = responseType
-                override val handlerFunction: ConcreteHandlerFunction<I, T> = { request -> handler.invoke(request) }
+                override val handlerFunction: HandlerFunction<I, T> = { request -> handler.invoke(request) }
             }
         }
     }
@@ -131,7 +131,7 @@ abstract class HandlerFunction<I, T> {
 
 class RouterFunction<I, T>(
     val requestPredicate: RequestPredicate,
-    val handler: HandlerFunction<I, T>,
+    val handler: HandlerFunctionWrapper<I, T>,
 ) {
     override fun toString(): String {
         return "RouterFunction(requestPredicate=$requestPredicate)"

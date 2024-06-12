@@ -29,9 +29,7 @@ import com.google.common.net.MediaType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
-import kotlin.reflect.jvm.ExperimentalReflectionOnLambdas
 
-@Suppress("UnstableApiUsage")
 abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     open val objectMapper = jacksonObjectMapper()
 
@@ -48,12 +46,11 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             .apply { headers = headers.mapKeys { it.key.lowercase() } }
             .let { router.filter.then(this::handleRequest)(it) }
 
-    @ExperimentalReflectionOnLambdas
     @Suppress("UNCHECKED_CAST")
     private fun handleRequest(input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         log.debug(
             "handling request with method '${input.httpMethod}' and path '${input.path}' - " +
-                    "Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input",
+                "Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input",
         )
         val routes = router.routes as List<RouterFunction<Any, Any>>
         val matchResults: List<RequestMatchResult> =
@@ -65,7 +62,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                         routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
                             ?: MediaType.parse(router.defaultContentType)
 
-                    val handler: HandlerFunction<Any, Any> = routerFunction.handler
+                    val handler: HandlerFunctionWrapper<Any, Any> = routerFunction.handler
 
                     val response =
                         try {
@@ -144,16 +141,15 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     open fun predicatePermissionHandlerSupplier(): ((r: APIGatewayProxyRequestEvent) -> PredicatePermissionHandler)? = null
 
     private fun deserializeRequest(
-        handler: HandlerFunction<Any, Any>,
+        handler: HandlerFunctionWrapper<Any, Any>,
         input: APIGatewayProxyRequestEvent,
     ): Any? {
-        val requestType = handler.requestType
         return when {
-            requestType.classifier as KClass<*> == Unit::class -> Unit
-            input.body == null && requestType.isMarkedNullable -> null
+            handler.requestType.classifier as KClass<*> == Unit::class -> Unit
+            input.body == null && handler.requestType.isMarkedNullable -> null
             input.body == null -> throw ApiException("no request body present", "REQUEST_BODY_MISSING", 400)
-            input.body is String && requestType.classifier as KClass<*> == String::class -> input.body
-            else -> deserializationHandlerChain.deserialize(input, requestType)
+            input.body is String && handler.requestType.classifier as KClass<*> == String::class -> input.body
+            else -> deserializationHandlerChain.deserialize(input, handler.requestType)
         }
     }
 
@@ -224,10 +220,10 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                             code = "ENTITY",
                             path = "",
                             details =
-                            mapOf(
-                                "payload" to ex.requestPayloadAsString.orEmpty(),
-                                "message" to ex.message.orEmpty(),
-                            ),
+                                mapOf(
+                                    "payload" to ex.requestPayloadAsString.orEmpty(),
+                                    "message" to ex.message.orEmpty(),
+                                ),
                         ),
                     ),
                 )
@@ -240,10 +236,10 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                             code = "FIELD",
                             path = ex.path.last().fieldName.orEmpty(),
                             details =
-                            mapOf(
-                                "cause" to ex.cause?.message.orEmpty(),
-                                "message" to ex.message.orEmpty(),
-                            ),
+                                mapOf(
+                                    "cause" to ex.cause?.message.orEmpty(),
+                                    "message" to ex.message.orEmpty(),
+                                ),
                         ),
                     ),
                 )
