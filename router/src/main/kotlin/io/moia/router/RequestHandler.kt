@@ -30,7 +30,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.ExperimentalReflectionOnLambdas
-import kotlin.reflect.jvm.reflect
 
 @Suppress("UnstableApiUsage")
 abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -54,7 +53,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     private fun handleRequest(input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         log.debug(
             "handling request with method '${input.httpMethod}' and path '${input.path}' - " +
-                "Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input",
+                    "Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input",
         )
         val routes = router.routes as List<RouterFunction<Any, Any>>
         val matchResults: List<RequestMatchResult> =
@@ -74,8 +73,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                                 throw ApiException("missing permissions", "MISSING_PERMISSIONS", 403)
                             } else {
                                 val requestBody = deserializeRequest(handler, input)
-                                val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
-                                (handler as HandlerFunction<*, *>)(request)
+                                val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern) as Request<Any>
+                                handler.handlerFunction(request)
                             }
                         } catch (e: Exception) {
                             exceptionToResponseEntity(e, input)
@@ -144,16 +143,11 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     open fun predicatePermissionHandlerSupplier(): ((r: APIGatewayProxyRequestEvent) -> PredicatePermissionHandler)? = null
 
-    @ExperimentalReflectionOnLambdas
     private fun deserializeRequest(
         handler: HandlerFunction<Any, Any>,
         input: APIGatewayProxyRequestEvent,
     ): Any? {
-        val requestType =
-            handler.reflect()?.parameters?.first()?.type?.arguments?.first()?.type
-                ?: throw IllegalArgumentException(
-                    "reflection failed, try using a real lambda instead of function references (Kotlin 1.6 bug?)",
-                )
+        val requestType = handler.requestType
         return when {
             requestType.classifier as KClass<*> == Unit::class -> Unit
             input.body == null && requestType.isMarkedNullable -> null
@@ -230,10 +224,10 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                             code = "ENTITY",
                             path = "",
                             details =
-                                mapOf(
-                                    "payload" to ex.requestPayloadAsString.orEmpty(),
-                                    "message" to ex.message.orEmpty(),
-                                ),
+                            mapOf(
+                                "payload" to ex.requestPayloadAsString.orEmpty(),
+                                "message" to ex.message.orEmpty(),
+                            ),
                         ),
                     ),
                 )
@@ -246,10 +240,10 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                             code = "FIELD",
                             path = ex.path.last().fieldName.orEmpty(),
                             details =
-                                mapOf(
-                                    "cause" to ex.cause?.message.orEmpty(),
-                                    "message" to ex.message.orEmpty(),
-                                ),
+                            mapOf(
+                                "cause" to ex.cause?.message.orEmpty(),
+                                "message" to ex.message.orEmpty(),
+                            ),
                         ),
                     ),
                 )

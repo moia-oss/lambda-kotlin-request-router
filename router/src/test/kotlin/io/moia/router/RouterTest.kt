@@ -31,9 +31,12 @@ class RouterTest {
     fun `should register get route with default accept header`() {
         val router =
             router {
-                GET("/some") { r: Request<Unit> ->
-                    ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
-                }
+                GET(
+                    "/some",
+                    HandlerFunction { r: Request<Unit> ->
+                        ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
+                    },
+                )
             }
 
         assertThat(router.routes).hasSize(1)
@@ -49,10 +52,10 @@ class RouterTest {
     fun `should register routes`() {
         val router =
             router {
-                PUT("/some") { _: Request<Unit> -> ResponseEntity.ok("") }
-                PATCH("/some") { _: Request<Unit> -> ResponseEntity.ok("") }
-                DELETE("/some") { _: Request<Unit> -> ResponseEntity.ok("") }
-                POST("/some") { _: Request<Unit> -> ResponseEntity.ok("") }
+                PUT("/some", HandlerFunction { _: Request<Unit> -> ResponseEntity.ok("") })
+                PATCH("/some", HandlerFunction { _: Request<Unit> -> ResponseEntity.ok("") })
+                DELETE("/some", HandlerFunction { _: Request<Unit> -> ResponseEntity.ok("") })
+                POST("/some", HandlerFunction { _: Request<Unit> -> ResponseEntity.ok("") })
             }
 
         then(router.routes.map { it.requestPredicate.method }).containsOnly("PUT", "PATCH", "DELETE", "POST")
@@ -62,9 +65,12 @@ class RouterTest {
     fun `should register post route with specific content types`() {
         val router =
             router {
-                POST("/some") { r: Request<Unit> ->
-                    ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
-                }
+                POST(
+                    "/some",
+                    HandlerFunction { r: Request<Unit> ->
+                        ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
+                    },
+                )
                     .producing("text/plain")
                     .consuming("text/plain")
             }
@@ -85,9 +91,12 @@ class RouterTest {
                 defaultConsuming = setOf("text/plain")
                 defaultProducing = setOf("text/plain")
 
-                POST("/some") { r: Request<Unit> ->
-                    ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
-                }
+                POST(
+                    "/some",
+                    HandlerFunction { r: Request<Unit> ->
+                        ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
+                    },
+                )
             }
 
         assertThat(router.routes).hasSize(1)
@@ -103,9 +112,12 @@ class RouterTest {
     fun `should handle greedy path variables successfully`() {
         val router =
             router {
-                POST("/some/{proxy+}") { r: Request<Unit> ->
-                    ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
-                }
+                POST(
+                    "/some/{proxy+}",
+                    HandlerFunction { r: Request<Unit> ->
+                        ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
+                    },
+                )
             }
         assertThat(router.routes).hasSize(1)
         with(router.routes.first().requestPredicate) {
@@ -117,9 +129,12 @@ class RouterTest {
     fun `should not consume for a deletion route`() {
         val router =
             router {
-                DELETE("/delete-me") { _: Request<Unit> ->
-                    ResponseEntity.ok(null)
-                }
+                DELETE(
+                    "/delete-me",
+                    HandlerFunction<Unit, Unit> { _: Request<Unit> ->
+                        ResponseEntity.ok(null)
+                    },
+                )
             }
         with(router.routes.first().requestPredicate) {
             assertThat(consumes).isEqualTo(setOf<String>())

@@ -19,6 +19,8 @@ package io.moia.router
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.ProxyRequestContext
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 typealias PredicateFactory = (String, String, Set<String>, Set<String>) -> RequestPredicate
 
@@ -106,7 +108,26 @@ fun Filter.then(next: Filter): Filter = Filter { this(next(it)) }
 fun Filter.then(next: APIGatewayRequestHandlerFunction): APIGatewayRequestHandlerFunction = { this(next)(it) }
 
 typealias APIGatewayRequestHandlerFunction = (APIGatewayProxyRequestEvent) -> APIGatewayProxyResponseEvent
-typealias HandlerFunction<I, T> = (request: Request<I>) -> ResponseEntity<T>
+typealias ConcreteHandlerFunction<I, T> = (request: Request<I>) -> ResponseEntity<T>
+
+abstract class HandlerFunction<I, T> {
+    abstract val requestType: KType
+    abstract val responseType: KType
+
+    abstract val handlerFunction: ConcreteHandlerFunction<I, T>
+
+    companion object {
+        inline operator fun <reified I, reified T> invoke(crossinline handler: ConcreteHandlerFunction<I, T>): HandlerFunction<I, T> {
+            val requestType = typeOf<I>()
+            val responseType = typeOf<T>()
+            return object : HandlerFunction<I, T>() {
+                override val requestType: KType = requestType
+                override val responseType: KType = responseType
+                override val handlerFunction: ConcreteHandlerFunction<I, T> = { request -> handler.invoke(request) }
+            }
+        }
+    }
+}
 
 class RouterFunction<I, T>(
     val requestPredicate: RequestPredicate,
