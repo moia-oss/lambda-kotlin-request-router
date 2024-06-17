@@ -28,7 +28,6 @@ import io.mockk.mockk
 import io.moia.router.Router.Companion.router
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 @Suppress("ktlint:standard:max-line-length")
@@ -710,7 +709,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    fun `should fail for function references when using Kotlin 1_6_10`() {
+    fun `should be able to use function references as handler`() {
         class DummyHandler : RequestHandler() {
             val dummy =
                 object {
@@ -725,7 +724,8 @@ class RequestHandlerTest {
                     GET("/some", dummy::handler).producing("application/json")
                 }
         }
-        assertThrows<IllegalArgumentException> {
+
+        val response =
             DummyHandler().handleRequest(
                 APIGatewayProxyRequestEvent()
                     .withHttpMethod("GET")
@@ -733,7 +733,8 @@ class RequestHandlerTest {
                     .withAcceptHeader("application/json"),
                 mockk(),
             )
-        }
+
+        assertThat(response.statusCode).isEqualTo(200)
     }
 
     class TestRequestHandlerAuthorization : RequestHandler() {
@@ -864,16 +865,16 @@ class RequestHandlerTest {
                 POST("/no-content") { _: Request<TestRequest> ->
                     ResponseEntity.noContent()
                 }
-                POST("/create-without-location") { _: Request<TestRequest> ->
+                POST<TestRequest, Unit>("/create-without-location") { _: Request<TestRequest> ->
                     ResponseEntity.created(null, null, emptyMap())
                 }
-                POST("/create-with-location") { r: Request<TestRequest> ->
+                POST<TestRequest, Unit>("/create-with-location") { r: Request<TestRequest> ->
                     ResponseEntity.created(null, r.apiRequest.location("test"), emptyMap())
                 }
                 DELETE("/delete-me") { _: Request<Unit> ->
                     ResponseEntity.noContent()
                 }
-                GET("/non-existing-path-parameter") { request: Request<Unit> ->
+                GET<Unit, Unit>("/non-existing-path-parameter") { request: Request<Unit> ->
                     request.getPathParameter("foo")
                     ResponseEntity.ok(null)
                 }
@@ -883,7 +884,7 @@ class RequestHandlerTest {
     class TestQueryParamParsingHandler : RequestHandler() {
         override val router =
             router {
-                GET("/search") { r: Request<TestRequestHandler.TestRequest> ->
+                GET<TestRequestHandler.TestRequest, Unit>("/search") { r: Request<TestRequestHandler.TestRequest> ->
                     assertThat(r.getQueryParameter("testQueryParam")).isNotNull()
                     assertThat(r.getQueryParameter("testQueryParam")).isEqualTo("foo")
                     assertThat(r.queryParameters!!["testQueryParam"]).isNotNull()

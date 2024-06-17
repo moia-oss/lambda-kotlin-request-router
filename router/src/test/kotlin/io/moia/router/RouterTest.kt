@@ -117,7 +117,7 @@ class RouterTest {
     fun `should not consume for a deletion route`() {
         val router =
             router {
-                DELETE("/delete-me") { _: Request<Unit> ->
+                DELETE<Unit, Unit>("/delete-me") { _: Request<Unit> ->
                     ResponseEntity.ok(null)
                 }
             }

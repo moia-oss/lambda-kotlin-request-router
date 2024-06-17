@@ -29,10 +29,7 @@ import com.google.common.net.MediaType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
-import kotlin.reflect.jvm.ExperimentalReflectionOnLambdas
-import kotlin.reflect.jvm.reflect
 
-@Suppress("UnstableApiUsage")
 abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     open val objectMapper = jacksonObjectMapper()
 
@@ -49,7 +46,6 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
             .apply { headers = headers.mapKeys { it.key.lowercase() } }
             .let { router.filter.then(this::handleRequest)(it) }
 
-    @ExperimentalReflectionOnLambdas
     @Suppress("UNCHECKED_CAST")
     private fun handleRequest(input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         log.debug(
@@ -66,7 +62,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                         routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
                             ?: MediaType.parse(router.defaultContentType)
 
-                    val handler: HandlerFunction<Any, Any> = routerFunction.handler
+                    val handler: HandlerFunctionWrapper<Any, Any> = routerFunction.handler
 
                     val response =
                         try {
@@ -74,8 +70,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                                 throw ApiException("missing permissions", "MISSING_PERMISSIONS", 403)
                             } else {
                                 val requestBody = deserializeRequest(handler, input)
-                                val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
-                                (handler as HandlerFunction<*, *>)(request)
+                                val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern) as Request<Any>
+                                handler.handlerFunction(request)
                             }
                         } catch (e: Exception) {
                             exceptionToResponseEntity(e, input)
@@ -144,22 +140,16 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
 
     open fun predicatePermissionHandlerSupplier(): ((r: APIGatewayProxyRequestEvent) -> PredicatePermissionHandler)? = null
 
-    @ExperimentalReflectionOnLambdas
     private fun deserializeRequest(
-        handler: HandlerFunction<Any, Any>,
+        handler: HandlerFunctionWrapper<Any, Any>,
         input: APIGatewayProxyRequestEvent,
     ): Any? {
-        val requestType =
-            handler.reflect()?.parameters?.first()?.type?.arguments?.first()?.type
-                ?: throw IllegalArgumentException(
-                    "reflection failed, try using a real lambda instead of function references (Kotlin 1.6 bug?)",
-                )
         return when {
-            requestType.classifier as KClass<*> == Unit::class -> Unit
-            input.body == null && requestType.isMarkedNullable -> null
+            handler.requestType.classifier as KClass<*> == Unit::class -> Unit
+            input.body == null && handler.requestType.isMarkedNullable -> null
             input.body == null -> throw ApiException("no request body present", "REQUEST_BODY_MISSING", 400)
-            input.body is String && requestType.classifier as KClass<*> == String::class -> input.body
-            else -> deserializationHandlerChain.deserialize(input, requestType)
+            input.body is String && handler.requestType.classifier as KClass<*> == String::class -> input.body
+            else -> deserializationHandlerChain.deserialize(input, handler.requestType)
         }
     }
 
