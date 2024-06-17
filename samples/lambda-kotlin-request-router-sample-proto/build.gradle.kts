@@ -16,11 +16,11 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "2.0.0"
     idea
-    id("com.github.johnrengelman.shadow") version "5.1.0"
-    id("org.jmailen.kotlinter") version "1.22.0"
-    id("com.google.protobuf") version "0.8.7"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.jmailen.kotlinter") version "4.3.0"
+    id("com.google.protobuf") version "0.8.13"
 }
 
 
@@ -34,25 +34,25 @@ repositories {
 
 val proto = "3.11.1"
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-    implementation("io.moia.lambda-kotlin-request-router:router-protobuf:0.9.7")
+    implementation("io.moia.lambda-kotlin-request-router:router-protobuf:0.10.2")
 
-    implementation("com.amazonaws:aws-lambda-java-core:1.2.0")
-    implementation("com.amazonaws:aws-lambda-java-log4j2:1.1.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0")
+    implementation("com.amazonaws:aws-lambda-java-core:1.2.3")
+    implementation("com.amazonaws:aws-lambda-java-log4j2:1.6.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
     implementation("com.google.guava:guava:23.0")
     implementation("com.google.protobuf:protobuf-java:$proto")
     implementation("com.google.protobuf:protobuf-java-util:$proto")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 }
 
 tasks {
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "17"
     }
 
     withType<Test> {

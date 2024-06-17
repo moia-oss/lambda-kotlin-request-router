@@ -22,8 +22,11 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.Base64
 
 interface PermissionHandler {
-
     fun hasAnyRequiredPermission(requiredPermissions: Set<String>): Boolean
+}
+
+interface PredicatePermissionHandler {
+    fun hasAnyRequiredPermission(predicate: RequestPredicate): Boolean
 }
 
 class NoOpPermissionHandler : PermissionHandler {
@@ -32,9 +35,8 @@ class NoOpPermissionHandler : PermissionHandler {
 
 open class JwtAccessor(
     private val request: APIGatewayProxyRequestEvent,
-    private val authorizationHeaderName: String = "authorization"
+    private val authorizationHeaderName: String = "authorization",
 ) {
-
     private val objectMapper = jacksonObjectMapper()
 
     fun extractJwtToken(): String? =
@@ -55,16 +57,16 @@ open class JwtAccessor(
             }
             ?.let { objectMapper.readValue<Map<String, Any>>(it) }
 }
+
 open class JwtPermissionHandler(
     val accessor: JwtAccessor,
-    val permissionsClaim: String = defaultPermissionsClaim,
-    val permissionSeparator: String = defaultPermissionSeparator
+    val permissionsClaim: String = DEFAULT_PERMISSIONS_CLAIM,
+    val permissionSeparator: String = DEFAULT_PERMISSION_SEPARATOR,
 ) : PermissionHandler {
-
     constructor(
         request: APIGatewayProxyRequestEvent,
-        permissionsClaim: String = defaultPermissionsClaim,
-        permissionSeparator: String = defaultPermissionSeparator
+        permissionsClaim: String = DEFAULT_PERMISSIONS_CLAIM,
+        permissionSeparator: String = DEFAULT_PERMISSION_SEPARATOR,
     ) : this(JwtAccessor(request), permissionsClaim, permissionSeparator)
 
     override fun hasAnyRequiredPermission(requiredPermissions: Set<String>): Boolean =
@@ -87,7 +89,7 @@ open class JwtPermissionHandler(
             ?: emptySet()
 
     companion object {
-        private const val defaultPermissionsClaim = "scope"
-        private const val defaultPermissionSeparator: String = " "
+        private const val DEFAULT_PERMISSIONS_CLAIM = "scope"
+        private const val DEFAULT_PERMISSION_SEPARATOR: String = " "
     }
 }

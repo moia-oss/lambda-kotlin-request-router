@@ -29,12 +29,8 @@ import com.google.common.net.MediaType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
-import kotlin.reflect.jvm.ExperimentalReflectionOnLambdas
-import kotlin.reflect.jvm.reflect
 
-@Suppress("UnstableApiUsage")
 abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-
     open val objectMapper = jacksonObjectMapper()
 
     abstract val router: Router
@@ -42,100 +38,126 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     private val serializationHandlerChain by lazy { SerializationHandlerChain(serializationHandlers()) }
     private val deserializationHandlerChain by lazy { DeserializationHandlerChain(deserializationHandlers()) }
 
-    override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent =
+    override fun handleRequest(
+        input: APIGatewayProxyRequestEvent,
+        context: Context,
+    ): APIGatewayProxyResponseEvent =
         input
             .apply { headers = headers.mapKeys { it.key.lowercase() } }
             .let { router.filter.then(this::handleRequest)(it) }
 
-    @ExperimentalReflectionOnLambdas
     @Suppress("UNCHECKED_CAST")
     private fun handleRequest(input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
-        log.debug("handling request with method '${input.httpMethod}' and path '${input.path}' - Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input")
+        log.debug(
+            "handling request with method '${input.httpMethod}' and path '${input.path}' - " +
+                "Accept:${input.acceptHeader()} Content-Type:${input.contentType()} $input",
+        )
         val routes = router.routes as List<RouterFunction<Any, Any>>
-        val matchResults: List<RequestMatchResult> = routes.map { routerFunction: RouterFunction<Any, Any> ->
-            val matchResult = routerFunction.requestPredicate.match(input)
-            log.debug("match result for route '$routerFunction' is '$matchResult'")
-            if (matchResult.match) {
-                val matchedAcceptType = routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
-                    ?: MediaType.parse(router.defaultContentType)
+        val matchResults: List<RequestMatchResult> =
+            routes.map { routerFunction: RouterFunction<Any, Any> ->
+                val matchResult = routerFunction.requestPredicate.match(input)
+                log.debug("match result for route '$routerFunction' is '$matchResult'")
+                if (matchResult.match) {
+                    val matchedAcceptType =
+                        routerFunction.requestPredicate.matchedAcceptType(input.acceptedMediaTypes())
+                            ?: MediaType.parse(router.defaultContentType)
 
-                val handler: HandlerFunction<Any, Any> = routerFunction.handler
+                    val handler: HandlerFunctionWrapper<Any, Any> = routerFunction.handler
 
-                val response =
-                    try {
-                        if (missingPermissions(input, routerFunction)) {
-                            throw ApiException("missing permissions", "MISSING_PERMISSIONS", 403)
-                        } else {
-                            val requestBody = deserializeRequest(handler, input)
-                            val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern)
-                            (handler as HandlerFunction<*, *>)(request)
+                    val response =
+                        try {
+                            if (missingPermissions(input, routerFunction)) {
+                                throw ApiException("missing permissions", "MISSING_PERMISSIONS", 403)
+                            } else {
+                                val requestBody = deserializeRequest(handler, input)
+                                val request = Request(input, requestBody, routerFunction.requestPredicate.pathPattern) as Request<Any>
+                                handler.handlerFunction(request)
+                            }
+                        } catch (e: Exception) {
+                            exceptionToResponseEntity(e, input)
                         }
-                    } catch (e: Exception) {
-                        exceptionToResponseEntity(e, input)
-                    }
-                return createResponse(matchedAcceptType, response)
+                    return createResponse(matchedAcceptType, response)
+                }
+                matchResult
             }
-            matchResult
-        }
         return handleNonDirectMatch(MediaType.parse(router.defaultContentType), matchResults, input)
     }
 
-    private fun exceptionToResponseEntity(e: Exception, input: APIGatewayProxyRequestEvent) =
-        when (e) {
-            is ApiException ->
-                e.toResponseEntity(this::createErrorBody)
-                    .also { logApiException(e, input) }
-            else ->
-                exceptionToResponseEntity(e)
-                    .also { logUnknownException(e, input) }
-        }
+    private fun exceptionToResponseEntity(
+        e: Exception,
+        input: APIGatewayProxyRequestEvent,
+    ) = when (e) {
+        is ApiException ->
+            e.toResponseEntity(this::createErrorBody)
+                .also { logApiException(e, input) }
+        else ->
+            exceptionToResponseEntity(e)
+                .also { logUnknownException(e, input) }
+    }
 
-    private fun missingPermissions(input: APIGatewayProxyRequestEvent, routerFunction: RouterFunction<Any, Any>) =
-        !permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions)
+    private fun missingPermissions(
+        input: APIGatewayProxyRequestEvent,
+        routerFunction: RouterFunction<Any, Any>,
+    ): Boolean {
+        if (predicatePermissionHandlerSupplier() != null) {
+            return !predicatePermissionHandlerSupplier()!!(input).hasAnyRequiredPermission(routerFunction.requestPredicate)
+        }
+        return !permissionHandlerSupplier()(input).hasAnyRequiredPermission(routerFunction.requestPredicate.requiredPermissions)
+    }
 
     /**
      * Hook to be able to override the way ApiExceptions are logged.
      */
-    open fun logApiException(e: ApiException, input: APIGatewayProxyRequestEvent) {
+    open fun logApiException(
+        e: ApiException,
+        input: APIGatewayProxyRequestEvent,
+    ) {
         log.info("Caught api error while handling ${input.httpMethod} ${input.path} - $e")
     }
 
     /**
      * Hook to be able to override the way non-ApiExceptions are logged.
      */
-    open fun logUnknownException(e: Exception, input: APIGatewayProxyRequestEvent) {
+    open fun logUnknownException(
+        e: Exception,
+        input: APIGatewayProxyRequestEvent,
+    ) {
         log.error("Caught exception handling ${input.httpMethod} ${input.path} - $e", e)
     }
 
-    open fun serializationHandlers(): List<SerializationHandler> = listOf(
-        JsonSerializationHandler(objectMapper),
-        PlainTextSerializationHandler()
-    )
+    open fun serializationHandlers(): List<SerializationHandler> =
+        listOf(
+            JsonSerializationHandler(objectMapper),
+            PlainTextSerializationHandler(),
+        )
 
-    open fun deserializationHandlers(): List<DeserializationHandler> = listOf(
-        JsonDeserializationHandler(objectMapper)
-    )
+    open fun deserializationHandlers(): List<DeserializationHandler> =
+        listOf(
+            JsonDeserializationHandler(objectMapper),
+        )
 
-    open fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler =
-        { NoOpPermissionHandler() }
+    open fun permissionHandlerSupplier(): (r: APIGatewayProxyRequestEvent) -> PermissionHandler = { NoOpPermissionHandler() }
 
-    @ExperimentalReflectionOnLambdas
+    open fun predicatePermissionHandlerSupplier(): ((r: APIGatewayProxyRequestEvent) -> PredicatePermissionHandler)? = null
+
     private fun deserializeRequest(
-        handler: HandlerFunction<Any, Any>,
-        input: APIGatewayProxyRequestEvent
+        handler: HandlerFunctionWrapper<Any, Any>,
+        input: APIGatewayProxyRequestEvent,
     ): Any? {
-        val requestType = handler.reflect()?.parameters?.first()?.type?.arguments?.first()?.type
-            ?: throw IllegalArgumentException("reflection failed, try using a real lambda instead of function references (Kotlin 1.6 bug?)")
         return when {
-            requestType.classifier as KClass<*> == Unit::class -> Unit
-            input.body == null && requestType.isMarkedNullable -> null
+            handler.requestType.classifier as KClass<*> == Unit::class -> Unit
+            input.body == null && handler.requestType.isMarkedNullable -> null
             input.body == null -> throw ApiException("no request body present", "REQUEST_BODY_MISSING", 400)
-            input.body is String && requestType.classifier as KClass<*> == String::class -> input.body
-            else -> deserializationHandlerChain.deserialize(input, requestType)
+            input.body is String && handler.requestType.classifier as KClass<*> == String::class -> input.body
+            else -> deserializationHandlerChain.deserialize(input, handler.requestType)
         }
     }
 
-    private fun handleNonDirectMatch(defaultContentType: MediaType, matchResults: List<RequestMatchResult>, input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
+    private fun handleNonDirectMatch(
+        defaultContentType: MediaType,
+        matchResults: List<RequestMatchResult>,
+        input: APIGatewayProxyRequestEvent,
+    ): APIGatewayProxyResponseEvent {
         // no direct match
         val apiException =
             when {
@@ -143,29 +165,30 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                     ApiException(
                         httpResponseStatus = 415,
                         message = "Unsupported Media Type",
-                        code = "UNSUPPORTED_MEDIA_TYPE"
+                        code = "UNSUPPORTED_MEDIA_TYPE",
                     )
                 matchResults.any { it.matchPath && it.matchMethod && !it.matchAcceptType } ->
                     ApiException(
                         httpResponseStatus = 406,
                         message = "Not Acceptable",
-                        code = "NOT_ACCEPTABLE"
+                        code = "NOT_ACCEPTABLE",
                     )
                 matchResults.any { it.matchPath && !it.matchMethod } ->
                     ApiException(
                         httpResponseStatus = 405,
                         message = "Method Not Allowed",
-                        code = "METHOD_NOT_ALLOWED"
+                        code = "METHOD_NOT_ALLOWED",
                     )
-                else -> ApiException(
-                    httpResponseStatus = 404,
-                    message = "Not found",
-                    code = "NOT_FOUND"
-                )
+                else ->
+                    ApiException(
+                        httpResponseStatus = 404,
+                        message = "Not found",
+                        code = "NOT_FOUND",
+                    )
             }
         return createResponse(
             contentType = input.acceptedMediaTypes().firstOrNull() ?: defaultContentType,
-            response = apiException.toResponseEntity(this::createErrorBody)
+            response = apiException.toResponseEntity(this::createErrorBody),
         )
     }
 
@@ -188,58 +211,67 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
      */
     open fun exceptionToResponseEntity(ex: Exception) =
         when (ex) {
-            is JsonParseException -> ResponseEntity(
-                422,
-                createUnprocessableEntityErrorBody(
-                    UnprocessableEntityError(
-                        message = "INVALID_ENTITY",
-                        code = "ENTITY",
-                        path = "",
-                        details = mapOf(
-                            "payload" to ex.requestPayloadAsString.orEmpty(),
-                            "message" to ex.message.orEmpty()
-                        )
-                    )
+            is JsonParseException ->
+                ResponseEntity(
+                    422,
+                    createUnprocessableEntityErrorBody(
+                        UnprocessableEntityError(
+                            message = "INVALID_ENTITY",
+                            code = "ENTITY",
+                            path = "",
+                            details =
+                                mapOf(
+                                    "payload" to ex.requestPayloadAsString.orEmpty(),
+                                    "message" to ex.message.orEmpty(),
+                                ),
+                        ),
+                    ),
                 )
-            )
-            is InvalidDefinitionException -> ResponseEntity(
-                422,
-                createUnprocessableEntityErrorBody(
-                    UnprocessableEntityError(
-                        message = "INVALID_FIELD_FORMAT",
-                        code = "FIELD",
-                        path = ex.path.last().fieldName.orEmpty(),
-                        details = mapOf(
-                            "cause" to ex.cause?.message.orEmpty(),
-                            "message" to ex.message.orEmpty()
-                        )
-                    )
+            is InvalidDefinitionException ->
+                ResponseEntity(
+                    422,
+                    createUnprocessableEntityErrorBody(
+                        UnprocessableEntityError(
+                            message = "INVALID_FIELD_FORMAT",
+                            code = "FIELD",
+                            path = ex.path.last().fieldName.orEmpty(),
+                            details =
+                                mapOf(
+                                    "cause" to ex.cause?.message.orEmpty(),
+                                    "message" to ex.message.orEmpty(),
+                                ),
+                        ),
+                    ),
                 )
-            )
-            is InvalidFormatException -> ResponseEntity(
-                422,
-                createUnprocessableEntityErrorBody(
-                    UnprocessableEntityError(
-                        message = "INVALID_FIELD_FORMAT",
-                        code = "FIELD",
-                        path = ex.path.last().fieldName.orEmpty()
-                    )
+            is InvalidFormatException ->
+                ResponseEntity(
+                    422,
+                    createUnprocessableEntityErrorBody(
+                        UnprocessableEntityError(
+                            message = "INVALID_FIELD_FORMAT",
+                            code = "FIELD",
+                            path = ex.path.last().fieldName.orEmpty(),
+                        ),
+                    ),
                 )
-            )
-            is MissingKotlinParameterException -> ResponseEntity(
-                422,
-                createUnprocessableEntityErrorBody(
-                    UnprocessableEntityError(
-                        message = "MISSING_REQUIRED_FIELDS",
-                        code = "FIELD",
-                        path = ex.parameter.name.orEmpty()
-                    )
+            is MissingKotlinParameterException ->
+                ResponseEntity(
+                    422,
+                    createUnprocessableEntityErrorBody(
+                        UnprocessableEntityError(
+                            message = "MISSING_REQUIRED_FIELDS",
+                            code = "FIELD",
+                            path = ex.parameter.name.orEmpty(),
+                        ),
+                    ),
                 )
-            )
             else -> ResponseEntity(500, createErrorBody(ApiError(ex.message.orEmpty(), "INTERNAL_SERVER_ERROR")))
         }
 
-    open fun <T> createResponse(contentType: MediaType, response: ResponseEntity<T>): APIGatewayProxyResponseEvent =
+    open fun <T> createResponse(
+        contentType: MediaType,
+        response: ResponseEntity<T>,
+    ): APIGatewayProxyResponseEvent =
         when (response.body != null && serializationHandlerChain.supports(contentType, response.body)) {
             true -> contentType
             false -> MediaType.parse(router.defaultContentType)
@@ -250,7 +282,7 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                 .withBody(
                     response.body?.let {
                         serializationHandlerChain.serialize(finalContentType, it as Any)
-                    }
+                    },
                 )
         }
 

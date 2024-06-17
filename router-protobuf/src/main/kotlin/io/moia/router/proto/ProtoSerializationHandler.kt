@@ -7,14 +7,18 @@ import isCompatibleWith
 import java.util.Base64
 
 class ProtoSerializationHandler : SerializationHandler {
-
     private val json = MediaType.parse("application/json")
     private val jsonStructuredSuffixWildcard = MediaType.parse("application/*+json")
 
-    override fun supports(acceptHeader: MediaType, body: Any): Boolean =
-        body is GeneratedMessageV3
+    override fun supports(
+        acceptHeader: MediaType,
+        body: Any,
+    ): Boolean = body is GeneratedMessageV3
 
-    override fun serialize(acceptHeader: MediaType, body: Any): String {
+    override fun serialize(
+        acceptHeader: MediaType,
+        body: Any,
+    ): String {
         val message = body as GeneratedMessageV3
         return if (json.isCompatibleWith(acceptHeader) || jsonStructuredSuffixWildcard.isCompatibleWith(acceptHeader)) {
             ProtoBufUtils.toJsonWithoutWrappers(message)

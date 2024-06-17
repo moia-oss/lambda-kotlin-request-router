@@ -26,24 +26,25 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
 
 interface DeserializationHandler {
-
     fun supports(input: APIGatewayProxyRequestEvent): Boolean
 
-    fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any?
+    fun deserialize(
+        input: APIGatewayProxyRequestEvent,
+        target: KType?,
+    ): Any?
 }
 
 class DeserializationHandlerChain(private val handlers: List<DeserializationHandler>) :
     DeserializationHandler {
+    override fun supports(input: APIGatewayProxyRequestEvent): Boolean = handlers.any { it.supports(input) }
 
-    override fun supports(input: APIGatewayProxyRequestEvent): Boolean =
-        handlers.any { it.supports(input) }
-
-    override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? =
-        handlers.firstOrNull { it.supports(input) }?.deserialize(input, target)
+    override fun deserialize(
+        input: APIGatewayProxyRequestEvent,
+        target: KType?,
+    ): Any? = handlers.firstOrNull { it.supports(input) }?.deserialize(input, target)
 }
 
 class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : DeserializationHandler {
-
     private val json = MediaType.parse("application/json; charset=UTF-8")
     private val jsonStructuredSuffixWildcard = MediaType.parse("application/*+json; charset=UTF-8")
 
@@ -55,15 +56,19 @@ class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : Deser
                 .let { json.isCompatibleWith(it) || jsonStructuredSuffixWildcard.isCompatibleWith(it) }
         }
 
-    override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? {
+    override fun deserialize(
+        input: APIGatewayProxyRequestEvent,
+        target: KType?,
+    ): Any? {
         val targetClass = target?.classifier as KClass<*>
         return when {
             targetClass == Unit::class -> Unit
             targetClass == String::class -> input.body!!
             targetClass.isSubclassOf(Collection::class) -> {
                 val kClass = target.arguments.first().type!!.classifier as KClass<*>
-                val type = TypeFactory.defaultInstance()
-                    .constructParametricType(targetClass.javaObjectType, kClass.javaObjectType)
+                val type =
+                    TypeFactory.defaultInstance()
+                        .constructParametricType(targetClass.javaObjectType, kClass.javaObjectType)
                 objectMapper.readValue(input.body, type)
             }
             else -> objectMapper.readValue(input.body, targetClass.java)
@@ -73,6 +78,7 @@ class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : Deser
 
 object PlainTextDeserializationHandler : DeserializationHandler {
     private val text = MediaType.parse("text/*")
+
     override fun supports(input: APIGatewayProxyRequestEvent): Boolean =
         if (input.contentType() == null) {
             false
@@ -80,6 +86,8 @@ object PlainTextDeserializationHandler : DeserializationHandler {
             MediaType.parse(input.contentType()!!).isCompatibleWith(text)
         }
 
-    override fun deserialize(input: APIGatewayProxyRequestEvent, target: KType?): Any? =
-        input.body
+    override fun deserialize(
+        input: APIGatewayProxyRequestEvent,
+        target: KType?,
+    ): Any? = input.body
 }

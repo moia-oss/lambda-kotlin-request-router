@@ -24,11 +24,11 @@ import assertk.assertions.isNull
 import org.junit.jupiter.api.Test
 
 class ResponseEntityTest {
-
     private val body = "body"
-    private val headers = mapOf(
-        "content-type" to "text/plain"
-    )
+    private val headers =
+        mapOf(
+            "content-type" to "text/plain",
+        )
 
     @Test
     fun `should process ok response`() {
