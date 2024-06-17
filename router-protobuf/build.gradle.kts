@@ -2,7 +2,7 @@ import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 
 plugins {
-    id("com.google.protobuf") version "0.8.19"
+    id("com.google.protobuf") version "0.9.4"
 }
 
 repositories {
