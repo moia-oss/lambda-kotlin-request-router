@@ -15,7 +15,7 @@ dependencies {
 
     implementation("org.slf4j:slf4j-api:2.0.13")
     api("com.google.protobuf:protobuf-java:3.25.3")
-    api("com.google.protobuf:protobuf-java-util:3.25.3")
+    api("com.google.protobuf:protobuf-java-util:4.27.2")
     implementation("com.google.guava:guava:33.2.1-jre")
     api(project(":router"))
 
