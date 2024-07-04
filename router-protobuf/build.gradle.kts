@@ -6,13 +6,15 @@ repositories {
     mavenCentral()
 }
 
+val protoVersion = "4.27.2"
+
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
     implementation("org.slf4j:slf4j-api:2.0.13")
-    api("com.google.protobuf:protobuf-java:4.27.2")
-    api("com.google.protobuf:protobuf-java-util:4.27.2")
+    api("com.google.protobuf:protobuf-java:$protoVersion")
+    api("com.google.protobuf:protobuf-java-util:$protoVersion")
     implementation("com.google.guava:guava:33.2.1-jre")
     api(project(":router"))
 
@@ -28,6 +30,6 @@ protobuf {
     // Configure the protoc executable
     protoc {
         // Download from repositories
-        artifact = "com.google.protobuf:protoc:4.27.2"
+        artifact = "com.google.protobuf:protoc:$protoVersion"
     }
 }
