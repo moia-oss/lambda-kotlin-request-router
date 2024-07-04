@@ -1,8 +1,5 @@
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
-
 plugins {
-    id("com.google.protobuf") version "0.8.19"
+    id("com.google.protobuf") version "0.9.4"
 }
 
 repositories {
@@ -25,12 +22,4 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.11")
     testImplementation("org.slf4j:slf4j-simple:2.0.13")
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
-}
-
-
-protobuf {
-    protoc {
-        // The artifact spec for the Protobuf Compiler
-        artifact = "com.google.protobuf:protoc:4.27.2"
-    }
 }
