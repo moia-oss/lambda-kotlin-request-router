@@ -23,3 +23,11 @@ dependencies {
     testImplementation("org.slf4j:slf4j-simple:2.0.13")
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
 }
+
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        // Download from repositories
+        artifact = "com.google.protobuf:protoc:4.27.2"
+    }
+}
