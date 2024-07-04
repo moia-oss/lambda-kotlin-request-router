@@ -14,8 +14,8 @@ dependencies {
     implementation(kotlin("reflect"))
 
     implementation("org.slf4j:slf4j-api:2.0.13")
-    api("com.google.protobuf:protobuf-java:4.27.0")
-    api("com.google.protobuf:protobuf-java-util:4.27.0")
+    api("com.google.protobuf:protobuf-java:4.27.2")
+    api("com.google.protobuf:protobuf-java-util:4.27.2")
     implementation("com.google.guava:guava:33.2.1-jre")
     api(project(":router"))
 
@@ -31,6 +31,6 @@ dependencies {
 protobuf {
     protoc {
         // The artifact spec for the Protobuf Compiler
-        artifact = "com.google.protobuf:protoc:4.27.0"
+        artifact = "com.google.protobuf:protoc:4.27.2"
     }
 }
