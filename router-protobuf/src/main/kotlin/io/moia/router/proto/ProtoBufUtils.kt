@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.google.protobuf.GeneratedMessageV3
+import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.util.JsonFormat
 
 object ProtoBufUtils {
-    fun toJsonWithoutWrappers(proto: GeneratedMessageV3): String {
-        val message = JsonFormat.printer().omittingInsignificantWhitespace().includingDefaultValueFields().print(proto)
+    fun toJsonWithoutWrappers(proto: GeneratedMessage): String {
+        val message = JsonFormat.printer().omittingInsignificantWhitespace().alwaysPrintFieldsWithNoPresence().print(proto)
         return removeWrapperObjects(message)
     }
 

@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package io.moia.router.proto.sample;
 
+option java_multiple_files = false;
+option java_outer_classname = "SampleOuterClass";
+option java_package = "io.moia.router.proto.sample";
+
 import "google/protobuf/wrappers.proto";
 
 message Sample {

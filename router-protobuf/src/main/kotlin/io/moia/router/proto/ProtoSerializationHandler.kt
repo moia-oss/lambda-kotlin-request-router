@@ -1,7 +1,7 @@
 package io.moia.router.proto
 
 import com.google.common.net.MediaType
-import com.google.protobuf.GeneratedMessageV3
+import com.google.protobuf.GeneratedMessage
 import io.moia.router.SerializationHandler
 import isCompatibleWith
 import java.util.Base64
@@ -13,13 +13,13 @@ class ProtoSerializationHandler : SerializationHandler {
     override fun supports(
         acceptHeader: MediaType,
         body: Any,
-    ): Boolean = body is GeneratedMessageV3
+    ): Boolean = body is GeneratedMessage
 
     override fun serialize(
         acceptHeader: MediaType,
         body: Any,
     ): String {
-        val message = body as GeneratedMessageV3
+        val message = body as GeneratedMessage
         return if (json.isCompatibleWith(acceptHeader) || jsonStructuredSuffixWildcard.isCompatibleWith(acceptHeader)) {
             ProtoBufUtils.toJsonWithoutWrappers(message)
         } else {
