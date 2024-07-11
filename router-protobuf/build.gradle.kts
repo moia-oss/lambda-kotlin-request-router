@@ -1,21 +1,20 @@
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
-
 plugins {
-    id("com.google.protobuf") version "0.8.19"
+    id("com.google.protobuf") version "0.9.4"
 }
 
 repositories {
     mavenCentral()
 }
 
+val protoVersion = "4.27.2"
+
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
     implementation("org.slf4j:slf4j-api:2.0.13")
-    api("com.google.protobuf:protobuf-java:3.25.3")
-    api("com.google.protobuf:protobuf-java-util:3.25.3")
+    api("com.google.protobuf:protobuf-java:$protoVersion")
+    api("com.google.protobuf:protobuf-java-util:$protoVersion")
     implementation("com.google.guava:guava:33.2.1-jre")
     api(project(":router"))
 
@@ -27,10 +26,10 @@ dependencies {
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
 }
 
-
 protobuf {
+    // Configure the protoc executable
     protoc {
-        // The artifact spec for the Protobuf Compiler
-        artifact = "com.google.protobuf:protoc:3.25.3"
+        // Download from repositories
+        artifact = "com.google.protobuf:protoc:$protoVersion"
     }
 }
