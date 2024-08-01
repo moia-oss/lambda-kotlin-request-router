@@ -20,7 +20,7 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.28.1")
-    testImplementation("org.assertj:assertj-core:3.26.0")
+    testImplementation("org.assertj:assertj-core:3.26.3")
     testImplementation("io.mockk:mockk:1.13.11")
     testImplementation("org.slf4j:slf4j-simple:2.0.13")
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
