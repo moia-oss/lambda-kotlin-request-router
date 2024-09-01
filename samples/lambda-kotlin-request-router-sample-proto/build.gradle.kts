@@ -32,7 +32,7 @@ repositories {
     maven { url = URI("https://jitpack.io") }
 }
 
-val proto = "3.11.1"
+val proto = "4.28.0"
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
