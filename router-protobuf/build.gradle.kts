@@ -12,7 +12,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-    implementation("org.slf4j:slf4j-api:2.0.13")
+    implementation("org.slf4j:slf4j-api:2.0.16")
     api("com.google.protobuf:protobuf-java:$protoVersion")
     api("com.google.protobuf:protobuf-java-util:$protoVersion")
     implementation("com.google.guava:guava:33.2.1-jre")
