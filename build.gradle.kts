@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.0.20"
     `maven-publish`
     jacoco
     id("com.github.kt3k.coveralls") version "2.12.2"
