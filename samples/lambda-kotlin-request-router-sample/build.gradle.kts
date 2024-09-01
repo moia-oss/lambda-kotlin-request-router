@@ -42,7 +42,7 @@ dependencies {
     implementation("com.google.guava:guava:23.0")
 
     implementation("ch.qos.logback:logback-classic:1.5.6")
-    implementation("org.slf4j:log4j-over-slf4j:2.0.13")
+    implementation("org.slf4j:log4j-over-slf4j:2.0.16")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 }
