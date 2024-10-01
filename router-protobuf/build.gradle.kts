@@ -18,7 +18,7 @@ dependencies {
     implementation("com.google.guava:guava:33.2.1-jre")
     api(project(":router"))
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.1")
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.28.1")
     testImplementation("org.assertj:assertj-core:3.26.0")
     testImplementation("io.mockk:mockk:1.13.11")
