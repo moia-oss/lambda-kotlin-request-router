@@ -6,7 +6,7 @@ repositories {
     mavenCentral()
 }
 
-val protoVersion = "4.27.2"
+val protoVersion = "4.28.2"
 
 dependencies {
     implementation(kotlin("stdlib"))
