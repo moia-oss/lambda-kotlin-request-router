@@ -5,33 +5,61 @@ updates:
     open-pull-requests-limit: 99
     schedule:
       interval: monthly
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "gradle" 
     directory: "/router/"
     open-pull-requests-limit: 99
     schedule:
       interval: monthly
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "gradle" 
     directory: "/router-protobuf/"
     open-pull-requests-limit: 99
     schedule:
       interval: monthly
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "gradle" 
     directory: "/router-openapi-request-validator/"
     open-pull-requests-limit: 99
     schedule:
       interval: monthly
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "gradle" 
     directory: "/samples/lambda-kotlin-request-router-sample/"
     open-pull-requests-limit: 99
     schedule:
       interval: monthly
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "gradle" 
     directory: "/samples/lambda-kotlin-request-router-sample-proto"
     open-pull-requests-limit: 99
     schedule:
       interval: monthly
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "github-actions"
     directory: "/"
     open-pull-requests-limit: 99
     schedule:
       interval: monthly
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
