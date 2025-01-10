@@ -62,12 +62,23 @@ class RequestHandlerTest {
             )
 
         assertThat(response.statusCode).isEqualTo(200)
-        assertThat(Sample.parseFrom(response.bodyAsBytes())).isEqualTo(Sample.newBuilder().setHello("Hello").setRequest("").build())
+        assertThat(Sample.parseFrom(response.bodyAsBytes())).isEqualTo(
+            Sample
+                .newBuilder()
+                .setHello("Hello")
+                .setRequest("")
+                .build(),
+        )
     }
 
     @Test
     fun `should match request to proto handler and deserialize and return proto`() {
-        val request = Sample.newBuilder().setHello("Hello").setRequest("").build()
+        val request =
+            Sample
+                .newBuilder()
+                .setHello("Hello")
+                .setRequest("")
+                .build()
 
         val response =
             testRequestHandler.handleRequest(
@@ -104,7 +115,9 @@ class RequestHandlerTest {
 
         assertThat(response.statusCode).isEqualTo(406)
         assertThat(
-            io.moia.router.proto.sample.SampleOuterClass.ApiError.parseFrom(response.bodyAsBytes()).getCode(),
+            io.moia.router.proto.sample.SampleOuterClass.ApiError
+                .parseFrom(response.bodyAsBytes())
+                .getCode(),
         ).isEqualTo("NOT_ACCEPTABLE")
     }
 
@@ -122,7 +135,10 @@ class RequestHandlerTest {
             )
 
         assertThat(response.statusCode).isEqualTo(400)
-        with(io.moia.router.proto.sample.SampleOuterClass.ApiError.parseFrom(response.bodyAsBytes())) {
+        with(
+            io.moia.router.proto.sample.SampleOuterClass.ApiError
+                .parseFrom(response.bodyAsBytes()),
+        ) {
             assertThat(getCode()).isEqualTo("BOOM")
             assertThat(getMessage()).isEqualTo("boom")
         }
@@ -146,14 +162,16 @@ class RequestHandlerTest {
             }
 
         override fun createErrorBody(error: ApiError): Any =
-            io.moia.router.proto.sample.SampleOuterClass.ApiError.newBuilder()
+            io.moia.router.proto.sample.SampleOuterClass.ApiError
+                .newBuilder()
                 .setMessage(error.message)
                 .setCode(error.code)
                 .build()
 
         override fun createUnprocessableEntityErrorBody(errors: List<UnprocessableEntityError>): Any =
             errors.map { error ->
-                io.moia.router.proto.sample.SampleOuterClass.UnprocessableEntityError.newBuilder()
+                io.moia.router.proto.sample.SampleOuterClass.UnprocessableEntityError
+                    .newBuilder()
                     .setMessage(error.message)
                     .setCode(error.code)
                     .setPath(error.path)

@@ -13,7 +13,5 @@ abstract class ProtoEnabledRequestHandler : RequestHandler() {
     override fun <T> createResponse(
         contentType: MediaType,
         response: ResponseEntity<T>,
-    ): APIGatewayProxyResponseEvent {
-        return super.createResponse(contentType, response).withIsBase64Encoded(true)
-    }
+    ): APIGatewayProxyResponseEvent = super.createResponse(contentType, response).withIsBase64Encoded(true)
 }

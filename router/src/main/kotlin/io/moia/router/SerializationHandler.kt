@@ -32,8 +32,9 @@ interface SerializationHandler {
     ): String
 }
 
-class SerializationHandlerChain(private val handlers: List<SerializationHandler>) :
-    SerializationHandler {
+class SerializationHandlerChain(
+    private val handlers: List<SerializationHandler>,
+) : SerializationHandler {
     override fun supports(
         acceptHeader: MediaType,
         body: Any,
@@ -45,7 +46,9 @@ class SerializationHandlerChain(private val handlers: List<SerializationHandler>
     ): String = handlers.first { it.supports(acceptHeader, body) }.serialize(acceptHeader, body)
 }
 
-class JsonSerializationHandler(private val objectMapper: ObjectMapper) : SerializationHandler {
+class JsonSerializationHandler(
+    private val objectMapper: ObjectMapper,
+) : SerializationHandler {
     private val json = MediaType.parse("application/json")
     private val jsonStructuredSuffixWildcard = MediaType.parse("application/*+json")
 
@@ -60,7 +63,9 @@ class JsonSerializationHandler(private val objectMapper: ObjectMapper) : Seriali
     ): String = objectMapper.writeValueAsString(body)
 }
 
-class PlainTextSerializationHandler(val supportedAcceptTypes: List<MediaType> = listOf(MediaType.parse("text/*"))) : SerializationHandler {
+class PlainTextSerializationHandler(
+    val supportedAcceptTypes: List<MediaType> = listOf(MediaType.parse("text/*")),
+) : SerializationHandler {
     override fun supports(
         acceptHeader: MediaType,
         body: Any,

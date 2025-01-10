@@ -53,7 +53,9 @@ class OpenApiValidatorTest {
     }
 
     class TestRequestHandler : RequestHandler() {
-        data class TestResponse(val name: String)
+        data class TestResponse(
+            val name: String,
+        )
 
         override val router =
             Router.router {
@@ -67,7 +69,9 @@ class OpenApiValidatorTest {
     }
 
     class TestInvalidRequestHandler : RequestHandler() {
-        data class TestResponseInvalid(val invalid: String)
+        data class TestResponseInvalid(
+            val invalid: String,
+        )
 
         override val router =
             Router.router {

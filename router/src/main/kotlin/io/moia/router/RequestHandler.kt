@@ -88,7 +88,8 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
         input: APIGatewayProxyRequestEvent,
     ) = when (e) {
         is ApiException ->
-            e.toResponseEntity(this::createErrorBody)
+            e
+                .toResponseEntity(this::createErrorBody)
                 .also { logApiException(e, input) }
         else ->
             exceptionToResponseEntity(e)
@@ -143,15 +144,14 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
     private fun deserializeRequest(
         handler: HandlerFunctionWrapper<Any, Any>,
         input: APIGatewayProxyRequestEvent,
-    ): Any? {
-        return when {
+    ): Any? =
+        when {
             handler.requestType.classifier as KClass<*> == Unit::class -> Unit
             input.body == null && handler.requestType.isMarkedNullable -> null
             input.body == null -> throw ApiException("no request body present", "REQUEST_BODY_MISSING", 400)
             input.body is String && handler.requestType.classifier as KClass<*> == String::class -> input.body
             else -> deserializationHandlerChain.deserialize(input, handler.requestType)
         }
-    }
 
     private fun handleNonDirectMatch(
         defaultContentType: MediaType,
@@ -234,7 +234,11 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                         UnprocessableEntityError(
                             message = "INVALID_FIELD_FORMAT",
                             code = "FIELD",
-                            path = ex.path.last().fieldName.orEmpty(),
+                            path =
+                                ex.path
+                                    .last()
+                                    .fieldName
+                                    .orEmpty(),
                             details =
                                 mapOf(
                                     "cause" to ex.cause?.message.orEmpty(),
@@ -250,7 +254,11 @@ abstract class RequestHandler : RequestHandler<APIGatewayProxyRequestEvent, APIG
                         UnprocessableEntityError(
                             message = "INVALID_FIELD_FORMAT",
                             code = "FIELD",
-                            path = ex.path.last().fieldName.orEmpty(),
+                            path =
+                                ex.path
+                                    .last()
+                                    .fieldName
+                                    .orEmpty(),
                         ),
                     ),
                 )
