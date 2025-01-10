@@ -41,7 +41,11 @@ open class JwtAccessor(
 
     fun extractJwtToken(): String? =
         // support "Bearer <token>" as well as "<token>"
-        request.getHeaderCaseInsensitive(authorizationHeaderName)?.split(" ")?.toList()?.last()
+        request
+            .getHeaderCaseInsensitive(authorizationHeaderName)
+            ?.split(" ")
+            ?.toList()
+            ?.last()
 
     fun extractJwtClaims() =
         extractJwtToken()
@@ -54,8 +58,7 @@ open class JwtAccessor(
                 } catch (e: Exception) {
                     return null
                 }
-            }
-            ?.let { objectMapper.readValue<Map<String, Any>>(it) }
+            }?.let { objectMapper.readValue<Map<String, Any>>(it) }
 }
 
 open class JwtPermissionHandler(
@@ -77,7 +80,8 @@ open class JwtPermissionHandler(
         }
 
     internal open fun extractPermissions(): Set<String> =
-        accessor.extractJwtClaims()
+        accessor
+            .extractJwtClaims()
             ?.let { it[permissionsClaim] }
             ?.let {
                 when (it) {

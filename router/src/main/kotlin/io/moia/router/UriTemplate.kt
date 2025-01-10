@@ -19,7 +19,9 @@ package io.moia.router
 import java.net.URLDecoder
 import java.util.regex.Pattern
 
-class UriTemplate private constructor(private val template: String) {
+class UriTemplate private constructor(
+    private val template: String,
+) {
     private val templateRegex: Regex
     private val matches: Sequence<MatchResult>
     private val parameterNames: List<String>
@@ -31,17 +33,18 @@ class UriTemplate private constructor(private val template: String) {
         matches = PATH_VARIABLE_REGEX.findAll(template)
         parameterNames = matches.map { it.groupValues[1] }.toList()
         templateRegex =
-            template.replace(
-                PATH_VARIABLE_REGEX,
-                { notMatched -> Pattern.quote(notMatched) },
-                { matched ->
-                    // check for greedy path variables, e.g. '{proxy+}'
-                    if (matched.groupValues[1].endsWith("+")) {
-                        return@replace "(.+)"
-                    }
-                    if (matched.groupValues[2].isBlank()) "([^/]+)" else "(${matched.groupValues[2]})"
-                },
-            ).toRegex()
+            template
+                .replace(
+                    PATH_VARIABLE_REGEX,
+                    { notMatched -> Pattern.quote(notMatched) },
+                    { matched ->
+                        // check for greedy path variables, e.g. '{proxy+}'
+                        if (matched.groupValues[1].endsWith("+")) {
+                            return@replace "(.+)"
+                        }
+                        if (matched.groupValues[2].isBlank()) "([^/]+)" else "(${matched.groupValues[2]})"
+                    },
+                ).toRegex()
     }
 
     companion object {
@@ -59,7 +62,11 @@ class UriTemplate private constructor(private val template: String) {
     fun extract(uri: String): Map<String, String> = parameterNames.zip(templateRegex.findParameterValues(uri.trimSlashes())).toMap()
 
     private fun Regex.findParameterValues(uri: String): List<String> =
-        findAll(uri).first().groupValues.drop(1).map { URLDecoder.decode(it, "UTF-8") }
+        findAll(uri)
+            .first()
+            .groupValues
+            .drop(1)
+            .map { URLDecoder.decode(it, "UTF-8") }
 
     private fun String.replace(
         regex: Regex,

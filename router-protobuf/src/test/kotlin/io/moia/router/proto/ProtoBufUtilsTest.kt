@@ -11,7 +11,8 @@ class ProtoBufUtilsTest {
     @Test
     fun `should serialize empty list`() {
         val message =
-            ComplexSample.newBuilder()
+            ComplexSample
+                .newBuilder()
                 .addAllSamples(emptyList())
                 .build()
 
@@ -23,7 +24,8 @@ class ProtoBufUtilsTest {
     @Test
     fun `should remove wrapper object`() {
         val message =
-            ComplexSample.newBuilder()
+            ComplexSample
+                .newBuilder()
                 .setSomeString(StringValue.newBuilder().setValue("some").build())
                 .build()
 
@@ -35,7 +37,8 @@ class ProtoBufUtilsTest {
     @Test
     fun `should serialize value when it is the default`() {
         val message =
-            ComplexSample.newBuilder()
+            ComplexSample
+                .newBuilder()
                 .setEnumAttribute(ONE) // enum zero value
                 .build()
 

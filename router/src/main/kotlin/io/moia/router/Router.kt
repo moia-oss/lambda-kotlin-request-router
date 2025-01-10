@@ -25,7 +25,9 @@ import kotlin.reflect.typeOf
 typealias PredicateFactory = (String, String, Set<String>, Set<String>) -> RequestPredicate
 
 @Suppress("FunctionName")
-class Router(private val predicateFactory: PredicateFactory) {
+class Router(
+    private val predicateFactory: PredicateFactory,
+) {
     val routes = mutableListOf<RouterFunction<*, *>>()
 
     var defaultConsuming = setOf("application/json")
@@ -133,12 +135,14 @@ class RouterFunction<I, T>(
     val requestPredicate: RequestPredicate,
     val handler: HandlerFunctionWrapper<I, T>,
 ) {
-    override fun toString(): String {
-        return "RouterFunction(requestPredicate=$requestPredicate)"
-    }
+    override fun toString(): String = "RouterFunction(requestPredicate=$requestPredicate)"
 }
 
-data class Request<I>(val apiRequest: APIGatewayProxyRequestEvent, val body: I, val pathPattern: String = apiRequest.path) {
+data class Request<I>(
+    val apiRequest: APIGatewayProxyRequestEvent,
+    val body: I,
+    val pathPattern: String = apiRequest.path,
+) {
     val pathParameters by lazy { UriTemplate.from(pathPattern).extract(apiRequest.path) }
     val queryParameters: Map<String, String>? by lazy { apiRequest.queryStringParameters }
     val multiValueQueryStringParameters: Map<String, List<String>>? by lazy { apiRequest.multiValueQueryStringParameters }

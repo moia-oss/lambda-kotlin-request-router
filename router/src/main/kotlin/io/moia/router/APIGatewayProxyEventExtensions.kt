@@ -23,7 +23,10 @@ import java.net.URI
 import java.util.Base64
 
 /** Data class that represents an HTTP header */
-data class Header(val name: String, val value: String)
+data class Header(
+    val name: String,
+    val value: String,
+)
 
 fun APIGatewayProxyRequestEvent.acceptHeader() = getHeaderCaseInsensitive("accept")
 
@@ -120,7 +123,8 @@ private fun getCaseInsensitive(
     key: String,
     map: Map<String, String>?,
 ): String? =
-    map?.entries
+    map
+        ?.entries
         ?.firstOrNull { key.equals(it.key, ignoreCase = true) }
         ?.value
 

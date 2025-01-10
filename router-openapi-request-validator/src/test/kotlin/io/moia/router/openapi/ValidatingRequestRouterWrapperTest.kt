@@ -26,8 +26,7 @@ class ValidatingRequestRouterWrapperTest {
         thenThrownBy {
             ValidatingRequestRouterWrapper(InvalidTestRequestHandler(), "openapi.yml")
                 .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
-        }
-            .isInstanceOf(OpenApiValidator.ApiInteractionInvalid::class.java)
+        }.isInstanceOf(OpenApiValidator.ApiInteractionInvalid::class.java)
             .hasMessageContaining("Response status 404 not defined for path")
     }
 
@@ -36,8 +35,7 @@ class ValidatingRequestRouterWrapperTest {
         thenThrownBy {
             ValidatingRequestRouterWrapper(InvalidTestRequestHandler(), "openapi.yml")
                 .handleRequest(GET("/path-not-documented").withAcceptHeader("application/json"), mockk())
-        }
-            .isInstanceOf(OpenApiValidator.ApiInteractionInvalid::class.java)
+        }.isInstanceOf(OpenApiValidator.ApiInteractionInvalid::class.java)
             .hasMessageContaining("No API path found that matches request")
     }
 
@@ -59,10 +57,8 @@ class ValidatingRequestRouterWrapperTest {
                 delegate = OpenApiValidatorTest.TestRequestHandler(),
                 specUrlOrPayload = "openapi.yml",
                 additionalRequestValidationFunctions = listOf({ _ -> throw RequestValidationFailedException() }),
-            )
-                .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
-        }
-            .isInstanceOf(RequestValidationFailedException::class.java)
+            ).handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
+        }.isInstanceOf(RequestValidationFailedException::class.java)
     }
 
     @Test
@@ -72,10 +68,8 @@ class ValidatingRequestRouterWrapperTest {
                 delegate = OpenApiValidatorTest.TestRequestHandler(),
                 specUrlOrPayload = "openapi.yml",
                 additionalResponseValidationFunctions = listOf({ _, _ -> throw ResponseValidationFailedException() }),
-            )
-                .handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
-        }
-            .isInstanceOf(ResponseValidationFailedException::class.java)
+            ).handleRequest(GET("/tests").withAcceptHeader("application/json"), mockk())
+        }.isInstanceOf(ResponseValidationFailedException::class.java)
     }
 
     private class RequestValidationFailedException : RuntimeException("request validation failed")
