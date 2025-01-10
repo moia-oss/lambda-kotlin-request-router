@@ -23,9 +23,8 @@ open class ApiException(
     val details: Map<String, Any> = emptyMap(),
     cause: Throwable? = null,
 ) : RuntimeException(message, cause) {
-    override fun toString(): String {
-        return "ApiException(message='$message', code='$code', httpResponseStatus=$httpResponseStatus, details=$details, cause=$cause)"
-    }
+    override fun toString(): String =
+        "ApiException(message='$message', code='$code', httpResponseStatus=$httpResponseStatus, details=$details, cause=$cause)"
 
     fun toApiError() = ApiError(super.message!!, code, details)
 

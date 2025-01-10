@@ -34,8 +34,9 @@ interface DeserializationHandler {
     ): Any?
 }
 
-class DeserializationHandlerChain(private val handlers: List<DeserializationHandler>) :
-    DeserializationHandler {
+class DeserializationHandlerChain(
+    private val handlers: List<DeserializationHandler>,
+) : DeserializationHandler {
     override fun supports(input: APIGatewayProxyRequestEvent): Boolean = handlers.any { it.supports(input) }
 
     override fun deserialize(
@@ -44,7 +45,9 @@ class DeserializationHandlerChain(private val handlers: List<DeserializationHand
     ): Any? = handlers.firstOrNull { it.supports(input) }?.deserialize(input, target)
 }
 
-class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : DeserializationHandler {
+class JsonDeserializationHandler(
+    private val objectMapper: ObjectMapper,
+) : DeserializationHandler {
     private val json = MediaType.parse("application/json; charset=UTF-8")
     private val jsonStructuredSuffixWildcard = MediaType.parse("application/*+json; charset=UTF-8")
 
@@ -52,7 +55,8 @@ class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : Deser
         if (input.contentType() == null) {
             false
         } else {
-            MediaType.parse(input.contentType()!!)
+            MediaType
+                .parse(input.contentType()!!)
                 .let { json.isCompatibleWith(it) || jsonStructuredSuffixWildcard.isCompatibleWith(it) }
         }
 
@@ -65,9 +69,14 @@ class JsonDeserializationHandler(private val objectMapper: ObjectMapper) : Deser
             targetClass == Unit::class -> Unit
             targetClass == String::class -> input.body!!
             targetClass.isSubclassOf(Collection::class) -> {
-                val kClass = target.arguments.first().type!!.classifier as KClass<*>
+                val kClass =
+                    target.arguments
+                        .first()
+                        .type!!
+                        .classifier as KClass<*>
                 val type =
-                    TypeFactory.defaultInstance()
+                    TypeFactory
+                        .defaultInstance()
                         .constructParametricType(targetClass.javaObjectType, kClass.javaObjectType)
                 objectMapper.readValue(input.body, type)
             }

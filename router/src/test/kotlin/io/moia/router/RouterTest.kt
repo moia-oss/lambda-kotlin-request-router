@@ -64,8 +64,7 @@ class RouterTest {
             router {
                 POST("/some") { r: Request<Unit> ->
                     ResponseEntity.ok("""{"hello": "world", "request":"${r.body}"}""")
-                }
-                    .producing("text/plain")
+                }.producing("text/plain")
                     .consuming("text/plain")
             }
 

@@ -108,8 +108,7 @@ class RequestHandlerTest {
                             "Accept" to "application/json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""{ "greeting": "some" }"""),
+                    ).withBody("""{ "greeting": "some" }"""),
                 mockk(),
             )
 
@@ -127,8 +126,7 @@ class RequestHandlerTest {
                             "Accept" to "application/json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""[{ "greeting": "some" },{ "greeting": "some1" }]""".trimMargin()),
+                    ).withBody("""[{ "greeting": "some" },{ "greeting": "some1" }]""".trimMargin()),
                 mockk(),
             )
 
@@ -232,8 +230,7 @@ class RequestHandlerTest {
                             "Accept" to "application/json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("{}"),
+                    ).withBody("{}"),
                 mockk(),
             )
         assertThat(response.statusCode).isEqualTo(422)
@@ -249,8 +246,7 @@ class RequestHandlerTest {
                             "Accept" to "application/json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""{"greeting": "hello","age": "a"}"""),
+                    ).withBody("""{"greeting": "hello","age": "a"}"""),
                 mockk(),
             )
         assertThat(response.statusCode).isEqualTo(422)
@@ -274,8 +270,7 @@ class RequestHandlerTest {
                             "Accept" to "application/json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""{"greeting": "hello","age": 1, "bday": "2000-01-AA"}"""),
+                    ).withBody("""{"greeting": "hello","age": 1, "bday": "2000-01-AA"}"""),
                 mockk(),
             )
         assertThat(response.statusCode).isEqualTo(422)
@@ -299,8 +294,7 @@ class RequestHandlerTest {
                             "Accept" to "application/json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""{"greeting": "hello", bday: "2000-01-01"}"""),
+                    ).withBody("""{"greeting": "hello", bday: "2000-01-01"}"""),
                 mockk(),
             )
         assertThat(response.statusCode).isEqualTo(422)
@@ -324,8 +318,7 @@ class RequestHandlerTest {
                             "Accept" to "application/json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody(null),
+                    ).withBody(null),
                 mockk(),
             )
         assertThat(response.statusCode).isEqualTo(400)
@@ -342,8 +335,7 @@ class RequestHandlerTest {
                             "Accept" to "application/json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody(null),
+                    ).withBody(null),
                 mockk(),
             )
         assertThat(response.statusCode).isEqualTo(200)
@@ -388,8 +380,7 @@ class RequestHandlerTest {
                             "Accept" to "application/xhtml+xml, application/json, application/xml;q=0.9, image/webp, */*;q=0.8",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""{ "greeting": "some" }"""),
+                    ).withBody("""{ "greeting": "some" }"""),
                 mockk(),
             )
 
@@ -409,8 +400,7 @@ class RequestHandlerTest {
                             "Accept" to "*/*",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""{ "greeting": "some" }"""),
+                    ).withBody("""{ "greeting": "some" }"""),
                 mockk(),
             )
 
@@ -430,8 +420,7 @@ class RequestHandlerTest {
                             "Accept" to "application/vnd.moia.v1+json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""{ "greeting": "some" }"""),
+                    ).withBody("""{ "greeting": "some" }"""),
                 mockk(),
             )
 
@@ -449,8 +438,7 @@ class RequestHandlerTest {
                             "Accept" to "application/vnd.moia.v2+json",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""{ "greeting": "v2" }"""),
+                    ).withBody("""{ "greeting": "v2" }"""),
                 mockk(),
             )
 
@@ -469,8 +457,7 @@ class RequestHandlerTest {
                             "Accept" to "*",
                             "Content-Type" to "application/json",
                         ),
-                    )
-                    .withBody("""{ "greeting": "some" }"""),
+                    ).withBody("""{ "greeting": "some" }"""),
                 mockk(),
             )
 
@@ -485,7 +472,8 @@ class RequestHandlerTest {
                     .withHeaders(
                         mapOf(
                             "Accept" to "application/json",
-                            "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I",
+                            "Authorization" to
+                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I",
                         ),
                     ),
                 mockk(),
@@ -502,7 +490,8 @@ class RequestHandlerTest {
                     .withHeaders(
                         mapOf(
                             "Accept" to "application/json",
-                            "Custom-Auth" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I",
+                            "Custom-Auth" to
+                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24xIn0.E3PxWx68uP2s9yyAV7UVs8egyrGTIuWXjtkcqAA840I",
                         ),
                     ),
                 mockk(),
@@ -519,7 +508,8 @@ class RequestHandlerTest {
                     .withHeaders(
                         mapOf(
                             "Accept" to "application/json",
-                            "Authorization" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24yIn0.RA8ERppuFmastqFN-6C98WqMEE7L6h88WylMeq6jh1w",
+                            "Authorization" to
+                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJwZXJtaXNzaW9ucyI6InBlcm1pc3Npb24yIn0.RA8ERppuFmastqFN-6C98WqMEE7L6h88WylMeq6jh1w",
                         ),
                     ),
                 mockk(),
@@ -612,8 +602,7 @@ class RequestHandlerTest {
                     mapOf(
                         "testQueryParam" to "foo",
                     ),
-                )
-                .withMultiValueQueryStringParameters(
+                ).withMultiValueQueryStringParameters(
                     mapOf(
                         "testMultiValueQueryStringParam" to listOf("foo", "bar"),
                     ),
@@ -801,9 +790,15 @@ class RequestHandlerTest {
     }
 
     class TestRequestHandler : RequestHandler() {
-        data class TestResponse(val greeting: String)
+        data class TestResponse(
+            val greeting: String,
+        )
 
-        data class TestRequest(val greeting: String, val age: Int = 0, val bday: LocalDate = LocalDate.now())
+        data class TestRequest(
+            val greeting: String,
+            val age: Int = 0,
+            val bday: LocalDate = LocalDate.now(),
+        )
 
         override val router =
             router {
@@ -855,11 +850,12 @@ class RequestHandlerTest {
 
                 POST("/somes") { r: Request<List<TestRequest>> ->
                     ResponseEntity.ok(
-                        r.body.map {
-                            TestResponse(
-                                it.greeting,
-                            )
-                        }.toList(),
+                        r.body
+                            .map {
+                                TestResponse(
+                                    it.greeting,
+                                )
+                            }.toList(),
                     )
                 }
                 POST("/no-content") { _: Request<TestRequest> ->
@@ -897,7 +893,10 @@ class RequestHandlerTest {
     }
 
     class AcceptTypeDependingHandler : RequestHandler() {
-        data class CustomObject(val text: String, val number: Int)
+        data class CustomObject(
+            val text: String,
+            val number: Int,
+        )
 
         override val router =
             router {

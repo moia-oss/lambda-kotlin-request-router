@@ -9,15 +9,19 @@ import com.google.protobuf.util.JsonFormat
 
 object ProtoBufUtils {
     fun toJsonWithoutWrappers(proto: GeneratedMessage): String {
-        val message = JsonFormat.printer().omittingInsignificantWhitespace().alwaysPrintFieldsWithNoPresence().print(proto)
+        val message =
+            JsonFormat
+                .printer()
+                .omittingInsignificantWhitespace()
+                .alwaysPrintFieldsWithNoPresence()
+                .print(proto)
         return removeWrapperObjects(message)
     }
 
-    fun removeWrapperObjects(json: String): String {
-        return removeWrapperObjects(
+    fun removeWrapperObjects(json: String): String =
+        removeWrapperObjects(
             jacksonObjectMapper().readTree(json),
         ).toString()
-    }
 
     fun removeWrapperObjects(json: JsonNode): JsonNode {
         if (json.isArray) {
