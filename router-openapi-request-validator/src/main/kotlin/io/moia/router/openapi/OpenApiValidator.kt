@@ -72,7 +72,7 @@ class OpenApiValidator(
 
     private fun APIGatewayProxyRequestEvent.toRequest(): Request {
         val builder =
-            when (httpMethod.toLowerCase()) {
+            when (httpMethod.lowercase()) {
                 "get" -> SimpleRequest.Builder.get(path)
                 "post" -> SimpleRequest.Builder.post(path)
                 "put" -> SimpleRequest.Builder.put(path)
