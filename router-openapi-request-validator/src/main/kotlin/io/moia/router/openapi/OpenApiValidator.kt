@@ -10,30 +10,30 @@ import com.atlassian.oai.validator.model.SimpleResponse
 import com.atlassian.oai.validator.report.ValidationReport
 import org.slf4j.LoggerFactory
 
-class OpenApiValidator(val specUrlOrPayload: String) {
+class OpenApiValidator(
+    val specUrlOrPayload: String,
+) {
     val validator = OpenApiInteractionValidator.createFor(specUrlOrPayload).build()
 
     fun validate(
         request: APIGatewayProxyRequestEvent,
         response: APIGatewayProxyResponseEvent,
-    ): ValidationReport {
-        return validator.validate(request.toRequest(), response.toResponse())
+    ): ValidationReport =
+        validator
+            .validate(request.toRequest(), response.toResponse())
             .also { if (it.hasErrors()) log.error("error validating request and response against $specUrlOrPayload - $it") }
-    }
 
     fun assertValid(
         request: APIGatewayProxyRequestEvent,
         response: APIGatewayProxyResponseEvent,
-    ) {
-        return validate(request, response).let {
-            if (it.hasErrors()) {
-                throw ApiInteractionInvalid(
-                    specUrlOrPayload,
-                    request,
-                    response,
-                    it,
-                )
-            }
+    ) = validate(request, response).let {
+        if (it.hasErrors()) {
+            throw ApiInteractionInvalid(
+                specUrlOrPayload,
+                request,
+                response,
+                it,
+            )
         }
     }
 
@@ -72,7 +72,7 @@ class OpenApiValidator(val specUrlOrPayload: String) {
 
     private fun APIGatewayProxyRequestEvent.toRequest(): Request {
         val builder =
-            when (httpMethod.toLowerCase()) {
+            when (httpMethod.lowercase()) {
                 "get" -> SimpleRequest.Builder.get(path)
                 "post" -> SimpleRequest.Builder.post(path)
                 "put" -> SimpleRequest.Builder.put(path)
@@ -88,13 +88,12 @@ class OpenApiValidator(val specUrlOrPayload: String) {
         return builder.build()
     }
 
-    private fun APIGatewayProxyResponseEvent.toResponse(): Response {
-        return SimpleResponse.Builder
+    private fun APIGatewayProxyResponseEvent.toResponse(): Response =
+        SimpleResponse.Builder
             .status(statusCode)
             .withBody(body)
             .also { headers.forEach { h -> it.withHeader(h.key, h.value) } }
             .build()
-    }
 
     companion object {
         val log = LoggerFactory.getLogger(OpenApiValidator::class.java)
