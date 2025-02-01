@@ -14,7 +14,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.4")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.4")
     testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.28.1")
-    testImplementation("org.assertj:assertj-core:3.27.2")
-    testImplementation("io.mockk:mockk:1.13.14")
+    testImplementation("org.assertj:assertj-core:3.27.3")
+    testImplementation("io.mockk:mockk:1.13.16")
     testImplementation("ch.qos.logback:logback-classic:1.5.16")
 }
