@@ -16,11 +16,11 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.1.21"
     idea
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.jmailen.kotlinter") version "5.0.1"
-    id("com.google.protobuf") version "0.9.4"
+    id("org.jmailen.kotlinter") version "5.1.0"
+    id("com.google.protobuf") version "0.9.5"
 }
 
 
@@ -32,22 +32,22 @@ repositories {
     maven { url = URI("https://jitpack.io") }
 }
 
-val proto = "4.29.3"
+val proto = "4.31.1"
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
     implementation("io.moia.lambda-kotlin-request-router:router-protobuf:1.1.0")
 
-    implementation("com.amazonaws:aws-lambda-java-core:1.2.3")
+    implementation("com.amazonaws:aws-lambda-java-core:1.3.0")
     implementation("com.amazonaws:aws-lambda-java-log4j2:1.6.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.19.0")
     implementation("com.google.guava:guava:23.0")
     implementation("com.google.protobuf:protobuf-java:$proto")
     implementation("com.google.protobuf:protobuf-java-util:$proto")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.13.0")
 }
 
 tasks {
