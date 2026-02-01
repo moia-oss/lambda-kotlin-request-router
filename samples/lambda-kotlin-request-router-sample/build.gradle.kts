@@ -14,10 +14,10 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version "2.1.10"
+    kotlin("jvm") version "2.3.0"
     idea
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.jmailen.kotlinter") version "5.0.1"
+    id("org.jmailen.kotlinter") version "5.4.0"
 }
 
 
@@ -35,16 +35,16 @@ dependencies {
 
     implementation("io.moia.lambda-kotlin-request-router:router:1.1.0")
 
-    implementation("com.amazonaws:aws-lambda-java-core:1.2.3")
-    implementation("com.amazonaws:aws-lambda-java-log4j2:1.6.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.3")
+    implementation("com.amazonaws:aws-lambda-java-core:1.4.0")
+    implementation("com.amazonaws:aws-lambda-java-log4j2:1.6.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.21.0")
     implementation("com.google.guava:guava:23.0")
 
-    implementation("ch.qos.logback:logback-classic:1.5.17")
+    implementation("ch.qos.logback:logback-classic:1.5.27")
     implementation("org.slf4j:log4j-over-slf4j:2.0.17")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.12.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.2")
 }
 
 tasks {
